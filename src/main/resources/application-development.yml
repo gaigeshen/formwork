@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: development
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///demo
+    username: root
+    password: 123456

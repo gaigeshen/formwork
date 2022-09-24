@@ -1,0 +1,21 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: formwork
+  profiles:
+    default: development
+  mvc:
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
+      date: yyyy-MM-dd
+      time: HH:mm:ss
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+springdoc:
+  group-configs:
+    - group: default
+      paths-to-match: /**
+      paths-to-exclude: /error

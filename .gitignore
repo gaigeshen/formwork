@@ -1,0 +1,8 @@
+# sources
+!**/src/main/**
+!**/src/test/**
+# build
+target/
+# idea files
+.idea/
+*.iml
