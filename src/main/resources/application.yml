@@ -1,5 +1,6 @@
 server:
   port: 8080
+
 spring:
   application:
     name: formwork
@@ -15,7 +16,9 @@ spring:
     time-zone: GMT+8
 
 springdoc:
-  group-configs:
-    - group: default
-      paths-to-match: /**
-      paths-to-exclude: /error
+  paths-to-match: /*
+  paths-to-exclude: /error
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /ui-docs

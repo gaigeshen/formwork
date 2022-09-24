@@ -101,6 +101,7 @@ public class SecurityConfiguration {
                 .logoutSuccessHandler(logoutHandler);
 
         http.authorizeRequests()
+                .antMatchers("/api-docs", "/ui-docs").permitAll()
                 .anyRequest().authenticated();
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
