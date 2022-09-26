@@ -17,7 +17,9 @@ import java.util.Objects;
  *
  * @author gaigeshen
  */
-@RestControllerAdvice
+@RestControllerAdvice(
+        basePackageClasses = ErrorController.class
+)
 public class ResultResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
