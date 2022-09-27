@@ -7,21 +7,10 @@ import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
-import org.flowable.engine.runtime.ActivityInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
-import work.gaigeshen.formwork.commons.bpmn.BpmnService;
-import work.gaigeshen.formwork.commons.bpmn.DefaultUserTask;
-import work.gaigeshen.formwork.commons.bpmn.DefaultUserTaskActivity;
-import work.gaigeshen.formwork.commons.bpmn.ProcessDeployParameters;
-import work.gaigeshen.formwork.commons.bpmn.ProcessNode;
-import work.gaigeshen.formwork.commons.bpmn.ProcessStartParameters;
-import work.gaigeshen.formwork.commons.bpmn.UserTask;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskActivity;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskActivityQueryParameters;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskCompleteParameters;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskQueryParameters;
+import work.gaigeshen.formwork.commons.bpmn.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -86,44 +75,21 @@ public class FlowableBpmnService implements BpmnService {
 
     @Override
     public List<UserTaskActivity> queryTaskActivities(UserTaskActivityQueryParameters parameters) {
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
                 .processDefinitionKey(parameters.getProcessId()).processInstanceBusinessKey(parameters.getBusinessKey())
                 .singleResult();
-        if (Objects.isNull(processInstance)) {
-            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                    .processDefinitionKey(parameters.getProcessId()).processInstanceBusinessKey(parameters.getBusinessKey())
-                    .singleResult();
-            if (Objects.isNull(historicProcessInstance)) {
-                return Collections.emptyList();
-            }
-            List<HistoricActivityInstance> activities = historyService.createHistoricActivityInstanceQuery()
-                    .processInstanceId(historicProcessInstance.getId())
-                    .activityType("userTask").orderByHistoricActivityInstanceStartTime()
-                    .asc().list();
-            if (activities.isEmpty()) {
-                return Collections.emptyList();
-            }
-            List<UserTaskActivity> userTaskActivities = new ArrayList<>();
-            for (HistoricActivityInstance activity : activities) {
-                UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
-                        .assignee(activity.getAssignee())
-                        .startTime(activity.getStartTime())
-                        .endTime(activity.getEndTime())
-                        .taskId(activity.getTaskId())
-                        .build();
-                userTaskActivities.add(userTaskActivity);
-            }
-            return userTaskActivities;
+        if (Objects.isNull(historicProcessInstance)) {
+            return Collections.emptyList();
         }
-        List<ActivityInstance> activities = runtimeService.createActivityInstanceQuery()
-                .processInstanceId(processInstance.getProcessInstanceId())
-                .activityType("userTask").orderByActivityInstanceStartTime()
+        List<HistoricActivityInstance> activities = historyService.createHistoricActivityInstanceQuery()
+                .processInstanceId(historicProcessInstance.getId())
+                .activityType("userTask").orderByHistoricActivityInstanceStartTime()
                 .asc().list();
         if (activities.isEmpty()) {
             return Collections.emptyList();
         }
         List<UserTaskActivity> userTaskActivities = new ArrayList<>();
-        for (ActivityInstance activity : activities) {
+        for (HistoricActivityInstance activity : activities) {
             UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
                     .assignee(activity.getAssignee())
                     .startTime(activity.getStartTime())
