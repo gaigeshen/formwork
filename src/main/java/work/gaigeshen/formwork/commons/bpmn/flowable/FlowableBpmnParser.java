@@ -124,12 +124,8 @@ public abstract class FlowableBpmnParser {
             process.addFlowElement(outgoingNodeFlow);
 
             Conditions conditions = outgoingNode.getConditions();
-            if (!conditions.isEmpty()) {
-                Conditions updatedConditions = conditions.appendCondition(Condition.create("!rejected"));
-                outgoingNodeFlow.setConditionExpression(updatedConditions.toExpression());
-            } else {
-                outgoingNodeFlow.setConditionExpression(createAndToExpression("!rejected"));
-            }
+            Conditions updatedConditions = conditions.appendCondition(Condition.create("!rejected"));
+            outgoingNodeFlow.setConditionExpression(updatedConditions.toExpression());
         }
 
         return processFlowNode;
