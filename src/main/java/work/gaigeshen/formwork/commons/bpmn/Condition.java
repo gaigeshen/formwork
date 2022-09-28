@@ -14,6 +14,6 @@ public interface Condition {
         if (Objects.isNull(expression)) {
             throw new IllegalArgumentException("expression cannot be null");
         }
-        return () -> expression;
+        return () -> "(" + expression + ")";
     }
 }
