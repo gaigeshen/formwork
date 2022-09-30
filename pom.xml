@@ -116,7 +116,6 @@
                 <version>2.7.3</version>
                 <executions>
                     <execution>
-                        <id>repackage</id>
                         <goals>
                             <goal>repackage</goal>
                         </goals>
