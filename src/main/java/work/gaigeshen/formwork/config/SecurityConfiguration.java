@@ -110,7 +110,6 @@ public class SecurityConfiguration {
 
         http.csrf().disable().cors().configurationSource(r -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowCredentials(false);
             config.setAllowedMethods(Arrays.asList("GET", "POST"));
             config.setAllowedHeaders(Collections.singletonList(CorsConfiguration.ALL));
             config.setAllowedOrigins(Collections.singletonList(CorsConfiguration.ALL));
