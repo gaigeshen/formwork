@@ -2,6 +2,7 @@ package work.gaigeshen.formwork.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -101,6 +102,7 @@ public class SecurityConfiguration {
                 .logoutSuccessHandler(logoutHandler);
 
         http.authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
                 .antMatchers("/api-docs/**", "/ui-docs/**", "/swagger-ui/**").permitAll()
                 .anyRequest().authenticated();
 
