@@ -33,4 +33,9 @@ public class Candidate {
     public Set<String> getUsers() {
         return users;
     }
+
+    @Override
+    public String toString() {
+        return "Candidate{groups=" + groups + ", users=" + users + '}';
+    }
 }

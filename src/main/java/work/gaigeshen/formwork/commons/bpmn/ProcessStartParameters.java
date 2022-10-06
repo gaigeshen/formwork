@@ -36,6 +36,15 @@ public class ProcessStartParameters {
         return variables;
     }
 
+    @Override
+    public String toString() {
+        return "ProcessStartParameters{" +
+                "processId='" + processId + '\'' +
+                ", businessKey='" + businessKey + '\'' +
+                ", variables=" + variables +
+                '}';
+    }
+
     public static class Builder {
 
         private String processId;

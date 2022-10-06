@@ -27,6 +27,14 @@ public class UserTaskActivityQueryParameters {
         return businessKey;
     }
 
+    @Override
+    public String toString() {
+        return "UserTaskActivityQueryParameters{" +
+                "processId='" + processId + '\'' +
+                ", businessKey='" + businessKey + '\'' +
+                '}';
+    }
+
     public static class Builder {
 
         private String processId;

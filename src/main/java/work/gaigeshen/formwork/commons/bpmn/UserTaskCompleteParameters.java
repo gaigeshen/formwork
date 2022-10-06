@@ -43,6 +43,16 @@ public class UserTaskCompleteParameters {
         return rejected;
     }
 
+    @Override
+    public String toString() {
+        return "UserTaskCompleteParameters{" +
+                "userTask=" + userTask +
+                ", variables=" + variables +
+                ", assignee='" + assignee + '\'' +
+                ", rejected=" + rejected +
+                '}';
+    }
+
     public static class Builder {
 
         private UserTask userTask;

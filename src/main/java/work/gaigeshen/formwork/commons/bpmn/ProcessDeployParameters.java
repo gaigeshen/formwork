@@ -34,6 +34,15 @@ public class ProcessDeployParameters {
         return processNode;
     }
 
+    @Override
+    public String toString() {
+        return "ProcessDeployParameters{" +
+                "processId='" + processId + '\'' +
+                ", procesName='" + procesName + '\'' +
+                ", processNode=" + processNode +
+                '}';
+    }
+
     public static class Builder {
 
         private String processId;

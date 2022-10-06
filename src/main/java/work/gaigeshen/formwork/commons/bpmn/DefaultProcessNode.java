@@ -57,4 +57,13 @@ public class DefaultProcessNode implements ProcessNode {
     public Set<ProcessNode> getOutgoing() {
         return outgoing;
     }
+
+    @Override
+    public String toString() {
+        return "DefaultProcessNode{" +
+                "candidate=" + candidate +
+                ", conditions=" + conditions +
+                ", outgoing=" + outgoing +
+                '}';
+    }
 }

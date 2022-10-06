@@ -43,6 +43,16 @@ public class UserTaskQueryParameters {
         return candidateUser;
     }
 
+    @Override
+    public String toString() {
+        return "UserTaskQueryParameters{" +
+                "processId='" + processId + '\'' +
+                ", businessKey='" + businessKey + '\'' +
+                ", candidateGroups=" + candidateGroups +
+                ", candidateUser='" + candidateUser + '\'' +
+                '}';
+    }
+
     public static class Builder {
 
         private String processId;
