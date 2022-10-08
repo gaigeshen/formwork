@@ -20,6 +20,10 @@ public class DefaultCondition implements Condition {
         this.operator = operator;
     }
 
+    public static DefaultCondition create(String variable, Object value, String operator) {
+        return new DefaultCondition(variable, value, operator);
+    }
+
     public static DefaultCondition equalTo(String variable, Object value) {
         return new DefaultCondition(variable, value, " = ");
     }
