@@ -24,10 +24,6 @@ public class DefaultCondition implements Condition {
         return new DefaultCondition(variable, value, " = ");
     }
 
-    public static DefaultCondition notEqualTo(String variable, Object value) {
-        return new DefaultCondition(variable, value, " != ");
-    }
-
     public static DefaultCondition greaterThan(String variable, Object value) {
         return new DefaultCondition(variable, value, " > ");
     }
