@@ -45,6 +45,9 @@ public class FlowableBpmnService implements BpmnService {
         }
         TaskQuery taskQuery = taskService.createTaskQuery().processDefinitionKey(parameters.getProcessId())
                 .processInstanceBusinessKey(parameters.getBusinessKey());
+        if (Objects.nonNull(parameters.getTaskId())) {
+            taskQuery.taskId(parameters.getTaskId());
+        }
         Set<String> candidateGroups = parameters.getCandidateGroups();
         if (!candidateGroups.isEmpty()) {
             taskQuery.taskCandidateGroupIn(candidateGroups);

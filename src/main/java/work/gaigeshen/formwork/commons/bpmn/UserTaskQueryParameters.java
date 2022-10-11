@@ -8,6 +8,8 @@ import java.util.Set;
  */
 public class UserTaskQueryParameters {
 
+    private final String taskId;
+
     private final String processId;
 
     private final String businessKey;
@@ -17,6 +19,7 @@ public class UserTaskQueryParameters {
     private final String candidateUser;
 
     private UserTaskQueryParameters(Builder builder) {
+        this.taskId = builder.taskId;
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.candidateGroups = builder.candidateGroups;
@@ -25,6 +28,10 @@ public class UserTaskQueryParameters {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public String getTaskId() {
+        return taskId;
     }
 
     public String getProcessId() {
@@ -46,7 +53,8 @@ public class UserTaskQueryParameters {
     @Override
     public String toString() {
         return "UserTaskQueryParameters{" +
-                "processId='" + processId + '\'' +
+                "taskId='" + taskId + '\'' +
+                ", processId='" + processId + '\'' +
                 ", businessKey='" + businessKey + '\'' +
                 ", candidateGroups=" + candidateGroups +
                 ", candidateUser='" + candidateUser + '\'' +
@@ -55,6 +63,8 @@ public class UserTaskQueryParameters {
 
     public static class Builder {
 
+        private String taskId;
+
         private String processId;
 
         private String businessKey;
@@ -62,6 +72,11 @@ public class UserTaskQueryParameters {
         private Set<String> candidateGroups;
 
         private String candidateUser;
+
+        public Builder taskId(String taskId) {
+            this.taskId = taskId;
+            return this;
+        }
 
         public Builder processId(String processId) {
             this.processId = processId;
