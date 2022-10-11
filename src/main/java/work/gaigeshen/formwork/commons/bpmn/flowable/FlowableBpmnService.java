@@ -58,16 +58,19 @@ public class FlowableBpmnService implements BpmnService {
             return Collections.emptyList();
         }
         return queryResult.stream().map(task -> {
-            ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-                    .processInstanceId(task.getProcessInstanceId())
-                    .singleResult();
-            if (Objects.isNull(processInstance)) {
-                throw new IllegalStateException("process instance not found of task: " + task);
+            String businessKey = parameters.getBusinessKey();
+            if (Objects.isNull(businessKey)) {
+                ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                        .processInstanceId(task.getProcessInstanceId())
+                        .singleResult();
+                if (Objects.isNull(processInstance)) {
+                    throw new IllegalStateException("process instance not found of task: " + task);
+                }
+                businessKey = processInstance.getBusinessKey();
             }
             DefaultUserTask.Builder builder = DefaultUserTask.builder()
                     .id(task.getId()).name(task.getName()).description(task.getDescription())
-                    .businessKey(processInstance.getBusinessKey())
-                    .assignee(task.getAssignee())
+                    .businessKey(businessKey).assignee(task.getAssignee())
                     .createTime(task.getCreateTime()).dueDate(task.getDueDate()).claimTime(task.getClaimTime());
             return builder.build();
         }).collect(Collectors.toSet());
