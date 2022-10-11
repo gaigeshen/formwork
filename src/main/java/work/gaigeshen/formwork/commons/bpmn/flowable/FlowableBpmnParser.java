@@ -58,29 +58,31 @@ public abstract class FlowableBpmnParser {
      * @return 当前传入的流程节点转换后的流程模型
      */
     public static FlowNode parseProcessNode(ProcessNode processNode, Process process, EndEvent endEvent, boolean starter) {
-        // 创建流程节点并添加到流程模型中
+        // 创建的节点类型有开始节点、用户任务节点、排他网关
+        // 只有设置了审批人的情况才会创建用户任务节点
         FlowNode processFlowNode;
         if (starter) {
             processFlowNode = new StartEvent();
             processFlowNode.setId("startEvent_" + IdentityCreator.createDefault());
         } else {
-            processFlowNode = new UserTask();
-            processFlowNode.setId("userTask_" + IdentityCreator.createDefault());
+            if (processNode.hasCandidate()) {
+                processFlowNode = new UserTask();
+                processFlowNode.setId("userTask_" + IdentityCreator.createDefault());
+                Candidate candidate = processNode.getCandidate();
+                Set<String> groups = candidate.getGroups();
+                Set<String> users = candidate.getUsers();
+                if (!groups.isEmpty()) {
+                    ((UserTask) processFlowNode).setCandidateGroups(new ArrayList<>(groups));
+                }
+                if (!users.isEmpty()) {
+                    ((UserTask) processFlowNode).setCandidateUsers(new ArrayList<>(users));
+                }
+            } else {
+                processFlowNode = new ExclusiveGateway();
+                processFlowNode.setId("exclusive_" + IdentityCreator.createDefault());
+            }
         }
         process.addFlowElement(processFlowNode);
-
-        // 如果是用户任务节点则添加审批人
-        Candidate candidate = processNode.getCandidate();
-        if (!candidate.isEmpty() && processFlowNode instanceof UserTask) {
-            Set<String> groups = candidate.getGroups();
-            Set<String> users = candidate.getUsers();
-            if (!groups.isEmpty()) {
-                ((UserTask) processFlowNode).setCandidateGroups(new ArrayList<>(groups));
-            }
-            if (!users.isEmpty()) {
-                ((UserTask) processFlowNode).setCandidateUsers(new ArrayList<>(users));
-            }
-        }
 
         // 没有任何分支节点的情况则认为流程结束
         Set<ProcessNode> outgoing = processNode.getOutgoing();

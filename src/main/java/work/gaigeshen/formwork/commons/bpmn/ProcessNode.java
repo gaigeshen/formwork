@@ -10,6 +10,10 @@ public interface ProcessNode extends Comparable<ProcessNode> {
 
     Candidate getCandidate();
 
+    default boolean hasCandidate() {
+        return !getCandidate().isEmpty();
+    }
+
     Conditions getConditions();
 
     Set<ProcessNode> getOutgoing();
