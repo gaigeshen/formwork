@@ -49,7 +49,7 @@ public class FlowableBpmnService implements BpmnService {
             taskQuery.taskId(parameters.getTaskId());
         }
         Set<String> candidateGroups = parameters.getCandidateGroups();
-        if (!candidateGroups.isEmpty()) {
+        if (Objects.nonNull(candidateGroups) && !candidateGroups.isEmpty()) {
             taskQuery.taskCandidateGroupIn(candidateGroups);
         }
         String candidateUser = parameters.getCandidateUser();
@@ -61,19 +61,21 @@ public class FlowableBpmnService implements BpmnService {
             return Collections.emptyList();
         }
         return queryResult.stream().map(task -> {
+            String processId = parameters.getProcessId();
             String businessKey = parameters.getBusinessKey();
-            if (Objects.isNull(businessKey)) {
+            if (Objects.isNull(processId) || Objects.isNull(businessKey)) {
                 ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
                         .processInstanceId(task.getProcessInstanceId())
                         .singleResult();
                 if (Objects.isNull(processInstance)) {
                     throw new IllegalStateException("process instance not found of task: " + task);
                 }
+                processId = processInstance.getProcessDefinitionKey();
                 businessKey = processInstance.getBusinessKey();
             }
             DefaultUserTask.Builder builder = DefaultUserTask.builder()
                     .id(task.getId()).name(task.getName()).description(task.getDescription())
-                    .businessKey(businessKey).assignee(task.getAssignee())
+                    .processId(processId).businessKey(businessKey).assignee(task.getAssignee())
                     .createTime(task.getCreateTime()).dueDate(task.getDueDate()).claimTime(task.getClaimTime());
             return builder.build();
         }).collect(Collectors.toSet());
