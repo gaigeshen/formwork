@@ -110,7 +110,7 @@ public abstract class FlowableBpmnParser {
         process.addFlowElement(endFlow);
         endFlow.setSourceRef(exclusiveGateway.getId());
         endFlow.setTargetRef(endEvent.getId());
-        endFlow.setConditionExpression(Conditions.createAndToExpression("rejceted"));
+        endFlow.setConditionExpression(Conditions.createAndToExpression("rejected"));
 
         // 添加所有的分支节点并连接到排他网关
         // 这些分支节点的执行条件都必须是审批通过的
