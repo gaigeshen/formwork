@@ -48,7 +48,7 @@ public class DefaultConditions implements Conditions {
 
     @Override
     public String toExpression() {
-        StringJoiner joiner = new StringJoiner(") && (", "${(", ")}");
+        StringJoiner joiner = new StringJoiner(" && ", "${", "}");
         for (Condition condition : conditions) {
             joiner.add(condition.toExpression());
         }

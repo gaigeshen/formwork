@@ -85,8 +85,7 @@ public abstract class FlowableBpmnParser {
         process.addFlowElement(processFlowNode);
 
         // 没有任何分支节点的情况则认为流程结束
-        Set<ProcessNode> outgoing = processNode.getOutgoing();
-        if (outgoing.isEmpty()) {
+        if (!processNode.hasOutgoing()) {
             SequenceFlow endFlow = new SequenceFlow();
             process.addFlowElement(endFlow);
             endFlow.setSourceRef(processFlowNode.getId());
@@ -114,7 +113,7 @@ public abstract class FlowableBpmnParser {
 
         // 添加所有的分支节点并连接到排他网关
         // 这些分支节点的执行条件都必须是审批通过的
-        for (ProcessNode outgoingNode : outgoing) {
+        for (ProcessNode outgoingNode : processNode.getOutgoing()) {
             FlowNode outgoingFlowNode = parseProcessNode(outgoingNode, process, endEvent, false);
 
             SequenceFlow outgoingNodeFlow = new SequenceFlow();
