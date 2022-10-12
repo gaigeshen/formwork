@@ -15,6 +15,8 @@ public class DefaultUserTask implements UserTask {
 
     private final String description;
 
+    private final String processId;
+
     private final String businessKey;
 
     private final String assignee;
@@ -29,6 +31,7 @@ public class DefaultUserTask implements UserTask {
         this.id = builder.id;
         this.name = builder.name;
         this.description = builder.description;
+        this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.assignee = builder.assignee;
         this.createTime = builder.createTime;
@@ -53,6 +56,11 @@ public class DefaultUserTask implements UserTask {
     @Override
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public String getProcessId() {
+        return processId;
     }
 
     @Override
@@ -105,6 +113,8 @@ public class DefaultUserTask implements UserTask {
 
         private String description;
 
+        private String processId;
+
         private String businessKey;
 
         private String assignee;
@@ -127,6 +137,11 @@ public class DefaultUserTask implements UserTask {
 
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder processId(String processId) {
+            this.processId = processId;
             return this;
         }
 

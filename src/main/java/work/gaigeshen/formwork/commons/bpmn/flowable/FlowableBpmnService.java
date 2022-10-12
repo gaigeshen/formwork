@@ -108,18 +108,22 @@ public class FlowableBpmnService implements BpmnService {
     }
 
     @Override
-    public void completeTask(UserTaskCompleteParameters parameters) {
+    public boolean completeTask(UserTaskCompleteParameters parameters) {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("user task complete parameters cannot be null");
         }
-        String taskId = parameters.getUserTask().getId();
-
+        UserTask userTask = parameters.getUserTask();
+        String taskId = userTask.getId();
         Map<String, Object> variables = new HashMap<>(parameters.getVariables());
         variables.put("rejected", parameters.isRejected());
-
         try {
             taskService.setAssignee(taskId, parameters.getAssignee());
             taskService.complete(taskId, variables);
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                    .processDefinitionKey(userTask.getProcessId())
+                    .processInstanceBusinessKey(userTask.getBusinessKey())
+                    .singleResult();
+            return Objects.isNull(historicProcessInstance.getEndTime());
         } catch (Exception e) {
             throw new IllegalStateException("could not complete user task: " + parameters, e);
         }

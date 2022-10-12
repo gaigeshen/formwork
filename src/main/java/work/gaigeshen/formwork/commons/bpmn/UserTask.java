@@ -15,6 +15,8 @@ public interface UserTask {
 
     String getDescription();
 
+    String getProcessId();
+
     String getBusinessKey();
 
     String getAssignee();

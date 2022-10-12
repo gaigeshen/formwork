@@ -30,8 +30,9 @@ public interface BpmnService {
      * 用户任务执行完成操作
      *
      * @param parameters 执行完成操作参数
+     * @return 是否有后续用户任务
      */
-    void completeTask(UserTaskCompleteParameters parameters);
+    boolean completeTask(UserTaskCompleteParameters parameters);
 
     /**
      * 开启业务流程
