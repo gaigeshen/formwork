@@ -29,11 +29,11 @@ public class DefaultProcessNode implements ProcessNode {
         this.outgoing = new TreeSet<>(outgoing);
     }
 
-    public DefaultProcessNode create(Candidate candidate, Conditions conditions, Set<ProcessNode> outgoing) {
+    public static DefaultProcessNode create(Candidate candidate, Conditions conditions, Set<ProcessNode> outgoing) {
         return new DefaultProcessNode(candidate, conditions, outgoing);
     }
 
-    public DefaultProcessNode create(Candidate candidate, Conditions conditions) {
+    public static DefaultProcessNode create(Candidate candidate, Conditions conditions) {
         return new DefaultProcessNode(candidate, conditions, Collections.emptySet());
     }
 
