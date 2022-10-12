@@ -2,16 +2,15 @@ package work.gaigeshen.formwork.commons.bpmn.flowable;
 
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
+import org.flowable.common.engine.impl.cfg.IdGenerator;
+import org.flowable.common.engine.impl.persistence.StrongUuidGenerator;
 import work.gaigeshen.formwork.commons.bpmn.Candidate;
 import work.gaigeshen.formwork.commons.bpmn.Condition;
 import work.gaigeshen.formwork.commons.bpmn.Conditions;
 import work.gaigeshen.formwork.commons.bpmn.ProcessNode;
-import work.gaigeshen.formwork.commons.identity.IdentityCreator;
 
 import java.util.ArrayList;
 import java.util.Set;
-
-import static work.gaigeshen.formwork.commons.bpmn.Conditions.createAndToExpression;
 
 /**
  * 流程模型转换器
@@ -19,6 +18,8 @@ import static work.gaigeshen.formwork.commons.bpmn.Conditions.createAndToExpress
  * @author gaigeshen
  */
 public abstract class FlowableBpmnParser {
+
+    private static final IdGenerator idGenerator = new StrongUuidGenerator();
 
     private FlowableBpmnParser() { }
 
@@ -40,7 +41,7 @@ public abstract class FlowableBpmnParser {
         process.setName(procesName);
 
         EndEvent endEvent = new EndEvent();
-        endEvent.setId("endEvent_" + IdentityCreator.createDefault());
+        endEvent.setId("endEvent_" + idGenerator.getNextId());
         process.addFlowElement(endEvent);
 
         parseProcessNode(processStartNode, process, endEvent, true);
@@ -63,11 +64,11 @@ public abstract class FlowableBpmnParser {
         FlowNode processFlowNode;
         if (starter) {
             processFlowNode = new StartEvent();
-            processFlowNode.setId("startEvent_" + IdentityCreator.createDefault());
+            processFlowNode.setId("startEvent_" + idGenerator.getNextId());
         } else {
             if (processNode.hasCandidate()) {
                 processFlowNode = new UserTask();
-                processFlowNode.setId("userTask_" + IdentityCreator.createDefault());
+                processFlowNode.setId("userTask_" + idGenerator.getNextId());
                 Candidate candidate = processNode.getCandidate();
                 Set<String> groups = candidate.getGroups();
                 Set<String> users = candidate.getUsers();
@@ -79,7 +80,7 @@ public abstract class FlowableBpmnParser {
                 }
             } else {
                 processFlowNode = new ExclusiveGateway();
-                processFlowNode.setId("exclusive_" + IdentityCreator.createDefault());
+                processFlowNode.setId("exclusive_" + idGenerator.getNextId());
             }
         }
         process.addFlowElement(processFlowNode);
@@ -95,7 +96,7 @@ public abstract class FlowableBpmnParser {
 
         // 添加排他网关连接所有的分支节点
         ExclusiveGateway exclusiveGateway = new ExclusiveGateway();
-        exclusiveGateway.setId("exclusive_" + IdentityCreator.createDefault());
+        exclusiveGateway.setId("exclusive_" + idGenerator.getNextId());
 
         SequenceFlow exclusiveFlow = new SequenceFlow();
         exclusiveFlow.setSourceRef(processFlowNode.getId());
@@ -109,7 +110,7 @@ public abstract class FlowableBpmnParser {
         process.addFlowElement(endFlow);
         endFlow.setSourceRef(exclusiveGateway.getId());
         endFlow.setTargetRef(endEvent.getId());
-        endFlow.setConditionExpression(createAndToExpression("rejceted"));
+        endFlow.setConditionExpression(Conditions.createAndToExpression("rejceted"));
 
         // 添加所有的分支节点并连接到排他网关
         // 这些分支节点的执行条件都必须是审批通过的
@@ -117,7 +118,7 @@ public abstract class FlowableBpmnParser {
             FlowNode outgoingFlowNode = parseProcessNode(outgoingNode, process, endEvent, false);
 
             SequenceFlow outgoingNodeFlow = new SequenceFlow();
-            outgoingNodeFlow.setId("outgoing_" + IdentityCreator.createDefault());
+            outgoingNodeFlow.setId("outgoing_" + idGenerator.getNextId());
 
             outgoingNodeFlow.setSourceRef(exclusiveGateway.getId());
             outgoingNodeFlow.setTargetRef(outgoingFlowNode.getId());
