@@ -43,7 +43,8 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("user task query parameters cannot be null");
         }
-        TaskQuery taskQuery = taskService.createTaskQuery().processDefinitionKey(parameters.getProcessId())
+        TaskQuery taskQuery = taskService.createTaskQuery()
+                .processDefinitionKey(wrapProcessId(parameters.getProcessId()))
                 .processInstanceBusinessKey(parameters.getBusinessKey());
         if (Objects.nonNull(parameters.getTaskId())) {
             taskQuery.taskId(parameters.getTaskId());
@@ -70,7 +71,7 @@ public class FlowableBpmnService implements BpmnService {
                 if (Objects.isNull(processInstance)) {
                     throw new IllegalStateException("process instance not found of task: " + task);
                 }
-                processId = processInstance.getProcessDefinitionKey();
+                processId = unWrapProcessId(processInstance.getProcessDefinitionKey());
                 businessKey = processInstance.getBusinessKey();
             }
             DefaultUserTask.Builder builder = DefaultUserTask.builder()
@@ -84,7 +85,8 @@ public class FlowableBpmnService implements BpmnService {
     @Override
     public List<UserTaskActivity> queryTaskActivities(UserTaskActivityQueryParameters parameters) {
         HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                .processDefinitionKey(parameters.getProcessId()).processInstanceBusinessKey(parameters.getBusinessKey())
+                .processDefinitionKey(wrapProcessId(parameters.getProcessId()))
+                .processInstanceBusinessKey(parameters.getBusinessKey())
                 .singleResult();
         if (Objects.isNull(historicProcessInstance)) {
             return Collections.emptyList();
@@ -138,8 +140,9 @@ public class FlowableBpmnService implements BpmnService {
         }
         HashMap<String, Object> variables = new HashMap<>(parameters.getVariables());
         variables.put("rejected", false);
+        String processId = wrapProcessId(parameters.getProcessId());
         try {
-            runtimeService.startProcessInstanceByKey(parameters.getProcessId(), parameters.getBusinessKey(), variables);
+            runtimeService.startProcessInstanceByKey(processId, parameters.getBusinessKey(), variables);
         } catch (Exception e) {
             throw new IllegalStateException("could not start process: " + parameters, e);
         }
@@ -150,7 +153,7 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("process deploy parameters cannot be null");
         }
-        String processId = parameters.getProcessId();
+        String processId = wrapProcessId(parameters.getProcessId());
         String procesName = parameters.getProcesName();
         ProcessNode processNode = parameters.getProcessNode();
         String processResourceName = processId + "(" + procesName + ").bpmn20.xml";
@@ -160,5 +163,28 @@ public class FlowableBpmnService implements BpmnService {
         } catch (Exception e) {
             throw new IllegalStateException("could not deploy process: " + parameters, e);
         }
+    }
+
+    /**
+     * 包装流程标识符，由于用户传入的流程标识符可能不合法（例如数字开头）会造成部署流程失败，所以需要进行包装
+     *
+     * @param processId 原始的流程标识符
+     * @return 包装后的流程标识符
+     */
+    private String wrapProcessId(String processId) {
+        return Objects.isNull(processId) ? null : "process_" + processId;
+    }
+
+    /**
+     * 解包装流程标识符
+     *
+     * @param wrappedProcessId 包装的流程标识符
+     * @return 解包装后的流程标识符
+     */
+    private String unWrapProcessId(String wrappedProcessId) {
+        if (Objects.isNull(wrappedProcessId)) {
+            throw new IllegalArgumentException("wrapped process id cannot be null");
+        }
+        return wrappedProcessId.replace("process_", "");
     }
 }
