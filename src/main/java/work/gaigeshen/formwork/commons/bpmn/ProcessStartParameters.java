@@ -1,6 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -69,6 +70,15 @@ public class ProcessStartParameters {
         }
 
         public ProcessStartParameters build() {
+            if (Objects.isNull(processId)) {
+                throw new IllegalArgumentException("processId cannot be null");
+            }
+            if (Objects.isNull(businessKey)) {
+                throw new IllegalArgumentException("businessKey cannot be null");
+            }
+            if (Objects.isNull(variables)) {
+                throw new IllegalArgumentException("variables cannot be null");
+            }
             return new ProcessStartParameters(this);
         }
     }

@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import java.util.Objects;
+
 /**
  *
  * @author gaigeshen
@@ -52,6 +54,12 @@ public class UserTaskActivityQueryParameters {
         }
 
         public UserTaskActivityQueryParameters build() {
+            if (Objects.isNull(processId)) {
+                throw new IllegalArgumentException("processId cannot be null");
+            }
+            if (Objects.isNull(businessKey)) {
+                throw new IllegalArgumentException("businessKey cannot be null");
+            }
             return new UserTaskActivityQueryParameters(this);
         }
     }

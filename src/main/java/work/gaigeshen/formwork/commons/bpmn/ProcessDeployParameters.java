@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import java.util.Objects;
+
 /**
  *
  * @author gaigeshen
@@ -67,6 +69,15 @@ public class ProcessDeployParameters {
         }
 
         public ProcessDeployParameters build() {
+            if (Objects.isNull(processId)) {
+                throw new IllegalArgumentException("processId cannot be null");
+            }
+            if (Objects.isNull(procesName)) {
+                throw new IllegalArgumentException("processName cannot be null");
+            }
+            if (Objects.isNull(processNode)) {
+                throw new IllegalArgumentException("processNode cannot be null");
+            }
             return new ProcessDeployParameters(this);
         }
     }

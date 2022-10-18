@@ -15,11 +15,14 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
 
     private final Date endTime;
 
+    private final Status status;
+
     private DefaultUserTaskActivity(Builder builder) {
         this.taskId = builder.taskId;
         this.assignee = builder.assignee;
         this.startTime = builder.startTime;
         this.endTime = builder.endTime;
+        this.status = builder.status;
     }
 
     public static Builder builder() {
@@ -46,6 +49,11 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
         return endTime;
     }
 
+    @Override
+    public Status getStatus() {
+        return status;
+    }
+
     public static class Builder {
 
         private String taskId;
@@ -55,6 +63,8 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
         private Date startTime;
 
         private Date endTime;
+
+        private Status status;
 
         public Builder taskId(String taskId) {
             this.taskId = taskId;
@@ -73,6 +83,11 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
 
         public Builder endTime(Date endTime) {
             this.endTime = endTime;
+            return this;
+        }
+
+        public Builder status(Status status) {
+            this.status = status;
             return this;
         }
 

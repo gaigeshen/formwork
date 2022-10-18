@@ -84,8 +84,9 @@ public class FlowableBpmnService implements BpmnService {
 
     @Override
     public List<UserTaskActivity> queryTaskActivities(UserTaskActivityQueryParameters parameters) {
+        String wrappedProcessId = wrapProcessId(parameters.getProcessId());
         HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                .processDefinitionKey(wrapProcessId(parameters.getProcessId()))
+                .processDefinitionKey(wrappedProcessId)
                 .processInstanceBusinessKey(parameters.getBusinessKey())
                 .singleResult();
         if (Objects.isNull(historicProcessInstance)) {
@@ -98,13 +99,28 @@ public class FlowableBpmnService implements BpmnService {
         if (activities.isEmpty()) {
             return Collections.emptyList();
         }
+        long userTaskCount = taskService.createTaskQuery()
+                .processDefinitionKey(wrappedProcessId)
+                .processInstanceBusinessKey(parameters.getBusinessKey())
+                .count();
         List<UserTaskActivity> userTaskActivities = new ArrayList<>();
         for (HistoricActivityInstance activity : activities) {
+            UserTaskActivity.Status status;
+            if (Objects.isNull(activity.getEndTime())) {
+                status = UserTaskActivity.Status.PROCESSING;
+            } else {
+                if (userTaskCount > 0) {
+                    status = UserTaskActivity.Status.APPROVED;
+                } else {
+                    Map<String, Object> variables = historicProcessInstance.getProcessVariables();
+                    boolean rejected = (boolean) variables.get("rejected");
+                    status = rejected ? UserTaskActivity.Status.REJECTED : UserTaskActivity.Status.APPROVED;
+                }
+            }
             UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
+                    .taskId(activity.getTaskId()).status(status)
                     .assignee(activity.getAssignee())
-                    .startTime(activity.getStartTime())
-                    .endTime(activity.getEndTime())
-                    .taskId(activity.getTaskId())
+                    .startTime(activity.getStartTime()).endTime(activity.getEndTime())
                     .build();
             userTaskActivities.add(userTaskActivity);
         }

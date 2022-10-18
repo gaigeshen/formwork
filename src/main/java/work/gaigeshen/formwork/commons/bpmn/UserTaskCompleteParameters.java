@@ -1,6 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -84,6 +85,15 @@ public class UserTaskCompleteParameters {
         }
 
         public UserTaskCompleteParameters build() {
+            if (Objects.isNull(userTask)) {
+                throw new IllegalArgumentException("userTask cannot be null");
+            }
+            if (Objects.isNull(variables)) {
+                throw new IllegalArgumentException("variables cannot be null");
+            }
+            if (Objects.isNull(assignee)) {
+                throw new IllegalArgumentException("assignee cannot be null");
+            }
             return new UserTaskCompleteParameters(this);
         }
     }
