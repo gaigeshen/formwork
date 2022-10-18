@@ -10,6 +10,7 @@ import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
+import org.flowable.variable.api.history.HistoricVariableInstance;
 import work.gaigeshen.formwork.commons.bpmn.*;
 
 import java.util.*;
@@ -84,9 +85,8 @@ public class FlowableBpmnService implements BpmnService {
 
     @Override
     public List<UserTaskActivity> queryTaskActivities(UserTaskActivityQueryParameters parameters) {
-        String wrappedProcessId = wrapProcessId(parameters.getProcessId());
         HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                .processDefinitionKey(wrappedProcessId)
+                .processDefinitionKey(wrapProcessId(parameters.getProcessId()))
                 .processInstanceBusinessKey(parameters.getBusinessKey())
                 .singleResult();
         if (Objects.isNull(historicProcessInstance)) {
@@ -99,22 +99,25 @@ public class FlowableBpmnService implements BpmnService {
         if (activities.isEmpty()) {
             return Collections.emptyList();
         }
-        long userTaskCount = taskService.createTaskQuery()
-                .processDefinitionKey(wrappedProcessId)
-                .processInstanceBusinessKey(parameters.getBusinessKey())
-                .count();
+        Map<String, List<HistoricVariableInstance>> taskVariables = historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(historicProcessInstance.getId()).variableName("rejected")
+                .taskIds(activities.stream().map(HistoricActivityInstance::getTaskId).collect(Collectors.toSet()))
+                .list().stream().collect(Collectors.groupingBy(HistoricVariableInstance::getTaskId));
         List<UserTaskActivity> userTaskActivities = new ArrayList<>();
         for (HistoricActivityInstance activity : activities) {
             UserTaskActivity.Status status;
             if (Objects.isNull(activity.getEndTime())) {
                 status = UserTaskActivity.Status.PROCESSING;
             } else {
-                if (userTaskCount > 0) {
-                    status = UserTaskActivity.Status.APPROVED;
+                List<HistoricVariableInstance> variables = taskVariables.get(activity.getTaskId());
+                if (Objects.isNull(variables)) {
+                    throw new IllegalStateException("'rejected' variable not found");
+                }
+                HistoricVariableInstance rejectedVariable = variables.iterator().next();
+                if ((boolean) rejectedVariable.getValue()) {
+                    status = UserTaskActivity.Status.REJECTED;
                 } else {
-                    Map<String, Object> variables = historicProcessInstance.getProcessVariables();
-                    boolean rejected = (boolean) variables.get("rejected");
-                    status = rejected ? UserTaskActivity.Status.REJECTED : UserTaskActivity.Status.APPROVED;
+                    status = UserTaskActivity.Status.APPROVED;
                 }
             }
             UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
@@ -138,6 +141,7 @@ public class FlowableBpmnService implements BpmnService {
         variables.put("rejected", parameters.isRejected());
         try {
             taskService.setAssignee(taskId, parameters.getAssignee());
+            taskService.setVariableLocal(taskId, "rejected", parameters.isRejected());
             taskService.complete(taskId, variables);
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
                     .processDefinitionKey(userTask.getProcessId())
