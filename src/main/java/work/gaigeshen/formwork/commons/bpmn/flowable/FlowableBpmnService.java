@@ -154,18 +154,25 @@ public class FlowableBpmnService implements BpmnService {
     }
 
     @Override
-    public void startProcess(ProcessStartParameters parameters) {
+    public boolean startProcess(ProcessStartParameters parameters) {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("process start parameters cannot be null");
         }
+        String processId = wrapProcessId(parameters.getProcessId());
+        long processCount = runtimeService.createProcessInstanceQuery()
+                .processDefinitionKey(processId).processInstanceBusinessKey(parameters.getBusinessKey())
+                .count();
+        if (processCount > 0) {
+            return true;
+        }
         HashMap<String, Object> variables = new HashMap<>(parameters.getVariables());
         variables.put("rejected", false);
-        String processId = wrapProcessId(parameters.getProcessId());
         try {
             runtimeService.startProcessInstanceByKey(processId, parameters.getBusinessKey(), variables);
         } catch (Exception e) {
             throw new IllegalStateException("could not start process: " + parameters, e);
         }
+        return false;
     }
 
     @Override

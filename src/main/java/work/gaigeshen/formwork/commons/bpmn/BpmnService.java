@@ -38,8 +38,9 @@ public interface BpmnService {
      * 开启业务流程
      *
      * @param parameters 业务流程开启参数
+     * @return 返回是否已经存在业务流程，如果已经存在业务流程则直接返回
      */
-    void startProcess(ProcessStartParameters parameters);
+    boolean startProcess(ProcessStartParameters parameters);
 
     /**
      * 部署业务流程
