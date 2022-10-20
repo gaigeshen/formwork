@@ -94,7 +94,7 @@ public class FlowableBpmnService implements BpmnService {
         }
         List<HistoricActivityInstance> activities = historyService.createHistoricActivityInstanceQuery()
                 .processInstanceId(historicProcessInstance.getId())
-                .activityType("userTask").orderByHistoricActivityInstanceStartTime()
+                .activityType("userTask").finished().orderByHistoricActivityInstanceStartTime()
                 .asc().list();
         if (activities.isEmpty()) {
             return Collections.emptyList();
@@ -105,20 +105,16 @@ public class FlowableBpmnService implements BpmnService {
                 .list().stream().collect(Collectors.groupingBy(HistoricVariableInstance::getTaskId));
         List<UserTaskActivity> userTaskActivities = new ArrayList<>();
         for (HistoricActivityInstance activity : activities) {
+            List<HistoricVariableInstance> variables = taskVariables.get(activity.getTaskId());
+            if (Objects.isNull(variables)) {
+                throw new IllegalStateException("'rejected' variable not found");
+            }
+            HistoricVariableInstance rejectedVariable = variables.iterator().next();
             UserTaskActivity.Status status;
-            if (Objects.isNull(activity.getEndTime())) {
-                status = UserTaskActivity.Status.PROCESSING;
+            if ((boolean) rejectedVariable.getValue()) {
+                status = UserTaskActivity.Status.REJECTED;
             } else {
-                List<HistoricVariableInstance> variables = taskVariables.get(activity.getTaskId());
-                if (Objects.isNull(variables)) {
-                    throw new IllegalStateException("'rejected' variable not found");
-                }
-                HistoricVariableInstance rejectedVariable = variables.iterator().next();
-                if ((boolean) rejectedVariable.getValue()) {
-                    status = UserTaskActivity.Status.REJECTED;
-                } else {
-                    status = UserTaskActivity.Status.APPROVED;
-                }
+                status = UserTaskActivity.Status.APPROVED;
             }
             UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
                     .taskId(activity.getTaskId()).status(status)
