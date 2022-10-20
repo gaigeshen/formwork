@@ -140,7 +140,7 @@ public class FlowableBpmnService implements BpmnService {
             taskService.setVariableLocal(taskId, "rejected", parameters.isRejected());
             taskService.complete(taskId, variables);
             HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                    .processDefinitionKey(userTask.getProcessId())
+                    .processDefinitionKey(wrapProcessId(userTask.getProcessId()))
                     .processInstanceBusinessKey(userTask.getBusinessKey())
                     .singleResult();
             return Objects.isNull(historicProcessInstance.getEndTime());
