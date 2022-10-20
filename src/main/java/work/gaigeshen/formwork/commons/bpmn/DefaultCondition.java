@@ -15,6 +15,12 @@ public class DefaultCondition implements Condition {
     private final String operator;
 
     private DefaultCondition(String variable, Object value, String operator) {
+        if (Objects.isNull(variable) || Objects.isNull(operator)) {
+            throw new IllegalArgumentException("variable and operator cannot be null");
+        }
+        if (Objects.isNull(value)) {
+            throw new IllegalArgumentException("value cannot be null");
+        }
         this.variable = variable;
         this.value = value;
         this.operator = operator;
@@ -58,12 +64,13 @@ public class DefaultCondition implements Condition {
             return false;
         }
         DefaultCondition that = (DefaultCondition) o;
-        return Objects.equals(variable, that.variable);
+        return Objects.equals(variable, that.variable)
+                && Objects.equals(operator, that.operator);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(variable);
+        return Objects.hash(variable, operator);
     }
 
     @Override
