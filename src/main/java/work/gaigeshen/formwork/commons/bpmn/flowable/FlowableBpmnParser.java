@@ -3,17 +3,20 @@ package work.gaigeshen.formwork.commons.bpmn.flowable;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 import org.flowable.common.engine.impl.cfg.IdGenerator;
+import org.flowable.common.engine.impl.de.odysseus.el.ExpressionFactoryImpl;
+import org.flowable.common.engine.impl.de.odysseus.el.util.SimpleContext;
+import org.flowable.common.engine.impl.javax.el.ExpressionFactory;
+import org.flowable.common.engine.impl.javax.el.ValueExpression;
 import org.flowable.common.engine.impl.persistence.StrongUuidGenerator;
 import work.gaigeshen.formwork.commons.bpmn.Candidate;
 import work.gaigeshen.formwork.commons.bpmn.Condition;
 import work.gaigeshen.formwork.commons.bpmn.Conditions;
 import work.gaigeshen.formwork.commons.bpmn.ProcessNode;
 
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.*;
 
 /**
- * 流程模型转换器
+ * 流程模型转换器，此类的方法不会对参数做校验，请确保传入的参数合法性
  *
  * @author gaigeshen
  */
@@ -131,5 +134,47 @@ public abstract class FlowableBpmnParser {
         }
 
         return processFlowNode;
+    }
+
+    /**
+     * 调用此方法将会获取指定节点以及后续节点预测的审批人
+     *
+     * @param flowNode 可以直接传入正在进行的用户任务节点
+     * @param candidates 此集合将存储所有预测的审批人
+     * @param variables 将会基于此变量来预测审批人
+     */
+    public static void parsePredictCandidates(FlowNode flowNode, List<Candidate> candidates, Map<String, Object> variables) {
+        if (flowNode instanceof UserTask) {
+            UserTask userTask = (UserTask) flowNode;
+            HashSet<String> groups = new HashSet<>(userTask.getCandidateGroups());
+            HashSet<String> users = new HashSet<>(userTask.getCandidateUsers());
+            candidates.add(new Candidate(groups, users));
+        }
+        List<SequenceFlow> outgoingFlows = flowNode.getOutgoingFlows();
+        if (outgoingFlows.isEmpty()) {
+            return;
+        }
+        FlowNode nextFlowNode = null;
+        if (outgoingFlows.size() > 1) {
+            for (SequenceFlow outgoingFlow : outgoingFlows) {
+                String expression = outgoingFlow.getConditionExpression();
+                ExpressionFactory factory = new ExpressionFactoryImpl();
+                SimpleContext context = new SimpleContext();
+                variables.forEach((k, v) -> {
+                    ValueExpression valueExpression = factory.createValueExpression(v, Object.class);
+                    context.setVariable(k, valueExpression);
+                });
+                Object value = factory.createValueExpression(context, expression, Boolean.class).getValue(context);
+                if (Objects.nonNull(value) && ((boolean) value)) {
+                    nextFlowNode = (FlowNode) outgoingFlow.getTargetFlowElement();
+                    break;
+                }
+            }
+        } else {
+            nextFlowNode = (FlowNode) outgoingFlows.get(0).getTargetFlowElement();
+        }
+        if (Objects.nonNull(nextFlowNode)) {
+            parsePredictCandidates(nextFlowNode, candidates, variables);
+        }
     }
 }

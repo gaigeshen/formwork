@@ -1,6 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn.flowable;
 
 import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.FlowElement;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -99,6 +100,10 @@ public class FlowableBpmnService implements BpmnService {
         if (activities.isEmpty()) {
             return Collections.emptyList();
         }
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(historicProcessInstance.getProcessDefinitionId());
+        if (Objects.isNull(bpmnModel)) {
+            throw new IllegalStateException("process bpmn model not found: " + parameters);
+        }
         Map<String, List<HistoricVariableInstance>> taskVariables = historyService.createHistoricVariableInstanceQuery()
                 .processInstanceId(historicProcessInstance.getId()).variableName("rejected")
                 .taskIds(activities.stream().map(HistoricActivityInstance::getTaskId).collect(Collectors.toSet()))
@@ -108,6 +113,9 @@ public class FlowableBpmnService implements BpmnService {
             UserTaskActivity.Status status;
             if (Objects.isNull(activity.getEndTime())) {
                 status = UserTaskActivity.Status.PROCESSING;
+                Task curTask = taskService.createTaskQuery().taskId(activity.getTaskId()).singleResult();
+                FlowElement flowNode = bpmnModel.getFlowElement(curTask.getTaskDefinitionKey());
+
             } else {
                 List<HistoricVariableInstance> variables = taskVariables.get(activity.getTaskId());
                 if (Objects.isNull(variables)) {

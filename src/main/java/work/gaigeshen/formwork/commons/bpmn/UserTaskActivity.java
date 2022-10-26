@@ -1,6 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * 用户任务历史
@@ -12,6 +13,10 @@ public interface UserTaskActivity {
     String getTaskId();
 
     String getAssignee();
+
+    Set<String> getGroups();
+
+    Set<String> getUsers();
 
     Date getStartTime();
 
