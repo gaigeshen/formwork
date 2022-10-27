@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.Set;
 
 /**
- * 用户任务历史（包含正在进行的任务）
+ * 用户任务活动
  *
  * @author gaigeshen
  */
