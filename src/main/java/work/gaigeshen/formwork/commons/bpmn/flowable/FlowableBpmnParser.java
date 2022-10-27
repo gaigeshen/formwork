@@ -8,6 +8,10 @@ import org.flowable.common.engine.impl.de.odysseus.el.util.SimpleContext;
 import org.flowable.common.engine.impl.javax.el.ExpressionFactory;
 import org.flowable.common.engine.impl.javax.el.ValueExpression;
 import org.flowable.common.engine.impl.persistence.StrongUuidGenerator;
+import org.flowable.engine.RepositoryService;
+import org.flowable.engine.RuntimeService;
+import org.flowable.engine.TaskService;
+import org.flowable.task.api.Task;
 import work.gaigeshen.formwork.commons.bpmn.Candidate;
 import work.gaigeshen.formwork.commons.bpmn.Condition;
 import work.gaigeshen.formwork.commons.bpmn.Conditions;
@@ -237,4 +241,58 @@ public abstract class FlowableBpmnParser {
         return null;
     }
 
+    /**
+     * 当需要获取运行时相关数据的时候可以调用此方法
+     *
+     * @param repositoryService 资源库服务
+     * @param runtimeService 运行时服务
+     * @param taskService 用户任务服务
+     * @return 返回的对象可以用来获取运行时相关的数据
+     */
+    public static Runtime createRuntime(RepositoryService repositoryService,
+                                        RuntimeService runtimeService, TaskService taskService) {
+        return new Runtime(repositoryService, runtimeService, taskService);
+    }
+
+    /**
+     * 当需要获取运行时相关数据的时候可以采用此类
+     *
+     * @author gaigeshen
+     */
+    public static class Runtime {
+
+        private final RepositoryService repositoryService;
+
+        private final RuntimeService runtimeService;
+
+        private final TaskService taskService;
+
+        public Runtime(RepositoryService repositoryService,
+                       RuntimeService runtimeService, TaskService taskService) {
+            this.repositoryService = repositoryService;
+            this.runtimeService = runtimeService;
+            this.taskService = taskService;
+        }
+
+        /**
+         * 获取用户任务的审批人以及后续的所有审批人
+         *
+         * @param taskId 用户任务编号
+         * @return 用户任务的审批人以及后续的所有审批人
+         */
+        public List<Candidate> getTaskNextCandidates(String taskId) {
+            Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+            if (Objects.isNull(task)) {
+                throw new IllegalStateException("task not found: " + taskId);
+            }
+            BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
+            if (Objects.isNull(bpmnModel)) {
+                throw new IllegalStateException("could not find bpmn model: " + task);
+            }
+            return getNextCandidatesAndCurrent(
+                    (FlowNode) bpmnModel.getFlowElement(task.getTaskDefinitionKey()),
+                    runtimeService.getVariables(task.getExecutionId())
+            );
+        }
+    }
 }
