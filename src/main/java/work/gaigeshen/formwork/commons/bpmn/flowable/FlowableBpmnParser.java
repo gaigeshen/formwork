@@ -137,44 +137,104 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 调用此方法将会获取指定节点以及后续节点预测的审批人
+     * 获取流程节点模型的审批人（如果该节点是用户任务类型）以及后续的所有审批人
      *
-     * @param flowNode 可以直接传入正在进行的用户任务节点
-     * @param candidates 此集合将存储所有预测的审批人
-     * @param variables 将会基于此变量来预测审批人
+     * @param flowNode 流程节点模型
+     * @param variables 变量集合
+     * @return 流程节点模型的审批人以及后续的所有审批人
      */
-    public static void parsePredictCandidates(FlowNode flowNode, List<Candidate> candidates, Map<String, Object> variables) {
+    public static List<Candidate> getNextCandidatesAndCurrent(FlowNode flowNode, Map<String, Object> variables) {
+        List<Candidate> candidates = new ArrayList<>();
         if (flowNode instanceof UserTask) {
-            UserTask userTask = (UserTask) flowNode;
-            HashSet<String> groups = new HashSet<>(userTask.getCandidateGroups());
-            HashSet<String> users = new HashSet<>(userTask.getCandidateUsers());
-            candidates.add(new Candidate(groups, users));
+            UserTask flowNodeUserTask = (UserTask) flowNode;
+            List<String> candidateGroups = flowNodeUserTask.getCandidateGroups();
+            List<String> candidateUsers = flowNodeUserTask.getCandidateUsers();
+            candidates.add(new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers)));
         }
-        List<SequenceFlow> outgoingFlows = flowNode.getOutgoingFlows();
-        if (outgoingFlows.isEmpty()) {
-            return;
-        }
-        FlowNode nextFlowNode = null;
-        if (outgoingFlows.size() > 1) {
-            for (SequenceFlow outgoingFlow : outgoingFlows) {
-                String expression = outgoingFlow.getConditionExpression();
-                ExpressionFactory factory = new ExpressionFactoryImpl();
-                SimpleContext context = new SimpleContext();
-                variables.forEach((k, v) -> {
-                    ValueExpression valueExpression = factory.createValueExpression(v, Object.class);
-                    context.setVariable(k, valueExpression);
-                });
-                Object value = factory.createValueExpression(context, expression, Boolean.class).getValue(context);
-                if (Objects.nonNull(value) && ((boolean) value)) {
-                    nextFlowNode = (FlowNode) outgoingFlow.getTargetFlowElement();
-                    break;
-                }
-            }
-        } else {
-            nextFlowNode = (FlowNode) outgoingFlows.get(0).getTargetFlowElement();
-        }
-        if (Objects.nonNull(nextFlowNode)) {
-            parsePredictCandidates(nextFlowNode, candidates, variables);
-        }
+        List<Candidate> nextCandidates = getNextCandidates(flowNode, variables);
+        candidates.addAll(nextCandidates);
+        return candidates;
     }
+
+    /**
+     * 获取流程节点模型后续的所有审批人
+     *
+     * @param flowNode 流程节点模型
+     * @param variables 变量集合
+     * @return 后续的所有审批人
+     */
+    public static List<Candidate> getNextCandidates(FlowNode flowNode, Map<String, Object> variables) {
+        List<UserTask> nextUserTasks = getNextUserTasks(flowNode, variables);
+        List<Candidate> candidates = new ArrayList<>();
+        for (UserTask nextUserTask : nextUserTasks) {
+            List<String> candidateGroups = nextUserTask.getCandidateGroups();
+            List<String> candidateUsers = nextUserTask.getCandidateUsers();
+            candidates.add(new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers)));
+        }
+        return candidates;
+    }
+
+    /**
+     * 获取流程节点模型后续的所有用户任务节点模型
+     *
+     * @param flowNode 流程节点模型
+     * @param variables 变量集合
+     * @return 后续的所有用户任务节点模型
+     */
+    public static List<UserTask> getNextUserTasks(FlowNode flowNode, Map<String, Object> variables) {
+        List<UserTask> userTasks = new ArrayList<>();
+        UserTask nextUserTask = getNextUserTask(flowNode, variables);
+        while (Objects.nonNull(nextUserTask)) {
+            userTasks.add(nextUserTask);
+            nextUserTask = getNextUserTask(nextUserTask, variables);
+        }
+        return userTasks;
+    }
+
+    /**
+     * 获取流程节点模型后续的用户任务节点模型
+     *
+     * @param flowNode 流程节点模型
+     * @param variables 变量集合
+     * @return 后续的用户任务节点模型
+     */
+    public static UserTask getNextUserTask(FlowNode flowNode, Map<String, Object> variables) {
+        FlowNode nextFlowNode = getNextFlowNode(flowNode, variables);
+        while (!(nextFlowNode instanceof UserTask)) {
+            if (Objects.isNull(nextFlowNode)) {
+                return null;
+            }
+            nextFlowNode = getNextFlowNode(flowNode, variables);
+        }
+        return (UserTask) nextFlowNode;
+    }
+
+    /**
+     * 获取流程节点模型后续的流程节点模型
+     *
+     * @param flowNode 流程节点模型
+     * @param variables 变量集合
+     * @return 后续的流程节点模型
+     */
+    public static FlowNode getNextFlowNode(FlowNode flowNode, Map<String, Object> variables) {
+        List<SequenceFlow> nextFlows = flowNode.getOutgoingFlows();
+        if (nextFlows.size() == 1) {
+            return (FlowNode) nextFlows.get(0).getTargetFlowElement();
+        }
+        for (SequenceFlow nextFlow : nextFlows) {
+            String expression = nextFlow.getConditionExpression();
+            ExpressionFactory factory = new ExpressionFactoryImpl();
+            SimpleContext context = new SimpleContext();
+            variables.forEach((k, v) -> {
+                ValueExpression valueExpression = factory.createValueExpression(v, Object.class);
+                context.setVariable(k, valueExpression);
+            });
+            Object value = factory.createValueExpression(context, expression, Boolean.class).getValue(context);
+            if (Objects.nonNull(value) && ((boolean) value)) {
+                return (FlowNode) nextFlow.getTargetFlowElement();
+            }
+        }
+        return null;
+    }
+
 }
