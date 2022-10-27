@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 用户任务完成参数
  *
  * @author gaigeshen
  */

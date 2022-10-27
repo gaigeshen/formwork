@@ -3,6 +3,7 @@ package work.gaigeshen.formwork.commons.bpmn;
 import java.util.Objects;
 
 /**
+ * 业务流程部署参数
  *
  * @author gaigeshen
  */

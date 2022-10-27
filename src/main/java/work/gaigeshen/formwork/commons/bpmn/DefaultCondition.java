@@ -3,6 +3,7 @@ package work.gaigeshen.formwork.commons.bpmn;
 import java.util.Objects;
 
 /**
+ * 默认的条件表达式
  *
  * @author gaigeshen
  */

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
+ * 审批人
  *
  * @author gaigeshen
  */

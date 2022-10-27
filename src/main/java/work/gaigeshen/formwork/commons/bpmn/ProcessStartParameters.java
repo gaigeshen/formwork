@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * 业务流程开启参数，用于开始某个业务流程
  *
  * @author gaigeshen
  */

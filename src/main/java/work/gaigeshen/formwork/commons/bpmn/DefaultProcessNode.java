@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
+ * 默认的业务流程处理节点
  *
  * @author gaigeshen
  */
