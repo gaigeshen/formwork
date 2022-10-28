@@ -204,7 +204,7 @@ public abstract class FlowableBpmnParser {
             if (Objects.isNull(nextFlowNode)) {
                 return null;
             }
-            nextFlowNode = getNextFlowNode(flowNode, variables);
+            nextFlowNode = getNextFlowNode(nextFlowNode, variables);
         }
         return (UserTask) nextFlowNode;
     }
