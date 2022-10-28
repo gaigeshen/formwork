@@ -1,6 +1,8 @@
 package work.gaigeshen.formwork.commons.bpmn.flowable;
 
 import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.FlowElement;
+import org.flowable.bpmn.model.FlowNode;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -11,10 +13,24 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
-import work.gaigeshen.formwork.commons.bpmn.*;
+import work.gaigeshen.formwork.commons.bpmn.BpmnService;
+import work.gaigeshen.formwork.commons.bpmn.Candidate;
+import work.gaigeshen.formwork.commons.bpmn.DefaultUserTask;
+import work.gaigeshen.formwork.commons.bpmn.DefaultUserTaskActivity;
+import work.gaigeshen.formwork.commons.bpmn.ProcessDeployParameters;
+import work.gaigeshen.formwork.commons.bpmn.ProcessNode;
+import work.gaigeshen.formwork.commons.bpmn.ProcessStartParameters;
+import work.gaigeshen.formwork.commons.bpmn.UserTask;
+import work.gaigeshen.formwork.commons.bpmn.UserTaskActivity;
+import work.gaigeshen.formwork.commons.bpmn.UserTaskActivityQueryParameters;
+import work.gaigeshen.formwork.commons.bpmn.UserTaskCompleteParameters;
+import work.gaigeshen.formwork.commons.bpmn.UserTaskQueryParameters;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static work.gaigeshen.formwork.commons.bpmn.flowable.FlowableBpmnParser.getNextCandidatesAndCurrent;
+import static work.gaigeshen.formwork.commons.bpmn.flowable.FlowableBpmnParser.parseProcess;
 
 /**
  *
@@ -104,36 +120,41 @@ public class FlowableBpmnService implements BpmnService {
                 .taskIds(activities.stream().map(HistoricActivityInstance::getTaskId).collect(Collectors.toSet()))
                 .list().stream().collect(Collectors.groupingBy(HistoricVariableInstance::getTaskId));
         List<UserTaskActivity> userTaskActivities = new ArrayList<>();
-        UserTaskActivity processingTaskActivity = null;
+        HistoricActivityInstance lastActivity = null;
+        // 已经完成的用户任务有开始时间和结束时间以及签收人
         for (HistoricActivityInstance activity : activities) {
-            UserTaskActivity.Status status;
             if (Objects.isNull(activity.getEndTime())) {
-                status = UserTaskActivity.Status.PROCESSING;
+                lastActivity = activity;
+                break;
             } else {
                 List<HistoricVariableInstance> variables = taskVariables.get(activity.getTaskId());
                 if (Objects.isNull(variables)) {
                     throw new IllegalStateException("'rejected' variable not found");
                 }
                 HistoricVariableInstance rejectedVariable = variables.iterator().next();
+                UserTaskActivity.Status status;
                 if ((boolean) rejectedVariable.getValue()) {
                     status = UserTaskActivity.Status.REJECTED;
                 } else {
                     status = UserTaskActivity.Status.APPROVED;
                 }
-            }
-            UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
-                    .taskId(activity.getTaskId()).status(status)
-                    .assignee(activity.getAssignee())
-                    .startTime(activity.getStartTime()).endTime(activity.getEndTime())
-                    .build();
-            if (userTaskActivity.getStatus().isProcessing()) {
-                processingTaskActivity = userTaskActivity;
-            } else {
+                UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
+                        .taskId(activity.getTaskId()).status(status)
+                        .assignee(activity.getAssignee())
+                        .startTime(activity.getStartTime()).endTime(activity.getEndTime())
+                        .build();
                 userTaskActivities.add(userTaskActivity);
             }
         }
-        if (Objects.nonNull(processingTaskActivity)) {
-
+        // 当前正在进行的用户任务只有候选审批人以及开始时间
+        if (Objects.nonNull(lastActivity)) {
+            Candidate candidate = getTaskCandidate(lastActivity.getTaskId());
+            DefaultUserTaskActivity lastActivityCandidate = DefaultUserTaskActivity.builder()
+                    .taskId(lastActivity.getTaskId()).status(UserTaskActivity.Status.PROCESSING)
+                    .groups(candidate.getGroups()).users(candidate.getUsers())
+                    .startTime(lastActivity.getStartTime())
+                    .build();
+            userTaskActivities.add(lastActivityCandidate);
         }
         return userTaskActivities;
     }
@@ -193,11 +214,49 @@ public class FlowableBpmnService implements BpmnService {
         ProcessNode processNode = parameters.getProcessNode();
         String processResourceName = processId + "(" + procesName + ").bpmn20.xml";
         try {
-            BpmnModel bpmnModel = FlowableBpmnParser.parseProcess(processNode, processId, procesName);
+            BpmnModel bpmnModel = parseProcess(processNode, processId, procesName);
             repositoryService.createDeployment().addBpmnModel(processResourceName, bpmnModel).deploy();
         } catch (Exception e) {
             throw new IllegalStateException("could not deploy process: " + parameters, e);
         }
+    }
+
+    /**
+     * 获取用户任务的审批人
+     *
+     * @param taskId 用户任务
+     * @return 审批人
+     */
+    private Candidate getTaskCandidate(String taskId) {
+        List<Candidate> candidates = getTaskNextCandidates(taskId);
+        if (candidates.isEmpty()) {
+            return Candidate.createEmpty();
+        }
+        return candidates.get(0);
+    }
+
+    /**
+     * 获取用户任务的审批人以及后续的审批人
+     *
+     * @param taskId 用户任务编号
+     * @return 审批人列表
+     */
+    private List<Candidate> getTaskNextCandidates(String taskId) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (Objects.isNull(task)) {
+            throw new IllegalStateException("could not find task: " + taskId);
+        }
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
+        if (Objects.isNull(bpmnModel)) {
+            throw new IllegalStateException("could not find bpmn model: " + task);
+        }
+        FlowElement taskFlowElement = bpmnModel.getFlowElement(task.getTaskDefinitionKey());
+        if (Objects.isNull(taskFlowElement)) {
+            throw new IllegalStateException("could not find task flow element: " + task);
+        }
+        Map<String, Object> variables = runtimeService.getVariables(task.getExecutionId());
+
+        return getNextCandidatesAndCurrent((FlowNode) taskFlowElement, variables);
     }
 
     /**
