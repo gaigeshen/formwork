@@ -39,7 +39,7 @@ public interface Condition {
 
         @Override
         public String toExpression() {
-            return "(" + expression + ")";
+            return expression;
         }
 
         @Override

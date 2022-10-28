@@ -22,7 +22,7 @@ public class DefaultCondition implements Condition {
         if (Objects.isNull(value)) {
             throw new IllegalArgumentException("value cannot be null");
         }
-        this.variable = variable;
+        this.variable = "variable_" + variable;
         this.value = value;
         this.operator = operator;
     }
@@ -53,7 +53,7 @@ public class DefaultCondition implements Condition {
 
     @Override
     public String toExpression() {
-        return "(" + variable + operator + value + ")";
+        return variable + operator + value;
     }
 
     @Override

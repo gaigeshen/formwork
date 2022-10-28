@@ -13,18 +13,7 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
-import work.gaigeshen.formwork.commons.bpmn.BpmnService;
-import work.gaigeshen.formwork.commons.bpmn.Candidate;
-import work.gaigeshen.formwork.commons.bpmn.DefaultUserTask;
-import work.gaigeshen.formwork.commons.bpmn.DefaultUserTaskActivity;
-import work.gaigeshen.formwork.commons.bpmn.ProcessDeployParameters;
-import work.gaigeshen.formwork.commons.bpmn.ProcessNode;
-import work.gaigeshen.formwork.commons.bpmn.ProcessStartParameters;
-import work.gaigeshen.formwork.commons.bpmn.UserTask;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskActivity;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskActivityQueryParameters;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskCompleteParameters;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskQueryParameters;
+import work.gaigeshen.formwork.commons.bpmn.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -166,7 +155,7 @@ public class FlowableBpmnService implements BpmnService {
         }
         UserTask userTask = parameters.getUserTask();
         String taskId = userTask.getId();
-        Map<String, Object> variables = new HashMap<>(parameters.getVariables());
+        Map<String, Object> variables = wrapVariables(parameters.getVariables());
         variables.put("rejected", parameters.isRejected());
         try {
             taskService.setAssignee(taskId, parameters.getAssignee());
@@ -194,7 +183,7 @@ public class FlowableBpmnService implements BpmnService {
         if (processCount > 0) {
             return true;
         }
-        HashMap<String, Object> variables = new HashMap<>(parameters.getVariables());
+        Map<String, Object> variables = wrapVariables(parameters.getVariables());
         variables.put("rejected", false);
         try {
             runtimeService.startProcessInstanceByKey(processId, parameters.getBusinessKey(), variables);
@@ -257,6 +246,23 @@ public class FlowableBpmnService implements BpmnService {
         Map<String, Object> variables = runtimeService.getVariables(task.getExecutionId());
 
         return getNextCandidatesAndCurrent((FlowNode) taskFlowElement, variables);
+    }
+
+    /**
+     * 包装变量，由于传入的变量标识符可能非法（例如数字开头）会造成流程运行时异常，所以需要对其进行包装后返回
+     *
+     * @param variables 需要包装的变量
+     * @return 被包装的变量
+     */
+    private Map<String, Object> wrapVariables(Map<String, Object> variables) {
+        if (Objects.isNull(variables)) {
+            return new HashMap<>();
+        }
+        Map<String, Object> wrappedVariables = new HashMap<>();
+        for (Map.Entry<String, Object> entry : variables.entrySet()) {
+            wrappedVariables.put("variable_" + entry.getKey(), entry.getValue());
+        }
+        return wrappedVariables;
     }
 
     /**
