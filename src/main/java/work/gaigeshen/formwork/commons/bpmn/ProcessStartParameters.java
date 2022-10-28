@@ -16,10 +16,13 @@ public class ProcessStartParameters {
 
     private final Map<String, Object> variables;
 
+    private final String userId;
+
     private ProcessStartParameters(Builder builder) {
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.variables = builder.variables;
+        this.userId = builder.userId;
     }
 
     public static Builder builder() {
@@ -36,6 +39,10 @@ public class ProcessStartParameters {
 
     public Map<String, Object> getVariables() {
         return variables;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     @Override
@@ -55,6 +62,8 @@ public class ProcessStartParameters {
 
         private Map<String, Object> variables;
 
+        private String userId;
+
         public Builder processId(String processId) {
             this.processId = processId;
             return this;
@@ -70,6 +79,11 @@ public class ProcessStartParameters {
             return this;
         }
 
+        public Builder userId(String userId) {
+            this.userId = userId;
+            return this;
+        }
+
         public ProcessStartParameters build() {
             if (Objects.isNull(processId)) {
                 throw new IllegalArgumentException("processId cannot be null");
@@ -79,6 +93,9 @@ public class ProcessStartParameters {
             }
             if (Objects.isNull(variables)) {
                 throw new IllegalArgumentException("variables cannot be null");
+            }
+            if (Objects.isNull(userId)) {
+                throw new IllegalArgumentException("userId cannot be null");
             }
             return new ProcessStartParameters(this);
         }

@@ -3,6 +3,7 @@ package work.gaigeshen.formwork.commons.bpmn.flowable;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.FlowElement;
 import org.flowable.bpmn.model.FlowNode;
+import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -186,6 +187,7 @@ public class FlowableBpmnService implements BpmnService {
         Map<String, Object> variables = wrapVariables(parameters.getVariables());
         variables.put("rejected", false);
         try {
+            Authentication.setAuthenticatedUserId(parameters.getUserId());
             runtimeService.startProcessInstanceByKey(processId, parameters.getBusinessKey(), variables);
         } catch (Exception e) {
             throw new IllegalStateException("could not start process: " + parameters, e);
