@@ -98,18 +98,25 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.isNull(historicProcessInstance)) {
             return Collections.emptyList();
         }
+        // 发起人也加入到返回结果
+        Date startTime = historicProcessInstance.getStartTime();
+        String startUserId = historicProcessInstance.getStartUserId();
+        List<UserTaskActivity> taskActivities = new ArrayList<>();
+        DefaultUserTaskActivity startActivity = DefaultUserTaskActivity.builder()
+                .status(UserTaskActivity.Status.APPROVED).startTime(startTime).endTime(startTime)
+                .assignee(Objects.isNull(startUserId) ? null : startUserId)
+                .build();
+        taskActivities.add(startActivity);
         List<HistoricActivityInstance> activities = historyService.createHistoricActivityInstanceQuery()
                 .processInstanceId(historicProcessInstance.getId())
-                .activityType("userTask").orderByHistoricActivityInstanceStartTime()
-                .asc().list();
+                .activityType("userTask").orderByHistoricActivityInstanceStartTime().asc().list();
         if (activities.isEmpty()) {
-            return Collections.emptyList();
+            return taskActivities;
         }
         Map<String, List<HistoricVariableInstance>> taskVariables = historyService.createHistoricVariableInstanceQuery()
                 .processInstanceId(historicProcessInstance.getId()).variableName("rejected")
                 .taskIds(activities.stream().map(HistoricActivityInstance::getTaskId).collect(Collectors.toSet()))
                 .list().stream().collect(Collectors.groupingBy(HistoricVariableInstance::getTaskId));
-        List<UserTaskActivity> userTaskActivities = new ArrayList<>();
         HistoricActivityInstance lastActivity = null;
         // 已经完成的用户任务有开始时间和结束时间以及签收人
         for (HistoricActivityInstance activity : activities) {
@@ -133,7 +140,7 @@ public class FlowableBpmnService implements BpmnService {
                         .assignee(activity.getAssignee())
                         .startTime(activity.getStartTime()).endTime(activity.getEndTime())
                         .build();
-                userTaskActivities.add(userTaskActivity);
+                taskActivities.add(userTaskActivity);
             }
         }
         // 当前正在进行的用户任务只有候选审批人以及开始时间
@@ -144,9 +151,9 @@ public class FlowableBpmnService implements BpmnService {
                     .groups(candidate.getGroups()).users(candidate.getUsers())
                     .startTime(lastActivity.getStartTime())
                     .build();
-            userTaskActivities.add(lastActivityCandidate);
+            taskActivities.add(lastActivityCandidate);
         }
-        return userTaskActivities;
+        return taskActivities;
     }
 
     @Override
