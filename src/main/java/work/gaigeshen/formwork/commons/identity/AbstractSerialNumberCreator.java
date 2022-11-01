@@ -105,11 +105,35 @@ public abstract class AbstractSerialNumberCreator implements SerialNumberCreator
         public long getPositionValue() {
             synchronized (this) {
                 long positionValue = position++;
-                if (positionValue == capacity) {
+                while (positionValue >= capacity) {
                     capacity = getNewCapacity(prefix, capacity);
                 }
                 return positionValue;
             }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            SerialNumber that = (SerialNumber) o;
+            return Objects.equals(prefix, that.prefix);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(prefix);
+        }
+
+        @Override
+        public String toString() {
+            return "SerialNumber{" +
+                    "prefix='" + prefix + '\'' +
+                    ", position=" + position +
+                    ", capacity=" + capacity +
+                    '}';
         }
     }
 
