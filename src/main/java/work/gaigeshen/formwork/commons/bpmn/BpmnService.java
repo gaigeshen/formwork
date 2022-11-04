@@ -11,6 +11,14 @@ import java.util.List;
 public interface BpmnService {
 
     /**
+     * 查询业务流程
+     *
+     * @param parameters 业务流程查询参数
+     * @return 业务流程
+     */
+    Collection<Process> queryProcesses(ProcessQueryParameters parameters);
+
+    /**
      * 查询用户任务
      *
      * @param parameters 用户任务查询参数

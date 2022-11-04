@@ -10,11 +10,13 @@ import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import work.gaigeshen.formwork.commons.bpmn.*;
+import work.gaigeshen.formwork.commons.bpmn.Process;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,6 +45,38 @@ public class FlowableBpmnService implements BpmnService {
         this.historyService = historyService;
         this.runtimeService = runtimeService;
         this.taskService = taskService;
+    }
+
+    @Override
+    public Collection<Process> queryProcesses(ProcessQueryParameters parameters) {
+        if (Objects.isNull(parameters)) {
+            throw new IllegalArgumentException("process query parameters cannot be null");
+        }
+        HistoricProcessInstanceQuery processInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        if (Objects.nonNull(parameters.getProcessId())) {
+            processInstanceQuery.processDefinitionKey(wrapProcessId(parameters.getProcessId()));
+        }
+        if (Objects.nonNull(parameters.getBusinessKey())) {
+            processInstanceQuery.processInstanceBusinessKey(parameters.getBusinessKey());
+        }
+        if (Objects.nonNull(parameters.getUserId())) {
+            processInstanceQuery.startedBy(parameters.getUserId());
+        }
+        if (!parameters.isIncludeHistorical()) {
+            processInstanceQuery.unfinished();
+        }
+        List<HistoricProcessInstance> processInstances = processInstanceQuery
+                .orderByProcessInstanceStartTime().asc().list();
+        Collection<Process> processes = new ArrayList<>();
+        for (HistoricProcessInstance processInstance : processInstances) {
+            DefaultProcess process = DefaultProcess.builder()
+                    .processId(unWrapProcessId(processInstance.getProcessDefinitionKey()))
+                    .businessKey(processInstance.getBusinessKey())
+                    .userId(processInstance.getStartUserId())
+                    .build();
+            processes.add(process);
+        }
+        return processes;
     }
 
     @Override
