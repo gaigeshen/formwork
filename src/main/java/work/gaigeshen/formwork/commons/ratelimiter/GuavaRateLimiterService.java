@@ -12,13 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author gaigeshen
  * @see #create(double)
  */
-public class GuavaRatelimiterService implements RatelimiterService {
+public class GuavaRateLimiterService implements RateLimiterService {
 
     private final Map<String, RateLimiter> rateLimiters = new ConcurrentHashMap<>();
 
     private final double permitsPerSecond;
 
-    public GuavaRatelimiterService(double permitsPerSecond) {
+    public GuavaRateLimiterService(double permitsPerSecond) {
         if (permitsPerSecond <= 0) {
             throw new IllegalArgumentException("permitsPerSecond");
         }

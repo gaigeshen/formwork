@@ -5,17 +5,17 @@ package work.gaigeshen.formwork.commons.ratelimiter;
  *
  * @author gaigeshen
  */
-public interface RatelimiterService {
+public interface RateLimiterService {
 
     /**
      * 创建限流服务对象实例，返回默认的实现
      *
      * @param permitsPerSecond 表示每秒许可数量
      * @return 限流服务对象实例
-     * @see GuavaRatelimiterService
+     * @see GuavaRateLimiterService
      */
-    static RatelimiterService create(double permitsPerSecond) {
-        return new GuavaRatelimiterService(permitsPerSecond);
+    static RateLimiterService create(double permitsPerSecond) {
+        return new GuavaRateLimiterService(permitsPerSecond);
     }
 
     /**
@@ -27,7 +27,7 @@ public interface RatelimiterService {
     void acquire(String key, int permits);
 
     /**
-     * 获取许可前会阻塞
+     * 获取许可前会阻塞，获取单个许可
      *
      * @param key 限流针对的标识符，不同标识符限流隔离
      */
