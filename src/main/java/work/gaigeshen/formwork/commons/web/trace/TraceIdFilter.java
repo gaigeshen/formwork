@@ -21,16 +21,24 @@ public class TraceIdFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-
         String traceId = UUID.randomUUID().toString().replace("-", "");
-
-        ((HttpServletResponse) response).setHeader(TRACE_ID_HEADER, traceId);
-
+        if (response instanceof HttpServletResponse) {
+            ((HttpServletResponse) response).setHeader(TRACE_ID_HEADER, traceId);
+        }
         MDC.put(TRACE_ID_KEY, traceId);
         try {
             chain.doFilter(request, response);
         } finally {
             MDC.remove(TRACE_ID_KEY);
         }
+    }
+
+    /**
+     * 获取当前的日志跟踪码
+     *
+     * @return 当前的日志跟踪码可能为空
+     */
+    public static String getCurrentTraceId() {
+        return MDC.get(TRACE_ID_KEY);
     }
 }
