@@ -191,6 +191,20 @@ public class FlowableBpmnService implements BpmnService {
     }
 
     @Override
+    public UserTaskActivity queryNextProcessingTaskActivity(UserTaskActivityQueryParameters parameters) {
+        List<UserTaskActivity> userTaskActivities = queryTaskActivities(parameters);
+        if (userTaskActivities.isEmpty()) {
+            return null;
+        }
+        for (UserTaskActivity userTaskActivity : userTaskActivities) {
+            if (UserTaskActivity.Status.PROCESSING == userTaskActivity.getStatus()) {
+                return userTaskActivity;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public boolean completeTask(UserTaskCompleteParameters parameters) {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("user task complete parameters cannot be null");

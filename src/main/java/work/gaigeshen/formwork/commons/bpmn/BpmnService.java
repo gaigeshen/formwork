@@ -35,6 +35,14 @@ public interface BpmnService {
     List<UserTaskActivity> queryTaskActivities(UserTaskActivityQueryParameters parameters);
 
     /**
+     * 查询下个进行中的用户任务活动
+     *
+     * @param parameters 下个进行中的用户任务活动查询参数
+     * @return 下个进行中的用户任务活动
+     */
+    UserTaskActivity queryNextProcessingTaskActivity(UserTaskActivityQueryParameters parameters);
+
+    /**
      * 用户任务执行完成操作
      *
      * @param parameters 执行完成操作参数
