@@ -51,6 +51,7 @@ public class ProcessStartParameters {
                 "processId='" + processId + '\'' +
                 ", businessKey='" + businessKey + '\'' +
                 ", variables=" + variables +
+                ", userId='" + userId + '\'' +
                 '}';
     }
 
