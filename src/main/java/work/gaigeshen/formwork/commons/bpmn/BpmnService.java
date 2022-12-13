@@ -35,7 +35,7 @@ public interface BpmnService {
     List<UserTaskActivity> queryTaskActivities(UserTaskActivityQueryParameters parameters);
 
     /**
-     * 查询下个进行中的用户任务活动
+     * 查询下个进行中的用户任务活动，如果不存在则返回空对象
      *
      * @param parameters 下个进行中的用户任务活动查询参数
      * @return 下个进行中的用户任务活动
