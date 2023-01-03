@@ -3,7 +3,6 @@ package work.gaigeshen.formwork.commons.json;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -48,9 +47,7 @@ public class GsonJsonCodec implements JsonCodec {
         if (Objects.isNull(json) || Objects.isNull(itemClass)) {
             throw new IllegalArgumentException("json and item class cannot be null");
         }
-        Type type = new TypeToken<ArrayList<E>>() {
-        }.getType();
-        return gson.fromJson(json, type);
+        return gson.fromJson(json, TypeToken.getParameterized(ArrayList.class, itemClass).getType());
     }
 
     @Override
