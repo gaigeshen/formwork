@@ -14,6 +14,8 @@ import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
+import org.flowable.task.api.history.HistoricTaskInstance;
+import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import work.gaigeshen.formwork.commons.bpmn.*;
 import work.gaigeshen.formwork.commons.bpmn.Process;
@@ -114,6 +116,47 @@ public class FlowableBpmnService implements BpmnService {
                 }
                 processId = unWrapProcessId(processInstance.getProcessDefinitionKey());
                 businessKey = processInstance.getBusinessKey();
+            }
+            DefaultUserTask.Builder builder = DefaultUserTask.builder()
+                    .id(task.getId()).name(task.getName()).description(task.getDescription())
+                    .processId(processId).businessKey(businessKey).assignee(task.getAssignee())
+                    .createTime(task.getCreateTime()).dueDate(task.getDueDate()).claimTime(task.getClaimTime());
+            return builder.build();
+        }).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Collection<UserTask> queryHistoricTasks(UserHistoricTaskQueryParameters parameters) {
+        if (Objects.isNull(parameters)) {
+            throw new IllegalArgumentException("user historic task query parameters cannot be null");
+        }
+        HistoricTaskInstanceQuery historicTaskInstanceQuery = historyService.createHistoricTaskInstanceQuery()
+                .processDefinitionKey(wrapProcessId(parameters.getProcessId()))
+                .processInstanceBusinessKey(parameters.getBusinessKey())
+                .orderByHistoricTaskInstanceStartTime()
+                .asc();
+        if (Objects.nonNull(parameters.getTaskId())) {
+            historicTaskInstanceQuery.taskId(parameters.getTaskId());
+        }
+        if (Objects.nonNull(parameters.getAssignee())) {
+            historicTaskInstanceQuery.taskAssignee(parameters.getAssignee());
+        }
+        List<HistoricTaskInstance> queryResult = historicTaskInstanceQuery.list();
+        if (queryResult.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return queryResult.stream().map(task -> {
+            String processId = parameters.getProcessId();
+            String businessKey = parameters.getBusinessKey();
+            if (Objects.isNull(processId) || Objects.isNull(businessKey)) {
+                HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                        .processInstanceId(task.getProcessInstanceId())
+                        .singleResult();
+                if (Objects.isNull(historicProcessInstance)) {
+                    throw new IllegalStateException("historic process instance not found of task: " + task);
+                }
+                processId = unWrapProcessId(historicProcessInstance.getProcessDefinitionKey());
+                businessKey = historicProcessInstance.getBusinessKey();
             }
             DefaultUserTask.Builder builder = DefaultUserTask.builder()
                     .id(task.getId()).name(task.getName()).description(task.getDescription())
