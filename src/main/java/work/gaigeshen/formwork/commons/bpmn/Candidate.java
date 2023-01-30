@@ -1,7 +1,6 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -15,10 +14,9 @@ public class Candidate {
 
     private final Set<String> users;
 
+    private boolean autoApproved = false;
+
     public Candidate(Set<String> groups, Set<String> users) {
-        if (Objects.isNull(groups) || Objects.isNull(users)) {
-            throw new IllegalArgumentException("groups and users cannot be null");
-        }
         this.groups = groups;
         this.users = users;
     }
@@ -39,8 +37,20 @@ public class Candidate {
         return users;
     }
 
+    public boolean isAutoApproved() {
+        return autoApproved;
+    }
+
+    public void setAutoApproved(boolean autoApproved) {
+        this.autoApproved = autoApproved;
+    }
+
     @Override
     public String toString() {
-        return "Candidate{groups=" + groups + ", users=" + users + '}';
+        return "Candidate{" +
+                "groups=" + groups +
+                ", users=" + users +
+                ", autoApproved=" + autoApproved +
+                '}';
     }
 }

@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import java.util.Set;
+
 /**
  * 用户历史任务查询参数
  *
@@ -13,13 +15,13 @@ public class UserHistoricTaskQueryParameters {
 
     private final String businessKey;
 
-    private final String assignee;
+    private final Set<String> assignees;
 
     private UserHistoricTaskQueryParameters(Builder builder) {
         this.taskId = builder.taskId;
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
-        this.assignee = builder.assignee;
+        this.assignees = builder.assignees;
     }
 
     public static Builder builder() {
@@ -38,17 +40,17 @@ public class UserHistoricTaskQueryParameters {
         return businessKey;
     }
 
-    public String getAssignee() {
-        return assignee;
+    public Set<String> getAssignees() {
+        return assignees;
     }
 
     @Override
     public String toString() {
-        return "UserTaskQueryParameters{" +
+        return "UserHistoricTaskQueryParameters{" +
                 "taskId='" + taskId + '\'' +
                 ", processId='" + processId + '\'' +
                 ", businessKey='" + businessKey + '\'' +
-                ", assignee='" + assignee + '\'' +
+                ", assignees=" + assignees +
                 '}';
     }
 
@@ -60,7 +62,7 @@ public class UserHistoricTaskQueryParameters {
 
         private String businessKey;
 
-        private String assignee;
+        private Set<String> assignees;
 
         public Builder taskId(String taskId) {
             this.taskId = taskId;
@@ -77,8 +79,8 @@ public class UserHistoricTaskQueryParameters {
             return this;
         }
 
-        public Builder assignee(String assignee) {
-            this.assignee = assignee;
+        public Builder assignees(Set<String> assignees) {
+            this.assignees = assignees;
             return this;
         }
 

@@ -50,21 +50,31 @@ public interface BpmnService {
      */
     UserTaskActivity queryNextProcessingTaskActivity(UserTaskActivityQueryParameters parameters);
 
-    /**
-     * 用户任务执行完成操作
-     *
-     * @param parameters 执行完成操作参数
-     * @return 是否有后续用户任务
-     */
-    boolean completeTask(UserTaskCompleteParameters parameters);
+
 
     /**
-     * 开启业务流程
+     * 用户任务执行完成操作，需要自动完成的用户任务也会执行
+     *
+     * @param parameters 执行完成操作参数
+     * @return 任务自动执行完成结果
+     */
+    UserTaskAutoCompletion completeTask(UserTaskCompleteParameters parameters);
+
+    /**
+     * 用户任务执行自动完成操作，只有需要自动审批通过的任务才会执行
+     *
+     * @param parameters 执行自动完成操作参数
+     * @return 任务自动执行完成结果
+     */
+    UserTaskAutoCompletion autoCompleteTasks(UserTaskAutoCompleteParameters parameters);
+
+    /**
+     * 开启业务流程，需要自动完成的用户任务会自动执行
      *
      * @param parameters 业务流程开启参数
-     * @return 返回是否已经存在业务流程，如果已经存在业务流程则直接返回
+     * @return 任务自动执行完成结果
      */
-    boolean startProcess(ProcessStartParameters parameters);
+    UserTaskAutoCompletion startProcess(ProcessStartParameters parameters);
 
     /**
      * 部署业务流程

@@ -81,6 +81,7 @@ public abstract class FlowableBpmnParser {
                 if (!users.isEmpty()) {
                     ((UserTask) processFlowNode).setCandidateUsers(new ArrayList<>(users));
                 }
+                applyCandidateProperties(candidate, (UserTask) processFlowNode);
             } else {
                 processFlowNode = new ExclusiveGateway();
                 processFlowNode.setId("exclusive_" + idGenerator.getNextId());
@@ -137,6 +138,24 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
+     * 获取流程节点模型的审批人（如果该节点是用户任务类型），如果不是用户类型的节点则会返回空对象
+     *
+     * @param flowNode 流程节点模型
+     * @return 流程节点模型的审批人
+     */
+    public static Candidate getCurrentCandidate(FlowNode flowNode) {
+        if (flowNode instanceof UserTask) {
+            UserTask flowNodeUserTask = (UserTask) flowNode;
+            Set<String> candidateGroups = new HashSet<>(flowNodeUserTask.getCandidateGroups());
+            Set<String> candidateUsers = new HashSet<>(flowNodeUserTask.getCandidateUsers());
+            Candidate candidate = new Candidate(candidateGroups, candidateUsers);
+            applyUserTaskProperties(candidate, flowNodeUserTask);
+            return candidate;
+        }
+        return null;
+    }
+
+    /**
      * 获取流程节点模型的审批人（如果该节点是用户任务类型）以及后续的所有审批人
      *
      * @param flowNode 流程节点模型
@@ -149,7 +168,9 @@ public abstract class FlowableBpmnParser {
             UserTask flowNodeUserTask = (UserTask) flowNode;
             List<String> candidateGroups = flowNodeUserTask.getCandidateGroups();
             List<String> candidateUsers = flowNodeUserTask.getCandidateUsers();
-            candidates.add(new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers)));
+            Candidate candidate = new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers));
+            applyUserTaskProperties(candidate, flowNodeUserTask);
+            candidates.add(candidate);
         }
         List<Candidate> nextCandidates = getNextCandidates(flowNode, variables);
         candidates.addAll(nextCandidates);
@@ -169,7 +190,9 @@ public abstract class FlowableBpmnParser {
         for (UserTask nextUserTask : nextUserTasks) {
             List<String> candidateGroups = nextUserTask.getCandidateGroups();
             List<String> candidateUsers = nextUserTask.getCandidateUsers();
-            candidates.add(new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers)));
+            Candidate candidate = new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers));
+            candidates.add(candidate);
+            applyUserTaskProperties(candidate, nextUserTask);
         }
         return candidates;
     }
@@ -237,4 +260,36 @@ public abstract class FlowableBpmnParser {
         return null;
     }
 
+    /**
+     * 将审批人属性应用到流程模型的用户任务中
+     *
+     * @param candidate 审批人
+     * @param userTask 流程模型的用户任务
+     */
+    public static void applyCandidateProperties(Candidate candidate, UserTask userTask) {
+        if (candidate.isAutoApproved()) {
+            CustomProperty autoApprovedProperty = new CustomProperty();
+            autoApprovedProperty.setName("autoApproved");
+            autoApprovedProperty.setSimpleValue("true");
+            userTask.setCustomProperties(Collections.singletonList(autoApprovedProperty));
+
+        }
+    }
+
+    /**
+     * 将流程模型的用户任务属性应用到审批人中
+     *
+     * @param candidate 审批人
+     * @param userTask 流程模型的用户任务
+     */
+    public static void applyUserTaskProperties(Candidate candidate, UserTask userTask) {
+        for (Map.Entry<String, List<ExtensionElement>> entry : userTask.getExtensionElements().entrySet()) {
+            List<ExtensionElement> els = entry.getValue();
+            if ("autoApproved".equals(entry.getKey()) && els.size() > 0) {
+                if (Boolean.parseBoolean(els.get(0).getElementText())) {
+                    candidate.setAutoApproved(true);
+                }
+            }
+        }
+    }
 }
