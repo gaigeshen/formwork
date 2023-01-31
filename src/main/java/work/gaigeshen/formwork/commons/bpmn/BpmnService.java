@@ -50,8 +50,6 @@ public interface BpmnService {
      */
     UserTaskActivity queryNextProcessingTaskActivity(UserTaskActivityQueryParameters parameters);
 
-
-
     /**
      * 用户任务执行完成操作，需要自动完成的用户任务也会执行
      *

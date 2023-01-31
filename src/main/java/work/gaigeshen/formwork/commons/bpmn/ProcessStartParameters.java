@@ -1,5 +1,8 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,11 +21,14 @@ public class ProcessStartParameters {
 
     private final String userId;
 
+    private final List<Candidate> candidates;
+
     private ProcessStartParameters(Builder builder) {
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.variables = builder.variables;
         this.userId = builder.userId;
+        this.candidates = builder.candidates;
     }
 
     public static Builder builder() {
@@ -45,6 +51,10 @@ public class ProcessStartParameters {
         return userId;
     }
 
+    public List<Candidate> getCandidates() {
+        return candidates;
+    }
+
     @Override
     public String toString() {
         return "ProcessStartParameters{" +
@@ -52,6 +62,7 @@ public class ProcessStartParameters {
                 ", businessKey='" + businessKey + '\'' +
                 ", variables=" + variables +
                 ", userId='" + userId + '\'' +
+                ", candidates=" + candidates +
                 '}';
     }
 
@@ -64,6 +75,8 @@ public class ProcessStartParameters {
         private Map<String, Object> variables;
 
         private String userId;
+
+        private List<Candidate> candidates;
 
         public Builder processId(String processId) {
             this.processId = processId;
@@ -85,6 +98,11 @@ public class ProcessStartParameters {
             return this;
         }
 
+        public Builder candidates(List<Candidate> candidates) {
+            this.candidates = candidates;
+            return this;
+        }
+
         public ProcessStartParameters build() {
             if (Objects.isNull(processId)) {
                 throw new IllegalArgumentException("processId cannot be null");
@@ -97,6 +115,9 @@ public class ProcessStartParameters {
             }
             if (Objects.isNull(userId)) {
                 throw new IllegalArgumentException("userId cannot be null");
+            }
+            if (Objects.isNull(candidates)) {
+                throw new IllegalArgumentException("candidates cannot be null");
             }
             return new ProcessStartParameters(this);
         }

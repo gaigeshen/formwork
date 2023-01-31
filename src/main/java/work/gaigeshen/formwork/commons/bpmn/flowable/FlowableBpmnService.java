@@ -19,6 +19,7 @@ import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import work.gaigeshen.formwork.commons.bpmn.Process;
 import work.gaigeshen.formwork.commons.bpmn.*;
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
 import work.gaigeshen.formwork.commons.bpmn.candidate.TypedCandidate;
 
 import java.util.*;
@@ -268,23 +269,21 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("user task complete parameters cannot be null");
         }
-        // 以下完成当前的用户任务
         UserTask userTask = parameters.getUserTask();
         String taskId = userTask.getId();
-        Map<String, Object> variables = wrapVariables(parameters.getVariables());
-        variables.put("rejected", parameters.isRejected());
+        boolean rejected = parameters.isRejected();
+        Map<String, Object> variables = wrapProcessVariables(parameters.getVariables(), rejected);
+        Map<String, Object> taskVariables = createTaskVariables(taskId, rejected);
         try {
-            // 设定签收人的目的是为了后续查询历史用户任务
             taskService.setAssignee(taskId, parameters.getAssignee());
-            taskService.setVariableLocal(taskId, "rejected", parameters.isRejected());
-            taskService.setVariableLocal(taskId, "autoApproved", false);
+            taskService.setVariablesLocal(taskId, taskVariables);
             taskService.complete(taskId, variables);
         } catch (Exception ex) {
             throw new IllegalStateException("could not complete user task: " + parameters, ex);
         }
-        // 以下执行需要自动完成的用户任务
         UserTaskAutoCompleteParameters autoCompleteParameters = UserTaskAutoCompleteParameters.builder()
-                .processId(userTask.getProcessId()).businessKey(userTask.getBusinessKey())
+                .processId(userTask.getProcessId())
+                .businessKey(userTask.getBusinessKey())
                 .variables(parameters.getVariables())
                 .build();
         return autoCompleteTasks(autoCompleteParameters);
@@ -297,20 +296,21 @@ public class FlowableBpmnService implements BpmnService {
         }
         String processId = wrapProcessId(parameters.getProcessId());
         String businessKey = parameters.getBusinessKey();
+
         DefaultUserTaskAutoCompletion.Builder builder = DefaultUserTaskAutoCompletion.builder()
                 .processId(parameters.getProcessId())
+                .groups(Collections.emptySet()).users(Collections.emptySet())
                 .businessKey(businessKey);
+
         Task nextTask = taskService.createTaskQuery().processDefinitionKey(processId)
                 .processInstanceBusinessKey(businessKey)
                 .singleResult();
         if (Objects.isNull(nextTask)) {
-            builder.groups(Collections.emptySet()).users(Collections.emptySet());
             return builder.hasMoreUserTasks(false).build();
         }
-        Map<String, Object> autoApprovedTaskVariables = new HashMap<>();
-        autoApprovedTaskVariables.put("rejected", false);
-        autoApprovedTaskVariables.put("autoApproved", true);
-        // 记录自动完成的用户任务涉及到的所有审批人
+
+        Map<String, Object> variables = wrapProcessVariables(parameters.getVariables(), false);
+
         Set<String> allGroups = new HashSet<>();
         Set<String> allUsers = new HashSet<>();
         builder.groups(allGroups).users(allUsers);
@@ -320,10 +320,9 @@ public class FlowableBpmnService implements BpmnService {
                 if (!candidate.isAutoApprover()) {
                     return builder.hasMoreUserTasks(true).build();
                 }
-                // 开始执行自动完成的操作且签收人设定的时候比较特殊
                 taskService.setAssignee(nextTask.getId(), parseAutoApprovedAssignee(candidate));
-                taskService.setVariablesLocal(nextTask.getId(), autoApprovedTaskVariables);
-                taskService.complete(nextTask.getId(), parameters.getVariables());
+                taskService.setVariablesLocal(nextTask.getId(), createTaskVariables(candidate, false));
+                taskService.complete(nextTask.getId(), variables);
                 nextTask = taskService.createTaskQuery().processDefinitionKey(processId)
                         .processInstanceBusinessKey(businessKey)
                         .singleResult();
@@ -343,28 +342,34 @@ public class FlowableBpmnService implements BpmnService {
         }
         String processId = wrapProcessId(parameters.getProcessId());
         String businessKey = parameters.getBusinessKey();
-        long processCount = runtimeService.createProcessInstanceQuery()
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
                 .processDefinitionKey(processId)
                 .processInstanceBusinessKey(businessKey)
-                .count();
-        if (processCount > 0) {
+                .singleResult();
+        if (Objects.isNull(processInstance)) {
             throw new IllegalStateException("could not start process because has started: " + parameters);
         }
-        Map<String, Object> variables = wrapVariables(parameters.getVariables());
-        variables.put("rejected", false);
-        variables.put("startUserId", parameters.getUserId());
+        Map<String, Object> variables = wrapProcessVariables(parameters.getVariables(), false);
+        variables.put("candidates", parameters.getCandidates());
         try {
             Authentication.setAuthenticatedUserId(parameters.getUserId());
             runtimeService.startProcessInstanceByKey(processId, businessKey, variables);
         } catch (Exception e) {
             throw new IllegalStateException("could not start process: " + parameters, e);
         }
-        // 以下执行需要自动完成的用户任务
         UserTaskAutoCompleteParameters autoCompleteParameters = UserTaskAutoCompleteParameters.builder()
-                .processId(parameters.getProcessId()).businessKey(parameters.getBusinessKey())
+                .processId(parameters.getProcessId())
+                .businessKey(parameters.getBusinessKey())
                 .variables(parameters.getVariables())
                 .build();
-        return autoCompleteTasks(autoCompleteParameters);
+        UserTaskAutoCompletion userTaskAutoCompletion = autoCompleteTasks(autoCompleteParameters);
+        Task nextTask = taskService.createTaskQuery().processDefinitionKey(processId)
+                .processInstanceBusinessKey(businessKey)
+                .singleResult();
+        if (Objects.nonNull(nextTask)) {
+            updateTaskCandidate(nextTask, processInstance);
+        }
+        return userTaskAutoCompletion;
     }
 
     @Override
@@ -384,34 +389,28 @@ public class FlowableBpmnService implements BpmnService {
         }
     }
 
-    /**
-     * 获取用户任务的审批人
-     *
-     * @param taskId 用户任务
-     * @return 审批人
-     */
+    private void updateTaskCandidate(Task task, ProcessInstance processInstance) {
+        TypedCandidate taskCandidate = getTaskCandidate(task.getId());
+        if (taskCandidate.isStarter()) {
+            taskService.addCandidateUser(task.getId(), processInstance.getStartUserId());
+        }
+        else if (taskCandidate.isStarterAppoint()) {
+            Map<String, Object> processVariables = processInstance.getProcessVariables();
+            List<?> candidates = (List<?>) processVariables.get("candidates");
+            if (!candidates.isEmpty()) {
+                Candidate candidate = (Candidate) candidates.remove(0);
+                for (String group : candidate.getGroups()) {
+                    taskService.addCandidateGroup(task.getId(), group);
+                }
+                for (String user : candidate.getUsers()) {
+                    taskService.addCandidateUser(task.getId(), user);
+                }
+                runtimeService.setVariable(task.getExecutionId(), "candidates", candidates);
+            }
+        }
+    }
+
     private TypedCandidate getTaskCandidate(String taskId) {
-        return getTaskNextCandidates(taskId, true).get(0);
-    }
-
-    /**
-     * 获取用户任务的审批人以及后续的审批人
-     *
-     * @param taskId 用户任务编号
-     * @return 审批人列表
-     */
-    private List<TypedCandidate> getTaskNextCandidates(String taskId) {
-        return getTaskNextCandidates(taskId, false);
-    }
-
-    /**
-     * 获取用户任务的审批人以及后续的审批人
-     *
-     * @param taskId 用户任务编号
-     * @param onlyCurrent 可以指定不返回后续的审批人
-     * @return 审批人列表
-     */
-    private List<TypedCandidate> getTaskNextCandidates(String taskId, boolean onlyCurrent) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if (Objects.isNull(task)) {
             throw new IllegalStateException("could not find task: " + taskId);
@@ -424,11 +423,7 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.isNull(taskFlowElement)) {
             throw new IllegalStateException("could not find task flow element: " + task);
         }
-        Map<String, Object> variables = runtimeService.getVariables(task.getExecutionId());
-        if (onlyCurrent) {
-            return Collections.singletonList(getCurrentCandidate((FlowNode) taskFlowElement));
-        }
-        return getNextCandidatesAndCurrent((FlowNode) taskFlowElement, variables);
+        return FlowableBpmnParser.getCurrentCandidate((FlowNode) taskFlowElement);
     }
 
     /**
@@ -456,13 +451,25 @@ public class FlowableBpmnService implements BpmnService {
         return builder.toString();
     }
 
+    private Map<String, Object> createTaskVariables(String taskId, boolean rejected) {
+        return createTaskVariables(getTaskCandidate(taskId), rejected);
+    }
+
+    private Map<String, Object> createTaskVariables(TypedCandidate taskCandidate, boolean rejected) {
+        Map<String, Object> taskVariables = new HashMap<>();
+        taskVariables.put("rejected", rejected);
+        taskVariables.put("candidateType", taskCandidate.getType());
+        return taskVariables;
+    }
+
     /**
-     * 包装变量，由于传入的变量标识符可能非法（例如数字开头）会造成流程运行时异常，所以需要对其进行包装后返回
+     * 包装流程变量，由于传入的变量标识符可能非法（例如数字开头）会造成流程运行时异常，所以需要对其进行包装后返回
      *
      * @param variables 需要包装的变量
+     * @param rejected 变量表示是否审批拒绝
      * @return 被包装的变量
      */
-    private Map<String, Object> wrapVariables(Map<String, Object> variables) {
+    private Map<String, Object> wrapProcessVariables(Map<String, Object> variables, boolean rejected) {
         if (Objects.isNull(variables)) {
             return new HashMap<>();
         }
@@ -470,6 +477,7 @@ public class FlowableBpmnService implements BpmnService {
         for (Map.Entry<String, Object> entry : variables.entrySet()) {
             wrappedVariables.put("variable_" + entry.getKey(), entry.getValue());
         }
+        wrappedVariables.put("rejected", rejected);
         return wrappedVariables;
     }
 
