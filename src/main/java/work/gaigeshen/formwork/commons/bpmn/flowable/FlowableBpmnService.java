@@ -17,8 +17,9 @@ import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
-import work.gaigeshen.formwork.commons.bpmn.*;
 import work.gaigeshen.formwork.commons.bpmn.Process;
+import work.gaigeshen.formwork.commons.bpmn.*;
+import work.gaigeshen.formwork.commons.bpmn.candidate.TypedCandidate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -206,7 +207,7 @@ public class FlowableBpmnService implements BpmnService {
             if (Objects.isNull(activity.getEndTime())) {
                 // 当前正在进行的用户任务只有候选审批人以及开始时间
                 // 由于已经按开始时间进行了升序排序所以此用户任务肯定时最后的
-                Candidate candidate = getTaskCandidate(activity.getTaskId());
+                TypedCandidate candidate = getTaskCandidate(activity.getTaskId());
                 UserTaskActivity lastActivityCandidate = DefaultUserTaskActivity.builder()
                         .taskId(activity.getTaskId()).status(UserTaskActivity.Status.PROCESSING)
                         .groups(candidate.getGroups()).users(candidate.getUsers())
@@ -283,8 +284,7 @@ public class FlowableBpmnService implements BpmnService {
         }
         // 以下执行需要自动完成的用户任务
         UserTaskAutoCompleteParameters autoCompleteParameters = UserTaskAutoCompleteParameters.builder()
-                .processId(userTask.getProcessId())
-                .businessKey(userTask.getBusinessKey())
+                .processId(userTask.getProcessId()).businessKey(userTask.getBusinessKey())
                 .variables(parameters.getVariables())
                 .build();
         return autoCompleteTasks(autoCompleteParameters);
@@ -304,7 +304,6 @@ public class FlowableBpmnService implements BpmnService {
                 .processInstanceBusinessKey(businessKey)
                 .singleResult();
         if (Objects.isNull(nextTask)) {
-            // 没有任何用户任务了无需执行自动完成的任务
             builder.groups(Collections.emptySet()).users(Collections.emptySet());
             return builder.hasMoreUserTasks(false).build();
         }
@@ -317,8 +316,8 @@ public class FlowableBpmnService implements BpmnService {
         builder.groups(allGroups).users(allUsers);
         try {
             while (Objects.nonNull(nextTask)) {
-                Candidate candidate = getTaskCandidate(nextTask.getId());
-                if (!candidate.isAutoApproved()) {
+                TypedCandidate candidate = getTaskCandidate(nextTask.getId());
+                if (!candidate.isAutoApprover()) {
                     return builder.hasMoreUserTasks(true).build();
                 }
                 // 开始执行自动完成的操作且签收人设定的时候比较特殊
@@ -362,8 +361,7 @@ public class FlowableBpmnService implements BpmnService {
         }
         // 以下执行需要自动完成的用户任务
         UserTaskAutoCompleteParameters autoCompleteParameters = UserTaskAutoCompleteParameters.builder()
-                .processId(parameters.getProcessId())
-                .businessKey(parameters.getBusinessKey())
+                .processId(parameters.getProcessId()).businessKey(parameters.getBusinessKey())
                 .variables(parameters.getVariables())
                 .build();
         return autoCompleteTasks(autoCompleteParameters);
@@ -392,12 +390,8 @@ public class FlowableBpmnService implements BpmnService {
      * @param taskId 用户任务
      * @return 审批人
      */
-    private Candidate getTaskCandidate(String taskId) {
-        List<Candidate> candidates = getTaskNextCandidates(taskId, true);
-        if (candidates.isEmpty()) {
-            return Candidate.createEmpty();
-        }
-        return candidates.get(0);
+    private TypedCandidate getTaskCandidate(String taskId) {
+        return getTaskNextCandidates(taskId, true).get(0);
     }
 
     /**
@@ -406,7 +400,7 @@ public class FlowableBpmnService implements BpmnService {
      * @param taskId 用户任务编号
      * @return 审批人列表
      */
-    private List<Candidate> getTaskNextCandidates(String taskId) {
+    private List<TypedCandidate> getTaskNextCandidates(String taskId) {
         return getTaskNextCandidates(taskId, false);
     }
 
@@ -417,7 +411,7 @@ public class FlowableBpmnService implements BpmnService {
      * @param onlyCurrent 可以指定不返回后续的审批人
      * @return 审批人列表
      */
-    private List<Candidate> getTaskNextCandidates(String taskId, boolean onlyCurrent) {
+    private List<TypedCandidate> getTaskNextCandidates(String taskId, boolean onlyCurrent) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if (Objects.isNull(task)) {
             throw new IllegalStateException("could not find task: " + taskId);
@@ -432,11 +426,7 @@ public class FlowableBpmnService implements BpmnService {
         }
         Map<String, Object> variables = runtimeService.getVariables(task.getExecutionId());
         if (onlyCurrent) {
-            Candidate currentCandidate = getCurrentCandidate((FlowNode) taskFlowElement);
-            if (Objects.isNull(currentCandidate)) {
-                return Collections.emptyList();
-            }
-            return Collections.singletonList(currentCandidate);
+            return Collections.singletonList(getCurrentCandidate((FlowNode) taskFlowElement));
         }
         return getNextCandidatesAndCurrent((FlowNode) taskFlowElement, variables);
     }
@@ -447,7 +437,7 @@ public class FlowableBpmnService implements BpmnService {
      * @param candidate 审批人对象
      * @return 签收人
      */
-    private String parseAutoApprovedAssignee(Candidate candidate) {
+    private String parseAutoApprovedAssignee(TypedCandidate candidate) {
         StringBuilder builder = new StringBuilder();
         Set<String> candidateGroups = candidate.getGroups();
         Set<String> candidateUsers = candidate.getUsers();
@@ -464,31 +454,6 @@ public class FlowableBpmnService implements BpmnService {
             return "group:|user:";
         }
         return builder.toString();
-    }
-
-    /**
-     * 转换自动审批通过的签收人至审批人对象
-     *
-     * @param assignee 签收人
-     * @return 审批人对象
-     */
-    private Candidate parseAutoApprovedCandidate(String assignee) {
-        if (Objects.isNull(assignee)) {
-            return Candidate.createEmpty();
-        }
-        Set<String> groups = new HashSet<>();
-        Set<String> users = new HashSet<>();
-        for (String candidateGroupsOrUsers : assignee.split("\\|")) {
-            if (candidateGroupsOrUsers.startsWith("group:")) {
-                groups.addAll(Arrays.asList(candidateGroupsOrUsers.substring(6).split(",")));
-            }
-            else if (candidateGroupsOrUsers.startsWith("user:")) {
-                users.addAll(Arrays.asList(candidateGroupsOrUsers.substring(5).split(",")));
-            }
-        }
-        Candidate candidate = new Candidate(groups, users);
-        candidate.setAutoApproved(true);
-        return candidate;
     }
 
     /**

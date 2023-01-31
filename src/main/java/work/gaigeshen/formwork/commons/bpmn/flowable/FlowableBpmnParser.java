@@ -8,10 +8,10 @@ import org.flowable.common.engine.impl.de.odysseus.el.util.SimpleContext;
 import org.flowable.common.engine.impl.javax.el.ExpressionFactory;
 import org.flowable.common.engine.impl.javax.el.ValueExpression;
 import org.flowable.common.engine.impl.persistence.StrongUuidGenerator;
-import work.gaigeshen.formwork.commons.bpmn.Candidate;
 import work.gaigeshen.formwork.commons.bpmn.Condition;
 import work.gaigeshen.formwork.commons.bpmn.Conditions;
 import work.gaigeshen.formwork.commons.bpmn.ProcessNode;
+import work.gaigeshen.formwork.commons.bpmn.candidate.*;
 
 import java.util.*;
 
@@ -72,7 +72,7 @@ public abstract class FlowableBpmnParser {
             if (processNode.hasCandidate()) {
                 processFlowNode = new UserTask();
                 processFlowNode.setId("userTask_" + idGenerator.getNextId());
-                Candidate candidate = processNode.getCandidate();
+                TypedCandidate candidate = processNode.getCandidate();
                 Set<String> groups = candidate.getGroups();
                 Set<String> users = candidate.getUsers();
                 if (!groups.isEmpty()) {
@@ -143,14 +143,10 @@ public abstract class FlowableBpmnParser {
      * @param flowNode 流程节点模型
      * @return 流程节点模型的审批人
      */
-    public static Candidate getCurrentCandidate(FlowNode flowNode) {
+    public static TypedCandidate getCurrentCandidate(FlowNode flowNode) {
         if (flowNode instanceof UserTask) {
             UserTask flowNodeUserTask = (UserTask) flowNode;
-            Set<String> candidateGroups = new HashSet<>(flowNodeUserTask.getCandidateGroups());
-            Set<String> candidateUsers = new HashSet<>(flowNodeUserTask.getCandidateUsers());
-            Candidate candidate = new Candidate(candidateGroups, candidateUsers);
-            applyUserTaskProperties(candidate, flowNodeUserTask);
-            return candidate;
+            return resolveUserTaskCandidate(flowNodeUserTask);
         }
         return null;
     }
@@ -162,17 +158,13 @@ public abstract class FlowableBpmnParser {
      * @param variables 变量集合
      * @return 流程节点模型的审批人以及后续的所有审批人
      */
-    public static List<Candidate> getNextCandidatesAndCurrent(FlowNode flowNode, Map<String, Object> variables) {
-        List<Candidate> candidates = new ArrayList<>();
+    public static List<TypedCandidate> getNextCandidatesAndCurrent(FlowNode flowNode, Map<String, Object> variables) {
+        List<TypedCandidate> candidates = new ArrayList<>();
         if (flowNode instanceof UserTask) {
             UserTask flowNodeUserTask = (UserTask) flowNode;
-            List<String> candidateGroups = flowNodeUserTask.getCandidateGroups();
-            List<String> candidateUsers = flowNodeUserTask.getCandidateUsers();
-            Candidate candidate = new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers));
-            applyUserTaskProperties(candidate, flowNodeUserTask);
-            candidates.add(candidate);
+            candidates.add(resolveUserTaskCandidate(flowNodeUserTask));
         }
-        List<Candidate> nextCandidates = getNextCandidates(flowNode, variables);
+        List<TypedCandidate> nextCandidates = getNextCandidates(flowNode, variables);
         candidates.addAll(nextCandidates);
         return candidates;
     }
@@ -184,15 +176,11 @@ public abstract class FlowableBpmnParser {
      * @param variables 变量集合
      * @return 后续的所有审批人
      */
-    public static List<Candidate> getNextCandidates(FlowNode flowNode, Map<String, Object> variables) {
+    public static List<TypedCandidate> getNextCandidates(FlowNode flowNode, Map<String, Object> variables) {
         List<UserTask> nextUserTasks = getNextUserTasks(flowNode, variables);
-        List<Candidate> candidates = new ArrayList<>();
+        List<TypedCandidate> candidates = new ArrayList<>();
         for (UserTask nextUserTask : nextUserTasks) {
-            List<String> candidateGroups = nextUserTask.getCandidateGroups();
-            List<String> candidateUsers = nextUserTask.getCandidateUsers();
-            Candidate candidate = new Candidate(new HashSet<>(candidateGroups), new HashSet<>(candidateUsers));
-            candidates.add(candidate);
-            applyUserTaskProperties(candidate, nextUserTask);
+            candidates.add(resolveUserTaskCandidate(nextUserTask));
         }
         return candidates;
     }
@@ -261,35 +249,36 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 将审批人属性应用到流程模型的用户任务中
+     * 将审批人属性应用到用户任务中，作为用户任务的自定义属性保存
      *
      * @param candidate 审批人
-     * @param userTask 流程模型的用户任务
+     * @param userTask 用户任务
      */
-    public static void applyCandidateProperties(Candidate candidate, UserTask userTask) {
-        if (candidate.isAutoApproved()) {
-            CustomProperty autoApprovedProperty = new CustomProperty();
-            autoApprovedProperty.setName("autoApproved");
-            autoApprovedProperty.setSimpleValue("true");
-            userTask.setCustomProperties(Collections.singletonList(autoApprovedProperty));
-
-        }
+    public static void applyCandidateProperties(TypedCandidate candidate, UserTask userTask) {
+        CustomProperty autoApprovedProperty = new CustomProperty();
+        autoApprovedProperty.setName("type");
+        autoApprovedProperty.setSimpleValue(candidate.getType().name());
+        userTask.setCustomProperties(Collections.singletonList(autoApprovedProperty));
     }
 
     /**
-     * 将流程模型的用户任务属性应用到审批人中
+     * 解析用户任务的审批人
      *
-     * @param candidate 审批人
-     * @param userTask 流程模型的用户任务
+     * @param userTask 用户任务
+     * @return 审批人
      */
-    public static void applyUserTaskProperties(Candidate candidate, UserTask userTask) {
+    public static TypedCandidate resolveUserTaskCandidate(UserTask userTask) {
+        List<String> groups = userTask.getCandidateGroups();
+        List<String> users = userTask.getCandidateUsers();
+        Candidate candidate = DefaultCandidate.create(new HashSet<>(groups), new HashSet<>(users));
         for (Map.Entry<String, List<ExtensionElement>> entry : userTask.getExtensionElements().entrySet()) {
-            List<ExtensionElement> els = entry.getValue();
-            if ("autoApproved".equals(entry.getKey()) && els.size() > 0) {
-                if (Boolean.parseBoolean(els.get(0).getElementText())) {
-                    candidate.setAutoApproved(true);
-                }
+            List<ExtensionElement> elements = entry.getValue();
+            if ("type".equals(entry.getKey()) && elements.size() > 0) {
+                CandidateType type = CandidateType.valueOf(elements.get(0).getElementText());
+                return DefaultTypedCandidate.create(candidate, type);
             }
         }
+        throw new IllegalStateException("missing candidate type");
     }
+
 }

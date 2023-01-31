@@ -1,5 +1,8 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import work.gaigeshen.formwork.commons.bpmn.candidate.TypedCandidate;
+
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -10,11 +13,11 @@ import java.util.Set;
 public interface ProcessNode extends Comparable<ProcessNode> {
 
     /**
-     * 返回处理审批人
+     * 返回处理审批人，如果为空的情况表示此处理节点无需用户处理
      *
-     * @return 处理审批人不能为空对象
+     * @return 处理审批人可能为空
      */
-    Candidate getCandidate();
+    TypedCandidate getCandidate();
 
     /**
      * 返回是否包含处理审批人
@@ -22,7 +25,7 @@ public interface ProcessNode extends Comparable<ProcessNode> {
      * @return 是否包含处理审批人
      */
     default boolean hasCandidate() {
-        return !getCandidate().isEmpty();
+        return Objects.nonNull(getCandidate());
     }
 
     /**

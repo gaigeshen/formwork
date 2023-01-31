@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import work.gaigeshen.formwork.commons.bpmn.candidate.TypedCandidate;
+
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -12,15 +14,15 @@ import java.util.TreeSet;
  */
 public class DefaultProcessNode implements ProcessNode {
 
-    private final Candidate candidate;
+    private final TypedCandidate candidate;
 
     private final Conditions conditions;
 
     private final Set<ProcessNode> outgoing;
 
-    private DefaultProcessNode(Candidate candidate, Conditions conditions, Set<ProcessNode> outgoing) {
-        if (Objects.isNull(candidate) || Objects.isNull(conditions)) {
-            throw new IllegalArgumentException("candidate and conditions cannot be null");
+    private DefaultProcessNode(TypedCandidate candidate, Conditions conditions, Set<ProcessNode> outgoing) {
+        if (Objects.isNull(conditions)) {
+            throw new IllegalArgumentException("conditions cannot be null");
         }
         if (Objects.isNull(outgoing)) {
             throw new IllegalArgumentException("outgoing object cannot be null");
@@ -30,11 +32,11 @@ public class DefaultProcessNode implements ProcessNode {
         this.outgoing = new TreeSet<>(outgoing);
     }
 
-    public static DefaultProcessNode create(Candidate candidate, Conditions conditions, Set<ProcessNode> outgoing) {
+    public static DefaultProcessNode create(TypedCandidate candidate, Conditions conditions, Set<ProcessNode> outgoing) {
         return new DefaultProcessNode(candidate, conditions, outgoing);
     }
 
-    public static DefaultProcessNode create(Candidate candidate, Conditions conditions) {
+    public static DefaultProcessNode create(TypedCandidate candidate, Conditions conditions) {
         return new DefaultProcessNode(candidate, conditions, Collections.emptySet());
     }
 
@@ -45,7 +47,7 @@ public class DefaultProcessNode implements ProcessNode {
     }
 
     @Override
-    public Candidate getCandidate() {
+    public TypedCandidate getCandidate() {
         return candidate;
     }
 
