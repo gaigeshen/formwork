@@ -1,6 +1,5 @@
 package work.gaigeshen.formwork.commons.bpmn.candidate;
 
-import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -20,14 +19,6 @@ public class DefaultCandidate implements Candidate {
 
     public static DefaultCandidate create(Set<String> groups, Set<String> users) {
         return new DefaultCandidate(groups, users);
-    }
-
-    public static DefaultCandidate createOnlyGroups(Set<String> groups) {
-        return create(groups, Collections.emptySet());
-    }
-
-    public static DefaultCandidate createOnlyUsers(Set<String> users) {
-        return create(Collections.emptySet(), users);
     }
 
     @Override

@@ -1,60 +1,59 @@
 package work.gaigeshen.formwork.commons.bpmn.candidate;
 
-import java.util.Objects;
-
 /**
+ * 审批人类型
  *
  * @author gaigeshen
  */
 public enum CandidateType {
 
-    APPROVER("approver") {
+    APPROVER(1) {
         @Override
         public boolean isApprover() {
             return true;
         }
     },
-    AUTO_APPROVER("autoApprover") {
+    AUTO_APPROVER(2) {
         @Override
         public boolean isAutoApprover() {
             return true;
         }
     },
-    STARTER("starter") {
+    UPDATES_APPROVER(3) {
+        @Override
+        public boolean isUpdatesApprover() {
+            return true;
+        }
+    },
+    STARTER(4) {
         @Override
         public boolean isStarter() {
             return true;
         }
     },
-    STARTER_APPOINT("starterAppoint") {
+    STARTER_APPOINTEE(5) {
         @Override
-        public boolean isStarterAppoint() {
-            return true;
-        }
-    },
-    STARTER_LEADER_INCLUDE("starterLeaderInclude") {
-        @Override
-        public boolean isStarterLeaderInclude() {
+        public boolean isStarterAppointee() {
             return true;
         }
     };
 
-    private final String typeCode;
+    private final int typeCode;
 
-    CandidateType(String typeCode) {
+    CandidateType(int typeCode) {
         this.typeCode = typeCode;
     }
 
-    public static CandidateType fromTypeCode(String typeCode) {
+    public static CandidateType fromTypeCode(int typeCode) {
         for (CandidateType candidateType : values()) {
-            if (Objects.equals(typeCode, candidateType.getTypeCode())) {
+            if (candidateType.getTypeCode() == typeCode) {
                 return candidateType;
             }
         }
         throw new IllegalArgumentException();
     }
 
-    public String getTypeCode() {
+    public int getTypeCode() {
         return typeCode;
     }
 
@@ -66,15 +65,15 @@ public enum CandidateType {
         return false;
     }
 
+    public boolean isUpdatesApprover() {
+        return false;
+    }
+
     public boolean isStarter() {
         return false;
     }
 
-    public boolean isStarterAppoint() {
-        return false;
-    }
-
-    public boolean isStarterLeaderInclude() {
+    public boolean isStarterAppointee() {
         return false;
     }
 }

@@ -13,6 +13,7 @@ import org.flowable.task.api.Task;
 import work.gaigeshen.formwork.commons.bpmn.CandidateService;
 import work.gaigeshen.formwork.commons.bpmn.candidate.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -119,9 +120,10 @@ public class FlowableCandidateService implements CandidateService {
             if (Objects.isNull(starter)) {
                 throw new IllegalStateException("missing starter candidate: " + taskId);
             }
-            addTaskCandidateUser(taskId, starter);
+            DefaultCandidate candidate = DefaultCandidate.createWithUsers(Collections.singletonList(starter));
+            addTaskCandidate(taskId, candidate);
         }
-        else if (taskCandidateType.isStarterAppoint()) {
+        else if (taskCandidateType.isStarterAppointee()) {
             Candidates starterAppoint = candidates.getStarterAppoint();
             if (Objects.isNull(starterAppoint)) {
                 throw new IllegalStateException("missing starter appoint candidate: " + taskId);
@@ -133,7 +135,7 @@ public class FlowableCandidateService implements CandidateService {
             addTaskCandidate(taskId, candidate);
             updateProcessCandidateVariables(processId, businessKey, candidates);
         }
-        else if (taskCandidateType.isStarterLeaderInclude()) {
+        else if (taskCandidateType.isUpdatesApprover()) {
             Candidate candidate = candidates.getStarterLeader();
             if (Objects.isNull(candidate)) {
                 throw new IllegalStateException("missing starter leader candidate: " + taskId);
