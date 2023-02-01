@@ -1,5 +1,6 @@
 package work.gaigeshen.formwork.commons.bpmn.candidate;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -16,11 +17,22 @@ public class Candidates implements Iterable<Candidate> {
         if (Objects.isNull(candidates)) {
             throw new IllegalArgumentException("candidates cannot be null");
         }
-        this.candidates = candidates;
+        this.candidates = new ArrayList<>(candidates);
     }
 
     @Override
     public Iterator<Candidate> iterator() {
         return candidates.iterator();
+    }
+
+    public boolean isEmpty() {
+        return candidates.isEmpty();
+    }
+
+    public Candidate poll() {
+        if (candidates.isEmpty()) {
+            return null;
+        }
+        return candidates.remove(0);
     }
 }

@@ -11,6 +11,7 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.history.HistoricProcessInstanceQuery;
+import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
@@ -350,7 +351,7 @@ public class FlowableBpmnService implements BpmnService {
             throw new IllegalStateException("could not start process because has started: " + parameters);
         }
         Map<String, Object> variables = wrapProcessVariables(parameters.getVariables(), false);
-        variables.put("candidates", parameters.getCandidates());
+        variables.put("candidates", parameters.getStarterAppoint());
         try {
             Authentication.setAuthenticatedUserId(parameters.getUserId());
             runtimeService.startProcessInstanceByKey(processId, businessKey, variables);
@@ -362,14 +363,7 @@ public class FlowableBpmnService implements BpmnService {
                 .businessKey(parameters.getBusinessKey())
                 .variables(parameters.getVariables())
                 .build();
-        UserTaskAutoCompletion userTaskAutoCompletion = autoCompleteTasks(autoCompleteParameters);
-        Task nextTask = taskService.createTaskQuery().processDefinitionKey(processId)
-                .processInstanceBusinessKey(businessKey)
-                .singleResult();
-        if (Objects.nonNull(nextTask)) {
-            updateTaskCandidate(nextTask, processInstance);
-        }
-        return userTaskAutoCompletion;
+        return autoCompleteTasks(autoCompleteParameters);
     }
 
     @Override
@@ -387,43 +381,6 @@ public class FlowableBpmnService implements BpmnService {
         } catch (Exception e) {
             throw new IllegalStateException("could not deploy process: " + parameters, e);
         }
-    }
-
-    private void updateTaskCandidate(Task task, ProcessInstance processInstance) {
-        TypedCandidate taskCandidate = getTaskCandidate(task.getId());
-        if (taskCandidate.isStarter()) {
-            taskService.addCandidateUser(task.getId(), processInstance.getStartUserId());
-        }
-        else if (taskCandidate.isStarterAppoint()) {
-            Map<String, Object> processVariables = processInstance.getProcessVariables();
-            List<?> candidates = (List<?>) processVariables.get("candidates");
-            if (!candidates.isEmpty()) {
-                Candidate candidate = (Candidate) candidates.remove(0);
-                for (String group : candidate.getGroups()) {
-                    taskService.addCandidateGroup(task.getId(), group);
-                }
-                for (String user : candidate.getUsers()) {
-                    taskService.addCandidateUser(task.getId(), user);
-                }
-                runtimeService.setVariable(task.getExecutionId(), "candidates", candidates);
-            }
-        }
-    }
-
-    private TypedCandidate getTaskCandidate(String taskId) {
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        if (Objects.isNull(task)) {
-            throw new IllegalStateException("could not find task: " + taskId);
-        }
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
-        if (Objects.isNull(bpmnModel)) {
-            throw new IllegalStateException("could not find bpmn model: " + task);
-        }
-        FlowElement taskFlowElement = bpmnModel.getFlowElement(task.getTaskDefinitionKey());
-        if (Objects.isNull(taskFlowElement)) {
-            throw new IllegalStateException("could not find task flow element: " + task);
-        }
-        return FlowableBpmnParser.getCurrentCandidate((FlowNode) taskFlowElement);
     }
 
     /**
@@ -462,13 +419,6 @@ public class FlowableBpmnService implements BpmnService {
         return taskVariables;
     }
 
-    /**
-     * 包装流程变量，由于传入的变量标识符可能非法（例如数字开头）会造成流程运行时异常，所以需要对其进行包装后返回
-     *
-     * @param variables 需要包装的变量
-     * @param rejected 变量表示是否审批拒绝
-     * @return 被包装的变量
-     */
     private Map<String, Object> wrapProcessVariables(Map<String, Object> variables, boolean rejected) {
         if (Objects.isNull(variables)) {
             return new HashMap<>();
@@ -479,28 +429,5 @@ public class FlowableBpmnService implements BpmnService {
         }
         wrappedVariables.put("rejected", rejected);
         return wrappedVariables;
-    }
-
-    /**
-     * 包装流程标识符，由于用户传入的流程标识符可能不合法（例如数字开头）会造成部署流程失败，所以需要进行包装
-     *
-     * @param processId 原始的流程标识符
-     * @return 包装后的流程标识符
-     */
-    private String wrapProcessId(String processId) {
-        return Objects.isNull(processId) ? null : "process_" + processId;
-    }
-
-    /**
-     * 解包装流程标识符
-     *
-     * @param wrappedProcessId 包装的流程标识符
-     * @return 解包装后的流程标识符
-     */
-    private String unWrapProcessId(String wrappedProcessId) {
-        if (Objects.isNull(wrappedProcessId)) {
-            throw new IllegalArgumentException("wrapped process id cannot be null");
-        }
-        return wrappedProcessId.replace("process_", "");
     }
 }

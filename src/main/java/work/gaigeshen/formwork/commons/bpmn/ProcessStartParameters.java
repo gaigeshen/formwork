@@ -21,14 +21,20 @@ public class ProcessStartParameters {
 
     private final String userId;
 
-    private final List<Candidate> candidates;
+    private final String starter;
+
+    private final List<Candidate> starterAppoint;
+
+    private final Candidate starterLeader;
 
     private ProcessStartParameters(Builder builder) {
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.variables = builder.variables;
         this.userId = builder.userId;
-        this.candidates = builder.candidates;
+        this.starter = builder.starter;
+        this.starterAppoint = builder.starterAppoint;
+        this.starterLeader = builder.starterLeader;
     }
 
     public static Builder builder() {
@@ -51,8 +57,12 @@ public class ProcessStartParameters {
         return userId;
     }
 
-    public List<Candidate> getCandidates() {
-        return candidates;
+    public List<Candidate> getStarterAppoint() {
+        return starterAppoint;
+    }
+
+    public Candidate getStarterLeader() {
+        return starterLeader;
     }
 
     @Override
@@ -62,7 +72,9 @@ public class ProcessStartParameters {
                 ", businessKey='" + businessKey + '\'' +
                 ", variables=" + variables +
                 ", userId='" + userId + '\'' +
-                ", candidates=" + candidates +
+                ", starter='" + starter + '\'' +
+                ", starterAppoint=" + starterAppoint +
+                ", starterLeader=" + starterLeader +
                 '}';
     }
 
@@ -76,7 +88,11 @@ public class ProcessStartParameters {
 
         private String userId;
 
-        private List<Candidate> candidates;
+        private String starter;
+
+        private List<Candidate> starterAppoint;
+
+        private Candidate starterLeader;
 
         public Builder processId(String processId) {
             this.processId = processId;
@@ -98,9 +114,18 @@ public class ProcessStartParameters {
             return this;
         }
 
-        public Builder candidates(List<Candidate> candidates) {
-            this.candidates = candidates;
+        public Builder starter(String starter) {
+            this.starter = starter;
             return this;
+        }
+
+        public Builder starterAppoint(List<Candidate> starterAppoint) {
+            this.starterAppoint = starterAppoint;
+            return this;
+        }
+
+        public void starterLeader(Candidate starterLeader) {
+            this.starterLeader = starterLeader;
         }
 
         public ProcessStartParameters build() {
@@ -116,8 +141,14 @@ public class ProcessStartParameters {
             if (Objects.isNull(userId)) {
                 throw new IllegalArgumentException("userId cannot be null");
             }
-            if (Objects.isNull(candidates)) {
-                throw new IllegalArgumentException("candidates cannot be null");
+            if (Objects.isNull(starter)) {
+                throw new IllegalArgumentException("starter cannot be null");
+            }
+            if (Objects.isNull(starterAppoint)) {
+                throw new IllegalArgumentException("starterAppoint cannot be null");
+            }
+            if (Objects.isNull(starterLeader)) {
+                throw new IllegalArgumentException("starterLeader cannot be null");
             }
             return new ProcessStartParameters(this);
         }

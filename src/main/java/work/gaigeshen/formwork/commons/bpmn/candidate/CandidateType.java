@@ -31,6 +31,12 @@ public enum CandidateType {
         public boolean isStarterAppoint() {
             return true;
         }
+    },
+    STARTER_LEADER_INCLUDE("starterLeaderInclude") {
+        @Override
+        public boolean isStarterLeaderInclude() {
+            return true;
+        }
     };
 
     private final String typeCode;
@@ -65,6 +71,10 @@ public enum CandidateType {
     }
 
     public boolean isStarterAppoint() {
+        return false;
+    }
+
+    public boolean isStarterLeaderInclude() {
         return false;
     }
 }
