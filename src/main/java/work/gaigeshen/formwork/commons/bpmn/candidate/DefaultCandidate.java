@@ -22,8 +22,12 @@ public class DefaultCandidate implements Candidate {
         return new DefaultCandidate(groups, users);
     }
 
-    public static DefaultCandidate createEmpty() {
-        return new DefaultCandidate(Collections.emptySet(), Collections.emptySet());
+    public static DefaultCandidate createOnlyGroups(Set<String> groups) {
+        return create(groups, Collections.emptySet());
+    }
+
+    public static DefaultCandidate createOnlyUsers(Set<String> users) {
+        return create(Collections.emptySet(), users);
     }
 
     @Override

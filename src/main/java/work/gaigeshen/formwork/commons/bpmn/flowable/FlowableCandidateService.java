@@ -117,23 +117,26 @@ public class FlowableCandidateService implements CandidateService {
         if (taskCandidateType.isStarter()) {
             String starter = candidates.getStarter();
             if (Objects.isNull(starter)) {
-                throw new IllegalStateException("missing starter candidate variable: " + taskId);
+                throw new IllegalStateException("missing starter candidate: " + taskId);
             }
-            taskService.addCandidateUser(task.getId(), starter);
+            addTaskCandidateUser(taskId, starter);
         }
         else if (taskCandidateType.isStarterAppoint()) {
             Candidates starterAppoint = candidates.getStarterAppoint();
-            if (Objects.isNull(starterAppoint) || starterAppoint.isEmpty()) {
-                throw new IllegalStateException("missing starter appoint candidate variable: " + taskId);
+            if (Objects.isNull(starterAppoint)) {
+                throw new IllegalStateException("missing starter appoint candidate: " + taskId);
             }
             Candidate candidate = starterAppoint.poll();
+            if (Objects.isNull(candidate)) {
+                throw new IllegalStateException("could not poll starter appoint candidate: " + taskId);
+            }
             addTaskCandidate(taskId, candidate);
             updateProcessCandidateVariables(processId, businessKey, candidates);
         }
         else if (taskCandidateType.isStarterLeaderInclude()) {
             Candidate candidate = candidates.getStarterLeader();
             if (Objects.isNull(candidate)) {
-                throw new IllegalStateException("missing starter leader candidate variable: " + taskId);
+                throw new IllegalStateException("missing starter leader candidate: " + taskId);
             }
             addTaskCandidate(taskId, candidate);
         }

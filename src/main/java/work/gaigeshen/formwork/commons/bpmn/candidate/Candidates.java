@@ -25,10 +25,6 @@ public class Candidates implements Iterable<Candidate> {
         return candidates.iterator();
     }
 
-    public boolean isEmpty() {
-        return candidates.isEmpty();
-    }
-
     public Candidate poll() {
         if (candidates.isEmpty()) {
             return null;
