@@ -128,7 +128,7 @@ public class FlowableCandidateService implements CandidateService {
             }
             Candidate candidate = starterAppoint.poll();
             addTaskCandidate(taskId, candidate);
-            runtimeService.setVariable(task.getExecutionId(), "starterAppoint", starterAppoint);
+            updateProcessCandidateVariables(processId, businessKey, candidates);
         }
         else if (taskCandidateType.isStarterLeaderInclude()) {
             Candidate candidate = candidates.getStarterLeader();
