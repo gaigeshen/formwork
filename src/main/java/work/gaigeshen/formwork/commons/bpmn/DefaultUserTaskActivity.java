@@ -1,7 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author gaigeshen
@@ -12,9 +12,9 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
 
     private final String assignee;
 
-    private final List<String> groups;
+    private final Set<String> groups;
 
-    private final List<String> users;
+    private final Set<String> users;
 
     private final Date startTime;
 
@@ -47,12 +47,12 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
     }
 
     @Override
-    public List<String> getGroups() {
+    public Set<String> getGroups() {
         return groups;
     }
 
     @Override
-    public List<String> getUsers() {
+    public Set<String> getUsers() {
         return users;
     }
 
@@ -77,9 +77,9 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
 
         private String assignee;
 
-        private List<String> groups;
+        private Set<String> groups;
 
-        private List<String> users;
+        private Set<String> users;
 
         private Date startTime;
 
@@ -97,12 +97,12 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
             return this;
         }
 
-        public Builder groups(List<String> groups) {
+        public Builder groups(Set<String> groups) {
             this.groups = groups;
             return this;
         }
 
-        public Builder users(List<String> users) {
+        public Builder users(Set<String> users) {
             this.users = users;
             return this;
         }

@@ -1,7 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 /**
  * 用户任务活动
@@ -29,14 +29,14 @@ public interface UserTaskActivity {
      *
      * @return 任务审批候选组可能为空
      */
-    List<String> getGroups();
+    Set<String> getGroups();
 
     /**
      * 返回任务审批候选人
      *
      * @return 任务审批候选人可能为空
      */
-    List<String> getUsers();
+    Set<String> getUsers();
 
     /**
      * 返回任务开始时间

@@ -19,19 +19,13 @@ public enum CandidateType {
             return true;
         }
     },
-    UPDATES_APPROVER(3) {
-        @Override
-        public boolean isUpdatesApprover() {
-            return true;
-        }
-    },
-    STARTER(4) {
+    STARTER(3) {
         @Override
         public boolean isStarter() {
             return true;
         }
     },
-    STARTER_APPOINTEE(5) {
+    STARTER_APPOINTEE(4) {
         @Override
         public boolean isStarterAppointee() {
             return true;
@@ -62,10 +56,6 @@ public enum CandidateType {
     }
 
     public boolean isAutoApprover() {
-        return false;
-    }
-
-    public boolean isUpdatesApprover() {
         return false;
     }
 

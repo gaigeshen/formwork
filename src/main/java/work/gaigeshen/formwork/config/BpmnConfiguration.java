@@ -1,6 +1,5 @@
 package work.gaigeshen.formwork.config;
 
-import org.flowable.common.engine.api.identity.AuthenticationContext;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -8,10 +7,11 @@ import org.flowable.engine.TaskService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import work.gaigeshen.formwork.commons.bpmn.BpmnService;
+import work.gaigeshen.formwork.commons.bpmn.CandidateService;
+import work.gaigeshen.formwork.commons.bpmn.VariableService;
 import work.gaigeshen.formwork.commons.bpmn.flowable.FlowableBpmnService;
-import work.gaigeshen.formwork.security.SecurityContextUtils;
-
-import java.security.Principal;
+import work.gaigeshen.formwork.commons.bpmn.flowable.FlowableCandidateService;
+import work.gaigeshen.formwork.commons.bpmn.flowable.FlowableVariableService;
 
 /**
  *
@@ -39,25 +39,16 @@ public class BpmnConfiguration {
 
     @Bean
     public BpmnService bpmnService() {
-        return new FlowableBpmnService(repositoryService, historyService, runtimeService, taskService);
+        return new FlowableBpmnService(repositoryService, historyService, runtimeService, taskService, candidateService());
     }
 
     @Bean
-    public AuthenticationContext authenticationContext() {
-        return new AuthenticationContext() {
-            @Override
-            public String getAuthenticatedUserId() {
-                return SecurityContextUtils.getAuthorizationUserId();
-            }
+    public VariableService userTaskService() {
+        return new FlowableVariableService(historyService, candidateService);
+    }
 
-            @Override
-            public Principal getPrincipal() {
-                return SecurityContextUtils.getAuthentication();
-            }
-
-            @Override
-            public void setPrincipal(Principal principal) {
-            }
-        };
+    @Bean
+    public CandidateService candidateService() {
+        return new FlowableCandidateService(repositoryService, runtimeService, taskService);
     }
 }

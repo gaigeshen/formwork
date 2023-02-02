@@ -4,14 +4,14 @@ public class CandidateVariables {
 
     private final String starter;
 
-    private final Candidates starterAppoint;
+    private final Candidates starterAppointee;
 
-    private final Candidate starterLeader;
+    private final CandidateUpdates candidateUpdates;
 
     private CandidateVariables(Builder builder) {
         this.starter = builder.starter;
-        this.starterAppoint = builder.starterAppoint;
-        this.starterLeader = builder.starterLeader;
+        this.starterAppointee = builder.starterAppointee;
+        this.candidateUpdates = builder.candidateUpdates;
     }
 
     public static Builder builder() {
@@ -22,34 +22,34 @@ public class CandidateVariables {
         return starter;
     }
 
-    public Candidates getStarterAppoint() {
-        return starterAppoint;
+    public Candidates getStarterAppointee() {
+        return starterAppointee;
     }
 
-    public Candidate getStarterLeader() {
-        return starterLeader;
+    public CandidateUpdates getCandidateUpdates() {
+        return candidateUpdates;
     }
 
     public static class Builder {
 
         private String starter;
 
-        private Candidates starterAppoint;
+        private Candidates starterAppointee;
 
-        private Candidate starterLeader;
+        private CandidateUpdates candidateUpdates;
 
         public Builder starter(String starter) {
             this.starter = starter;
             return this;
         }
 
-        public Builder starterAppoint(Candidates starterAppoint) {
-            this.starterAppoint = starterAppoint;
+        public Builder starterAppointee(Candidates starterAppointee) {
+            this.starterAppointee = starterAppointee;
             return this;
         }
 
-        public Builder starterLeader(Candidate starterLeader) {
-            this.starterLeader = starterLeader;
+        public Builder candidateUpdates(CandidateUpdates candidateUpdates) {
+            this.candidateUpdates = candidateUpdates;
             return this;
         }
 

@@ -1,8 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
-import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
+import work.gaigeshen.formwork.commons.bpmn.candidate.CandidateVariables;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -21,20 +20,14 @@ public class ProcessStartParameters {
 
     private final String userId;
 
-    private final String starter;
-
-    private final List<Candidate> starterAppoint;
-
-    private final Candidate starterLeader;
+    private final CandidateVariables candidateVariables;
 
     private ProcessStartParameters(Builder builder) {
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.variables = builder.variables;
         this.userId = builder.userId;
-        this.starter = builder.starter;
-        this.starterAppoint = builder.starterAppoint;
-        this.starterLeader = builder.starterLeader;
+        this.candidateVariables = builder.candidateVariables;
     }
 
     public static Builder builder() {
@@ -57,12 +50,8 @@ public class ProcessStartParameters {
         return userId;
     }
 
-    public List<Candidate> getStarterAppoint() {
-        return starterAppoint;
-    }
-
-    public Candidate getStarterLeader() {
-        return starterLeader;
+    public CandidateVariables getCandidateVariables() {
+        return candidateVariables;
     }
 
     @Override
@@ -72,9 +61,7 @@ public class ProcessStartParameters {
                 ", businessKey='" + businessKey + '\'' +
                 ", variables=" + variables +
                 ", userId='" + userId + '\'' +
-                ", starter='" + starter + '\'' +
-                ", starterAppoint=" + starterAppoint +
-                ", starterLeader=" + starterLeader +
+                ", candidateVariables=" + candidateVariables +
                 '}';
     }
 
@@ -88,11 +75,7 @@ public class ProcessStartParameters {
 
         private String userId;
 
-        private String starter;
-
-        private List<Candidate> starterAppoint;
-
-        private Candidate starterLeader;
+        private CandidateVariables candidateVariables;
 
         public Builder processId(String processId) {
             this.processId = processId;
@@ -114,18 +97,9 @@ public class ProcessStartParameters {
             return this;
         }
 
-        public Builder starter(String starter) {
-            this.starter = starter;
+        public Builder candidateVariables(CandidateVariables candidateVariables) {
+            this.candidateVariables = candidateVariables;
             return this;
-        }
-
-        public Builder starterAppoint(List<Candidate> starterAppoint) {
-            this.starterAppoint = starterAppoint;
-            return this;
-        }
-
-        public void starterLeader(Candidate starterLeader) {
-            this.starterLeader = starterLeader;
         }
 
         public ProcessStartParameters build() {
@@ -141,14 +115,8 @@ public class ProcessStartParameters {
             if (Objects.isNull(userId)) {
                 throw new IllegalArgumentException("userId cannot be null");
             }
-            if (Objects.isNull(starter)) {
-                throw new IllegalArgumentException("starter cannot be null");
-            }
-            if (Objects.isNull(starterAppoint)) {
-                throw new IllegalArgumentException("starterAppoint cannot be null");
-            }
-            if (Objects.isNull(starterLeader)) {
-                throw new IllegalArgumentException("starterLeader cannot be null");
+            if (Objects.isNull(candidateVariables)) {
+                throw new IllegalArgumentException("candidateVariables cannot be null");
             }
             return new ProcessStartParameters(this);
         }

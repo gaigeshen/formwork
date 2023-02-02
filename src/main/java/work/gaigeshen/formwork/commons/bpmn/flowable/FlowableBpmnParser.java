@@ -271,10 +271,22 @@ public abstract class FlowableBpmnParser {
         throw new IllegalStateException("missing candidate type");
     }
 
+    /**
+     * 对流程标识符进行包装，因为某些情况下传入的流程标识符可能不合法（例如数字开头），所以要进行包装
+     *
+     * @param processId 流程标识符
+     * @return 包装后的流程标识符
+     */
     public static String wrapProcessId(String processId) {
         return Objects.isNull(processId) ? null : "process_" + processId;
     }
 
+    /**
+     * 对包装后的流程标识符解包装
+     *
+     * @param wrappedProcessId 包装后的流程标识符
+     * @return 解包装后的流程标识符
+     */
     public static String unWrapProcessId(String wrappedProcessId) {
         if (Objects.isNull(wrappedProcessId)) {
             throw new IllegalArgumentException("wrapped process id cannot be null");

@@ -13,10 +13,7 @@ import org.flowable.task.api.Task;
 import work.gaigeshen.formwork.commons.bpmn.CandidateService;
 import work.gaigeshen.formwork.commons.bpmn.candidate.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static work.gaigeshen.formwork.commons.bpmn.flowable.FlowableBpmnParser.*;
 
@@ -41,8 +38,7 @@ public class FlowableCandidateService implements CandidateService {
         if (Objects.isNull(task)) {
             throw new IllegalStateException("could not find task: " + taskId);
         }
-        FlowNode taskFlowNode = getTaskFlowNode(task);
-        return getCandidate(taskFlowNode);
+        return getCandidate(getTaskFlowNode(task));
     }
 
     @Override
@@ -51,8 +47,7 @@ public class FlowableCandidateService implements CandidateService {
         if (Objects.isNull(task)) {
             throw new IllegalStateException("could not find task: " + taskId);
         }
-        FlowNode taskFlowNode = getTaskFlowNode(task);
-        return getCandidates(taskFlowNode, variables);
+        return getCandidates(getTaskFlowNode(task), variables);
     }
 
     @Override
@@ -77,7 +72,25 @@ public class FlowableCandidateService implements CandidateService {
             throw new IllegalStateException("could not find process instance: " + processId);
         }
         Map<String, Object> processVariables = processInstance.getProcessVariables();
-        return (CandidateVariables) processVariables.get("candidateVariables");
+        Object candidateVariables = processVariables.get("candidateVariables");
+        if (Objects.isNull(candidateVariables)) {
+            throw new IllegalStateException("could not find candidate variables: " + processId);
+        }
+        return (CandidateVariables) candidateVariables;
+    }
+
+    @Override
+    public CandidateVariables getTaskProcessCandidateVariables(String taskId) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (Objects.isNull(task)) {
+            throw new IllegalStateException("could not find task: " + taskId);
+        }
+        Map<String, Object> processVariables = task.getProcessVariables();
+        Object candidateVariables = processVariables.get("candidateVariables");
+        if (Objects.isNull(candidateVariables)) {
+            throw new IllegalStateException("could not find candidate variables: " + taskId);
+        }
+        return (CandidateVariables) candidateVariables;
     }
 
     @Override
@@ -93,6 +106,23 @@ public class FlowableCandidateService implements CandidateService {
     }
 
     @Override
+    public void updateTaskProcessCandidateVariables(String taskId, CandidateVariables variables) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (Objects.isNull(task)) {
+            throw new IllegalStateException("could not find task: " + taskId);
+        }
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(task.getProcessInstanceId())
+                .singleResult();
+        if (Objects.isNull(processInstance)) {
+            throw new IllegalStateException("could not find process instance: " + taskId);
+        }
+        String processId = unWrapProcessId(processInstance.getProcessDefinitionKey());
+        String businessKey = processInstance.getBusinessKey();
+        updateProcessCandidateVariables(processId, businessKey, variables);
+    }
+
+    @Override
     public void addTaskCandidate(String taskId, Candidate candidate) {
         for (String group : candidate.getGroups()) {
             taskService.addCandidateGroup(taskId, group);
@@ -103,45 +133,98 @@ public class FlowableCandidateService implements CandidateService {
     }
 
     @Override
-    public void updateTaskCandidate(String taskId) {
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        if (Objects.isNull(task)) {
-            throw new IllegalStateException("could not find task: " + taskId);
+    public void addTaskCandidates(String taskId, Set<Candidate> candidates) {
+        Set<String> groups = new HashSet<>();
+        Set<String> users = new HashSet<>();
+        for (Candidate candidate : candidates) {
+            groups.addAll(candidate.getGroups());
+            users.addAll(candidate.getUsers());
         }
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
-                .processInstanceId(task.getProcessInstanceId())
-                .singleResult();
-        String processId = unWrapProcessId(processInstance.getProcessDefinitionKey());
-        String businessKey = processInstance.getBusinessKey();
-        CandidateVariables candidates = getProcessCandidateVariables(processId, businessKey);
+        addTaskCandidate(taskId, DefaultCandidate.create(groups, users));
+    }
+
+    @Override
+    public void removeTaskCandidate(String taskId, Candidate candidate) {
+        for (String group : candidate.getGroups()) {
+            taskService.deleteCandidateGroup(taskId, group);
+        }
+        for (String user : candidate.getUsers()) {
+            taskService.deleteCandidateUser(taskId, user);
+        }
+    }
+
+    @Override
+    public void removeTaskCandidates(String taskId, Set<Candidate> candidates) {
+        Set<String> groups = new HashSet<>();
+        Set<String> users = new HashSet<>();
+        for (Candidate candidate : candidates) {
+            groups.addAll(candidate.getGroups());
+            users.addAll(candidate.getUsers());
+        }
+        removeTaskCandidate(taskId, DefaultCandidate.create(groups, users));
+    }
+
+    @Override
+    public void updateTaskStarterCandidate(String taskId, CandidateVariables variables) {
+        String starter = variables.getStarter();
+        if (Objects.isNull(starter)) {
+            throw new IllegalStateException("missing starter candidate: " + taskId);
+        }
+        addTaskCandidate(taskId, DefaultCandidate.createUsers(Collections.singleton(starter)));
+    }
+
+    @Override
+    public void updateTaskStarterAppointeeCandidate(String taskId, CandidateVariables variables) {
+        Candidates starterAppointee = variables.getStarterAppointee();
+        if (Objects.isNull(starterAppointee)) {
+            throw new IllegalStateException("missing starter appoint candidate: " + taskId);
+        }
+        Candidate candidate = starterAppointee.poll();
+        if (Objects.isNull(candidate)) {
+            throw new IllegalStateException("could not poll starter appoint candidate: " + taskId);
+        }
+        addTaskCandidate(taskId, candidate);
+    }
+
+    @Override
+    public void updateTaskCandidateUpdatesCandidate(String taskId, CandidateVariables variables) {
+        CandidateUpdates candidateUpdates = variables.getCandidateUpdates();
+        Set<Candidate> candidatesToAdd = new HashSet<>();
+        Set<Candidate> candidatesToRemove = new HashSet<>();
+        for (Map.Entry<String, Candidate> update : candidateUpdates.getGroupUpdates().entrySet()) {
+            long count = taskService.createTaskQuery().taskId(taskId).taskCandidateGroup(update.getKey()).count();
+            if (count > 0) {
+                candidatesToAdd.add(update.getValue());
+                candidatesToRemove.add(DefaultCandidate.createGroups(Collections.singleton(update.getKey())));
+            }
+        }
+        for (Map.Entry<String, Candidate> update : candidateUpdates.getUserUpdates().entrySet()) {
+            long count = taskService.createTaskQuery().taskId(taskId).taskCandidateUser(update.getKey()).count();
+            if (count > 0) {
+                candidatesToAdd.add(update.getValue());
+                candidatesToRemove.add(DefaultCandidate.createUsers(Collections.singleton(update.getKey())));
+            }
+        }
+        if (!candidatesToAdd.isEmpty()) {
+            addTaskCandidates(taskId, candidatesToAdd);
+        }
+        if (!candidatesToRemove.isEmpty()) {
+            removeTaskCandidates(taskId, candidatesToRemove);
+        }
+    }
+
+    @Override
+    public void updateTaskCandidate(String taskId) {
+        CandidateVariables variables = getTaskProcessCandidateVariables(taskId);
         CandidateType taskCandidateType = getTaskCandidate(taskId).getType();
         if (taskCandidateType.isStarter()) {
-            String starter = candidates.getStarter();
-            if (Objects.isNull(starter)) {
-                throw new IllegalStateException("missing starter candidate: " + taskId);
-            }
-            DefaultCandidate candidate = DefaultCandidate.createWithUsers(Collections.singletonList(starter));
-            addTaskCandidate(taskId, candidate);
+            updateTaskStarterCandidate(taskId, variables);
         }
         else if (taskCandidateType.isStarterAppointee()) {
-            Candidates starterAppoint = candidates.getStarterAppoint();
-            if (Objects.isNull(starterAppoint)) {
-                throw new IllegalStateException("missing starter appoint candidate: " + taskId);
-            }
-            Candidate candidate = starterAppoint.poll();
-            if (Objects.isNull(candidate)) {
-                throw new IllegalStateException("could not poll starter appoint candidate: " + taskId);
-            }
-            addTaskCandidate(taskId, candidate);
-            updateProcessCandidateVariables(processId, businessKey, candidates);
+            updateTaskStarterAppointeeCandidate(taskId, variables);
         }
-        else if (taskCandidateType.isUpdatesApprover()) {
-            Candidate candidate = candidates.getStarterLeader();
-            if (Objects.isNull(candidate)) {
-                throw new IllegalStateException("missing starter leader candidate: " + taskId);
-            }
-            addTaskCandidate(taskId, candidate);
-        }
+        updateTaskCandidateUpdatesCandidate(taskId, variables);
+        updateTaskProcessCandidateVariables(taskId, variables);
     }
 
     private FlowNode getProcessStarterFlowNode(ProcessDefinition processDefinition) {

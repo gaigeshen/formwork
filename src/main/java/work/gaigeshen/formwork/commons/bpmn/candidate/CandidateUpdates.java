@@ -2,7 +2,6 @@ package work.gaigeshen.formwork.commons.bpmn.candidate;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class CandidateUpdates {
 
@@ -10,6 +9,11 @@ public class CandidateUpdates {
 
     private final Map<String, Candidate> userUpdates = new HashMap<>();
 
+    private CandidateUpdates() { }
+
+    public static CandidateUpdates create() {
+        return new CandidateUpdates();
+    }
 
     public void addGroupUpdate(String group, Candidate candidate) {
         groupUpdates.put(group, candidate);
@@ -19,11 +23,11 @@ public class CandidateUpdates {
         userUpdates.put(user, candidate);
     }
 
-    public void handleGroupUpdates(BiConsumer<String, Candidate> handler) {
-        groupUpdates.forEach(handler);
+    public Map<String, Candidate> getGroupUpdates() {
+        return groupUpdates;
     }
 
-    public void handleUserUpdates(BiConsumer<String, Candidate> handler) {
-        userUpdates.forEach(handler);
+    public Map<String, Candidate> getUserUpdates() {
+        return userUpdates;
     }
 }
