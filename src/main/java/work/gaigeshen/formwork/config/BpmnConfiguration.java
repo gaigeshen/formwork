@@ -7,11 +7,7 @@ import org.flowable.engine.TaskService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import work.gaigeshen.formwork.commons.bpmn.BpmnService;
-import work.gaigeshen.formwork.commons.bpmn.CandidateService;
-import work.gaigeshen.formwork.commons.bpmn.VariableService;
 import work.gaigeshen.formwork.commons.bpmn.flowable.FlowableBpmnService;
-import work.gaigeshen.formwork.commons.bpmn.flowable.FlowableCandidateService;
-import work.gaigeshen.formwork.commons.bpmn.flowable.FlowableVariableService;
 
 /**
  *
@@ -39,16 +35,6 @@ public class BpmnConfiguration {
 
     @Bean
     public BpmnService bpmnService() {
-        return new FlowableBpmnService(repositoryService, historyService, runtimeService, taskService, candidateService());
-    }
-
-    @Bean
-    public VariableService userTaskService() {
-        return new FlowableVariableService(historyService, candidateService);
-    }
-
-    @Bean
-    public CandidateService candidateService() {
-        return new FlowableCandidateService(repositoryService, runtimeService, taskService);
+        return new FlowableBpmnService(repositoryService, historyService, runtimeService, taskService);
     }
 }

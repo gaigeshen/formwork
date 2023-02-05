@@ -1,5 +1,10 @@
 package work.gaigeshen.formwork.commons.bpmn.candidate;
 
+/**
+ * 审批候选人变量
+ *
+ * @author gaigeshen
+ */
 public class CandidateVariables {
 
     private final String starter;

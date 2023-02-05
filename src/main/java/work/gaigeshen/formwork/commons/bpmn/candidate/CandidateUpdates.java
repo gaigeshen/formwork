@@ -3,6 +3,11 @@ package work.gaigeshen.formwork.commons.bpmn.candidate;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 审批候选人修改参数，用于动态替换审批候选人
+ *
+ * @author gaigeshen
+ */
 public class CandidateUpdates {
 
     private final Map<String, Candidate> groupUpdates = new HashMap<>();
