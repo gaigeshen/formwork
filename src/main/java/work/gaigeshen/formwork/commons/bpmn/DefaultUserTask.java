@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -11,15 +13,11 @@ public class DefaultUserTask implements UserTask {
 
     private final String id;
 
-    private final String name;
-
-    private final String description;
-
     private final String processId;
 
     private final String businessKey;
 
-    private final String assignee;
+    private final Candidate candidate;
 
     private final Date createTime;
 
@@ -29,11 +27,9 @@ public class DefaultUserTask implements UserTask {
 
     private DefaultUserTask(Builder builder) {
         this.id = builder.id;
-        this.name = builder.name;
-        this.description = builder.description;
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
-        this.assignee = builder.assignee;
+        this.candidate = builder.candidate;
         this.createTime = builder.createTime;
         this.dueDate = builder.dueDate;
         this.claimTime = builder.claimTime;
@@ -49,16 +45,6 @@ public class DefaultUserTask implements UserTask {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
     public String getProcessId() {
         return processId;
     }
@@ -69,8 +55,8 @@ public class DefaultUserTask implements UserTask {
     }
 
     @Override
-    public String getAssignee() {
-        return assignee;
+    public Candidate getCandidate() {
+        return candidate;
     }
 
     @Override
@@ -109,15 +95,11 @@ public class DefaultUserTask implements UserTask {
 
         private String id;
 
-        private String name;
-
-        private String description;
-
         private String processId;
 
         private String businessKey;
 
-        private String assignee;
+        private Candidate candidate;
 
         private Date createTime;
 
@@ -127,16 +109,6 @@ public class DefaultUserTask implements UserTask {
 
         public Builder id(String id) {
             this.id = id;
-            return this;
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
             return this;
         }
 
@@ -150,8 +122,8 @@ public class DefaultUserTask implements UserTask {
             return this;
         }
 
-        public Builder assignee(String assignee) {
-            this.assignee = assignee;
+        public Builder candidate(Candidate candidate) {
+            this.candidate = candidate;
             return this;
         }
 

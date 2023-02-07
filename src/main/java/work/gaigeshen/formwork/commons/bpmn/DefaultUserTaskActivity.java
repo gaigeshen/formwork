@@ -1,7 +1,8 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
+
 import java.util.Date;
-import java.util.Set;
 
 /**
  * @author gaigeshen
@@ -10,11 +11,7 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
 
     private final String taskId;
 
-    private final String assignee;
-
-    private final Set<String> groups;
-
-    private final Set<String> users;
+    private final Candidate candidate;
 
     private final Date startTime;
 
@@ -24,9 +21,7 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
 
     private DefaultUserTaskActivity(Builder builder) {
         this.taskId = builder.taskId;
-        this.assignee = builder.assignee;
-        this.groups = builder.groups;
-        this.users = builder.users;
+        this.candidate = builder.candidate;
         this.startTime = builder.startTime;
         this.endTime = builder.endTime;
         this.status = builder.status;
@@ -42,18 +37,8 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
     }
 
     @Override
-    public String getAssignee() {
-        return assignee;
-    }
-
-    @Override
-    public Set<String> getGroups() {
-        return groups;
-    }
-
-    @Override
-    public Set<String> getUsers() {
-        return users;
+    public Candidate getCandidate() {
+        return candidate;
     }
 
     @Override
@@ -75,11 +60,7 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
 
         private String taskId;
 
-        private String assignee;
-
-        private Set<String> groups;
-
-        private Set<String> users;
+        private Candidate candidate;
 
         private Date startTime;
 
@@ -92,18 +73,8 @@ public class DefaultUserTaskActivity implements UserTaskActivity {
             return this;
         }
 
-        public Builder assignee(String assignee) {
-            this.assignee = assignee;
-            return this;
-        }
-
-        public Builder groups(Set<String> groups) {
-            this.groups = groups;
-            return this;
-        }
-
-        public Builder users(Set<String> users) {
-            this.users = users;
+        public Builder candidate(Candidate candidate) {
+            this.candidate = candidate;
             return this;
         }
 

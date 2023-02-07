@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
+
 import java.util.Date;
 
 /**
@@ -11,15 +13,11 @@ public interface UserTask {
 
     String getId();
 
-    String getName();
-
-    String getDescription();
-
     String getProcessId();
 
     String getBusinessKey();
 
-    String getAssignee();
+    Candidate getCandidate();
 
     Date getCreateTime();
 

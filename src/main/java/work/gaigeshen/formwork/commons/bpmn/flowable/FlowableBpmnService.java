@@ -124,10 +124,14 @@ public class FlowableBpmnService implements BpmnService {
                 processId = unWrapProcessId(processInstance.getProcessDefinitionKey());
                 businessKey = processInstance.getBusinessKey();
             }
+            TypedCandidate appliedCandidate = getTaskAppliedCandidate(task.getId());
             DefaultUserTask.Builder builder = DefaultUserTask.builder()
-                    .id(task.getId()).name(task.getName()).description(task.getDescription())
-                    .processId(processId).businessKey(businessKey).assignee(task.getAssignee())
-                    .createTime(task.getCreateTime()).dueDate(task.getDueDate()).claimTime(task.getClaimTime());
+                    .id(task.getId())
+                    .processId(processId).businessKey(businessKey)
+                    .candidate(appliedCandidate)
+                    .createTime(task.getCreateTime())
+                    .dueDate(task.getDueDate())
+                    .claimTime(task.getClaimTime());
             return builder.build();
         }).collect(Collectors.toSet());
     }
@@ -170,9 +174,10 @@ public class FlowableBpmnService implements BpmnService {
                 processId = unWrapProcessId(historicProcessInstance.getProcessDefinitionKey());
                 businessKey = historicProcessInstance.getBusinessKey();
             }
+            TypedCandidate appliedCandidate = getTaskAppliedCandidate(task.getId());
             DefaultUserTask.Builder builder = DefaultUserTask.builder()
-                    .id(task.getId()).name(task.getName()).description(task.getDescription())
-                    .processId(processId).businessKey(businessKey).assignee(task.getAssignee())
+                    .id(task.getId())
+                    .processId(processId).businessKey(businessKey).candidate(appliedCandidate)
                     .createTime(task.getCreateTime()).dueDate(task.getDueDate()).claimTime(task.getClaimTime());
             return builder.build();
         }).collect(Collectors.toSet());
@@ -196,7 +201,7 @@ public class FlowableBpmnService implements BpmnService {
         UserTaskActivity startActivity = DefaultUserTaskActivity.builder()
                 .status(Status.APPROVED)
                 .startTime(startTime).endTime(startTime)
-                .assignee(historicProcessInstance.getStartUserId())
+                .candidate(DefaultCandidate.createUser(historicProcessInstance.getStartUserId()))
                 .build();
         taskActivities.add(startActivity);
         List<HistoricActivityInstance> activities = historyService.createHistoricActivityInstanceQuery()
@@ -207,14 +212,14 @@ public class FlowableBpmnService implements BpmnService {
             return taskActivities;
         }
         Map<String, Map<String, Object>> taskVariables = getProcessTaskVariables(processId, businessKey);
+        Map<String, TypedCandidate> taskAssignees = getProcessTaskAssignees(processId, businessKey);
         for (HistoricActivityInstance activity : activities) {
             String taskId = activity.getTaskId();
             TypedCandidate taskCandidate = getTaskCandidate(taskId);
             CandidateType taskCandidateType = taskCandidate.getType();
             if (Objects.isNull(activity.getEndTime())) {
                 UserTaskActivity lastActivityCandidate = DefaultUserTaskActivity.builder()
-                        .taskId(taskId).status(Status.PROCESSING)
-                        .groups(taskCandidate.getGroups()).users(taskCandidate.getUsers())
+                        .taskId(taskId).status(Status.PROCESSING).candidate(taskAssignees.get(taskId))
                         .startTime(activity.getStartTime())
                         .build();
                 taskActivities.add(lastActivityCandidate);
@@ -235,7 +240,7 @@ public class FlowableBpmnService implements BpmnService {
                 }
                 UserTaskActivity userTaskActivity = DefaultUserTaskActivity.builder()
                         .taskId(taskId).status(status)
-                        .assignee(activity.getAssignee())
+                        .candidate(taskAssignees.get(taskId))
                         .startTime(activity.getStartTime()).endTime(activity.getEndTime())
                         .build();
                 taskActivities.add(userTaskActivity);
@@ -446,7 +451,7 @@ public class FlowableBpmnService implements BpmnService {
     }
 
     private TypedCandidate getTaskAppliedCandidate(String taskId) {
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        HistoricTaskInstance task = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
         if (Objects.isNull(task)) {
             throw new IllegalStateException("could not find task: " + taskId);
         }
