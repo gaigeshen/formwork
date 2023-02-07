@@ -46,7 +46,7 @@ public class DefaultUserTaskAutoCompletion implements UserTaskAutoCompletion {
     }
 
     @Override
-    public Set<String> getUserId() {
+    public Set<String> getUsers() {
         return users;
     }
 

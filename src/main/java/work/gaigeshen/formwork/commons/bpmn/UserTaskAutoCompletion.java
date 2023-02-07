@@ -15,7 +15,7 @@ public interface UserTaskAutoCompletion {
 
     Set<String> getGroups();
 
-    Set<String> getUserId();
+    Set<String> getUsers();
 
     boolean hasMoreUserTasks();
 }

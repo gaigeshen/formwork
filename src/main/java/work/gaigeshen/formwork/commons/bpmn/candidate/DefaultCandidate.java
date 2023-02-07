@@ -1,6 +1,7 @@
 package work.gaigeshen.formwork.commons.bpmn.candidate;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -27,11 +28,43 @@ public class DefaultCandidate implements Candidate {
     }
 
     public static DefaultCandidate createGroups(Set<String> groups) {
-        return new DefaultCandidate(groups, Collections.emptySet());
+        return create(groups, Collections.emptySet());
     }
 
     public static DefaultCandidate createUsers(Set<String> users) {
-        return new DefaultCandidate(Collections.emptySet(), users);
+        return create(Collections.emptySet(), users);
+    }
+
+    public static DefaultCandidate createUser(String user) {
+        return createUsers(Collections.singleton(user));
+    }
+
+    @Override
+    public Candidate mergeCandidates(Set<Candidate> candidates) {
+        if (Objects.isNull(candidates)) {
+            throw new IllegalArgumentException("candidates cannot be null");
+        }
+        Set<String> mergedGroups = new HashSet<>(groups);
+        Set<String> mergedUsers = new HashSet<>(users);
+        for (Candidate candidate : candidates) {
+            mergedGroups.addAll(candidate.getGroups());
+            mergedUsers.addAll(candidate.getUsers());
+        }
+        return create(mergedGroups, mergedUsers);
+    }
+
+    @Override
+    public Candidate clearCandidates(Set<Candidate> candidates) {
+        if (Objects.isNull(candidates)) {
+            throw new IllegalArgumentException("candidates cannot be null");
+        }
+        Set<String> clearedGroups = new HashSet<>(groups);
+        Set<String> clearedUsers = new HashSet<>(users);
+        for (Candidate candidate : candidates) {
+            clearedGroups.removeAll(candidate.getGroups());
+            clearedUsers.removeAll(candidate.getUsers());
+        }
+        return create(clearedGroups, clearedUsers);
     }
 
     @Override

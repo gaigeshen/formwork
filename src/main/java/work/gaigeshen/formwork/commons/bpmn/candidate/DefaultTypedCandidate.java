@@ -26,6 +26,18 @@ public class DefaultTypedCandidate implements TypedCandidate {
     }
 
     @Override
+    public TypedCandidate mergeCandidates(Set<Candidate> candidates) {
+        Candidate mergedCandidate = candidate.mergeCandidates(candidates);
+        return create(mergedCandidate, type);
+    }
+
+    @Override
+    public TypedCandidate clearCandidates(Set<Candidate> candidates) {
+        Candidate clearedCandidate = candidate.clearCandidates(candidates);
+        return create(clearedCandidate, type);
+    }
+
+    @Override
     public Set<String> getGroups() {
         return candidate.getGroups();
     }
@@ -38,5 +50,10 @@ public class DefaultTypedCandidate implements TypedCandidate {
     @Override
     public CandidateType getType() {
         return type;
+    }
+
+    @Override
+    public Candidate getCandidate() {
+        return candidate;
     }
 }
