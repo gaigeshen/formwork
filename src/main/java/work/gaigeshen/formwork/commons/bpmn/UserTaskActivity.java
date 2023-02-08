@@ -9,19 +9,93 @@ import java.util.Date;
  *
  * @author gaigeshen
  */
-public interface UserTaskActivity {
+public class UserTaskActivity {
 
-    String getTaskId();
+    private final String taskId;
 
-    Candidate getCandidate();
+    private final Candidate candidate;
 
-    Date getStartTime();
+    private final Date startTime;
 
-    Date getEndTime();
+    private final Date endTime;
 
-    Status getStatus();
+    private final Status status;
 
-    enum Status {
+    private UserTaskActivity(Builder builder) {
+        this.taskId = builder.taskId;
+        this.candidate = builder.candidate;
+        this.startTime = builder.startTime;
+        this.endTime = builder.endTime;
+        this.status = builder.status;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public Candidate getCandidate() {
+        return candidate;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public static class Builder {
+
+        private String taskId;
+
+        private Candidate candidate;
+
+        private Date startTime;
+
+        private Date endTime;
+
+        private Status status;
+
+        public Builder taskId(String taskId) {
+            this.taskId = taskId;
+            return this;
+        }
+
+        public Builder candidate(Candidate candidate) {
+            this.candidate = candidate;
+            return this;
+        }
+
+        public Builder startTime(Date startTime) {
+            this.startTime = startTime;
+            return this;
+        }
+
+        public Builder endTime(Date endTime) {
+            this.endTime = endTime;
+            return this;
+        }
+
+        public Builder status(Status status) {
+            this.status = status;
+            return this;
+        }
+
+        public UserTaskActivity build() {
+            return new UserTaskActivity(this);
+        }
+    }
+
+    public enum Status {
 
         PROCESSING(1) {
             @Override

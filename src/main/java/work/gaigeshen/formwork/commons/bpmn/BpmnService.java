@@ -32,7 +32,7 @@ public interface BpmnService {
      * @param parameters 历史用户任务查询参数
      * @return 历史用户任务集合
      */
-    Collection<UserTask> queryHistoricTasks(UserHistoricTaskQueryParameters parameters);
+    Collection<UserHistoricTask> queryHistoricTasks(UserHistoricTaskQueryParameters parameters);
 
     /**
      * 查询用户任务活动

@@ -69,12 +69,12 @@ public class DefaultCandidate implements Candidate {
 
     @Override
     public Set<String> getGroups() {
-        return groups;
+        return Collections.unmodifiableSet(groups);
     }
 
     @Override
     public Set<String> getUsers() {
-        return users;
+        return Collections.unmodifiableSet(users);
     }
 
     @Override

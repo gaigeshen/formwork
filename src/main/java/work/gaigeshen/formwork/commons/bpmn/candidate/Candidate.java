@@ -1,5 +1,6 @@
 package work.gaigeshen.formwork.commons.bpmn.candidate;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -7,7 +8,7 @@ import java.util.Set;
  *
  * @author gaigeshen
  */
-public interface Candidate {
+public interface Candidate extends Serializable {
 
     default Candidate mergeCandidate(Candidate candidate) {
         return mergeCandidates(Collections.singleton(candidate));

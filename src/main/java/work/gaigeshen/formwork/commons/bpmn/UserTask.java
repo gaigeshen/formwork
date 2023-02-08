@@ -9,19 +9,89 @@ import java.util.Date;
  *
  * @author gaigeshen
  */
-public interface UserTask {
+public class UserTask {
 
-    String getId();
+    private final String id;
 
-    String getProcessId();
+    private final String processId;
 
-    String getBusinessKey();
+    private final String businessKey;
 
-    Candidate getCandidate();
+    private final Candidate candidate;
 
-    Date getCreateTime();
+    private final Date createTime;
 
-    Date getDueDate();
+    private UserTask(Builder builder) {
+        this.id = builder.id;
+        this.processId = builder.processId;
+        this.businessKey = builder.businessKey;
+        this.candidate = builder.candidate;
+        this.createTime = builder.createTime;
+    }
 
-    Date getClaimTime();
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getProcessId() {
+        return processId;
+    }
+
+    public String getBusinessKey() {
+        return businessKey;
+    }
+
+    public Candidate getCandidate() {
+        return candidate;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public static class Builder {
+
+        private String id;
+
+        private String processId;
+
+        private String businessKey;
+
+        private Candidate candidate;
+
+        private Date createTime;
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder processId(String processId) {
+            this.processId = processId;
+            return this;
+        }
+
+        public Builder businessKey(String businessKey) {
+            this.businessKey = businessKey;
+            return this;
+        }
+
+        public Builder candidate(Candidate candidate) {
+            this.candidate = candidate;
+            return this;
+        }
+
+        public Builder createTime(Date createTime) {
+            this.createTime = createTime;
+            return this;
+        }
+
+        public UserTask build() {
+            return new UserTask(this);
+        }
+    }
 }

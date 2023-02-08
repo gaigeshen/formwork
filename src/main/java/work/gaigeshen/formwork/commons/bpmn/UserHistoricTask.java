@@ -3,13 +3,13 @@ package work.gaigeshen.formwork.commons.bpmn;
 import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
+ * 用户历史任务
  *
  * @author gaigeshen
  */
-public class DefaultUserTask implements UserTask {
+public class UserHistoricTask {
 
     private final String id;
 
@@ -21,74 +21,43 @@ public class DefaultUserTask implements UserTask {
 
     private final Date createTime;
 
-    private final Date dueDate;
+    private final Date endTime;
 
-    private final Date claimTime;
-
-    private DefaultUserTask(Builder builder) {
+    private UserHistoricTask(Builder builder) {
         this.id = builder.id;
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.candidate = builder.candidate;
         this.createTime = builder.createTime;
-        this.dueDate = builder.dueDate;
-        this.claimTime = builder.claimTime;
+        this.endTime = builder.endTime;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public String getProcessId() {
         return processId;
     }
 
-    @Override
     public String getBusinessKey() {
         return businessKey;
     }
 
-    @Override
     public Candidate getCandidate() {
         return candidate;
     }
 
-    @Override
     public Date getCreateTime() {
         return createTime;
     }
 
-    @Override
-    public Date getDueDate() {
-        return dueDate;
-    }
-
-    @Override
-    public Date getClaimTime() {
-        return claimTime;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        DefaultUserTask that = (DefaultUserTask) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public Date getEndTime() {
+        return endTime;
     }
 
     public static class Builder {
@@ -103,9 +72,7 @@ public class DefaultUserTask implements UserTask {
 
         private Date createTime;
 
-        private Date dueDate;
-
-        private Date claimTime;
+        private Date endTime;
 
         public Builder id(String id) {
             this.id = id;
@@ -132,18 +99,13 @@ public class DefaultUserTask implements UserTask {
             return this;
         }
 
-        public Builder dueDate(Date dueDate) {
-            this.dueDate = dueDate;
+        public Builder endTime(Date endTime) {
+            this.endTime = endTime;
             return this;
         }
 
-        public Builder claimTime(Date claimTime) {
-            this.claimTime = claimTime;
-            return this;
-        }
-
-        public DefaultUserTask build() {
-            return new DefaultUserTask(this);
+        public UserHistoricTask build() {
+            return new UserHistoricTask(this);
         }
     }
 }

@@ -7,15 +7,89 @@ import java.util.Set;
  *
  * @author gaigeshen
  */
-public interface UserTaskAutoCompletion {
+public class UserTaskAutoCompletion {
 
-    String getProcessId();
+    private final String processId;
 
-    String getBusinessKey();
+    private final String businessKey;
 
-    Set<String> getGroups();
+    private final Set<String> groups;
 
-    Set<String> getUsers();
+    private final Set<String> users;
 
-    boolean hasMoreUserTasks();
+    private final boolean hasMoreUserTasks;
+
+    private UserTaskAutoCompletion(Builder builder) {
+        this.processId = builder.processId;
+        this.businessKey = builder.businessKey;
+        this.groups = builder.groups;
+        this.users = builder.users;
+        this.hasMoreUserTasks = builder.hasMoreUserTasks;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public String getProcessId() {
+        return processId;
+    }
+
+    public String getBusinessKey() {
+        return businessKey;
+    }
+
+    public Set<String> getGroups() {
+        return groups;
+    }
+
+    public Set<String> getUsers() {
+        return users;
+    }
+
+    public boolean hasMoreUserTasks() {
+        return hasMoreUserTasks;
+    }
+
+    public static class Builder {
+
+        private String processId;
+
+        private String businessKey;
+
+        private Set<String> groups;
+
+        private Set<String> users;
+
+        private boolean hasMoreUserTasks;
+
+        public Builder processId(String processId) {
+            this.processId = processId;
+            return this;
+        }
+
+        public Builder businessKey(String businessKey) {
+            this.businessKey = businessKey;
+            return this;
+        }
+
+        public Builder groups(Set<String> groups) {
+            this.groups = groups;
+            return this;
+        }
+
+        public Builder users(Set<String> users) {
+            this.users = users;
+            return this;
+        }
+
+        public Builder hasMoreUserTasks(boolean hasMoreUserTasks) {
+            this.hasMoreUserTasks = hasMoreUserTasks;
+            return this;
+        }
+
+        public UserTaskAutoCompletion build() {
+            return new UserTaskAutoCompletion(this);
+        }
+    }
 }
