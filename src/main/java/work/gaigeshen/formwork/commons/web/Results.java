@@ -8,16 +8,17 @@ public abstract class Results {
     private Results() { }
 
     public static <D> Result<D> create(ResultCode resultCode) {
-        Result<D> result = new Result<>();
-        result.setCode(resultCode.getCode());
-        result.setMessage(resultCode.getMessage());
-        return result;
+        return create(resultCode, resultCode.getMessage());
     }
 
-    public static <D> Result<D> create(ResultCode resultCode, D data) {
+    public static <D> Result<D> create(ResultCode resultCode, String message) {
+        return create(resultCode, message, null);
+    }
+
+    public static <D> Result<D> create(ResultCode resultCode, String message, D data) {
         Result<D> result = new Result<>();
         result.setCode(resultCode.getCode());
-        result.setMessage(resultCode.getMessage());
+        result.setMessage(message);
         result.setData(data);
         return result;
     }
@@ -36,15 +37,19 @@ public abstract class Results {
         return getData(result, new ResultValidator<D>() { }, new ResultExceptionProducer<D>() { });
     }
 
-    public static <D> D getData(Result<D> result, ResultValidator<D> validator) {
+    public static <D> D getData(Result<D> result,
+                                ResultValidator<D> validator) {
         return getData(result, validator, new ResultExceptionProducer<D>() { });
     }
 
-    public static <D> D getData(Result<D> result, ResultExceptionProducer<D> producer) {
+    public static <D> D getData(Result<D> result,
+                                ResultExceptionProducer<D> producer) {
         return getData(result, new ResultValidator<D>() { }, producer);
     }
 
-    public static <D> D getData(Result<D> result, ResultValidator<D> validator, ResultExceptionProducer<D> producer) {
+    public static <D> D getData(Result<D> result,
+                                ResultValidator<D> validator,
+                                ResultExceptionProducer<D> producer) {
         if (!validator.validate(result)) {
             throw producer.produce(result);
         }

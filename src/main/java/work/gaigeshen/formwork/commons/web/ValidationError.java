@@ -18,4 +18,11 @@ public class ValidationError {
     public Map<String, String> getViolations() {
         return violations;
     }
+
+    public String getViolationMessages() {
+        if (violations.isEmpty()) {
+            return null;
+        }
+        return String.join("\n", violations.values());
+    }
 }

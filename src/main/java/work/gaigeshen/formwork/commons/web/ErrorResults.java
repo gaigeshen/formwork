@@ -4,6 +4,7 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import work.gaigeshen.formwork.commons.exception.BusinessErrorException;
 
 import javax.validation.ConstraintViolation;
@@ -27,15 +28,23 @@ public abstract class ErrorResults {
         }
         switch (httpStatus) {
             case 400:
-                if (ex instanceof BindException) {
+                if (ex instanceof MethodArgumentNotValidException) {
+                    BindingResult bindingResult = ((MethodArgumentNotValidException) ex).getBindingResult();
+                    ValidationError validationError = bindingResultDetail(bindingResult);
+                    return Results.create(BAD_REQUEST, validationError.getViolationMessages(), validationError);
+                }
+                else if (ex instanceof BindException) {
                     BindingResult bindingResult = ((BindException) ex).getBindingResult();
-                    return Results.create(BAD_REQUEST, bindingResultDetail(bindingResult));
+                    ValidationError validationError = bindingResultDetail(bindingResult);
+                    return Results.create(BAD_REQUEST, validationError.getViolationMessages(), validationError);
                 }
-                if (ex instanceof ConstraintViolationException) {
+                else if (ex instanceof ConstraintViolationException) {
                     Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
-                    return Results.create(BAD_REQUEST, constraintViolationsDetail(violations));
+                    ValidationError validationError = constraintViolationsDetail(violations);
+                    return Results.create(BAD_REQUEST, validationError.getViolationMessages(), validationError);
+                } else {
+                    return Results.create(BAD_REQUEST);
                 }
-                return Results.create(BAD_REQUEST);
             case 401: return Results.create(UNAUTHORIZED);
             case 402: return Results.create(PAYMENT_REQUIRED);
             case 403: return Results.create(FORBIDDEN);

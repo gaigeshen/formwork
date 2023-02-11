@@ -13,6 +13,6 @@ public abstract class BusinessErrorResults {
     private BusinessErrorResults() { }
 
     public static Result<?> createResult(BusinessErrorException ex) {
-        return Results.create(DefaultResultCode.create(BUSINESS_ERROR, ex.getMessage()), ex.getData());
+        return Results.create(BUSINESS_ERROR, ex.getMessage(), ex.getData());
     }
 }
