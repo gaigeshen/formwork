@@ -26,25 +26,23 @@ public abstract class ErrorResults {
         if (ex instanceof BusinessErrorException) {
             return BusinessErrorResults.createResult((BusinessErrorException) ex);
         }
+        if (ex instanceof MethodArgumentNotValidException) {
+            BindingResult bindingResult = ((MethodArgumentNotValidException) ex).getBindingResult();
+            ValidationError validationError = bindingResultDetail(bindingResult);
+            return Results.create(BAD_REQUEST, validationError.getMessages(), validationError);
+        }
+        if (ex instanceof BindException) {
+            BindingResult bindingResult = ((BindException) ex).getBindingResult();
+            ValidationError validationError = bindingResultDetail(bindingResult);
+            return Results.create(BAD_REQUEST, validationError.getMessages(), validationError);
+        }
+        if (ex instanceof ConstraintViolationException) {
+            Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
+            ValidationError validationError = constraintViolationsDetail(violations);
+            return Results.create(BAD_REQUEST, validationError.getMessages(), validationError);
+        }
         switch (httpStatus) {
-            case 400:
-                if (ex instanceof MethodArgumentNotValidException) {
-                    BindingResult bindingResult = ((MethodArgumentNotValidException) ex).getBindingResult();
-                    ValidationError validationError = bindingResultDetail(bindingResult);
-                    return Results.create(BAD_REQUEST, validationError.getViolationMessages(), validationError);
-                }
-                else if (ex instanceof BindException) {
-                    BindingResult bindingResult = ((BindException) ex).getBindingResult();
-                    ValidationError validationError = bindingResultDetail(bindingResult);
-                    return Results.create(BAD_REQUEST, validationError.getViolationMessages(), validationError);
-                }
-                else if (ex instanceof ConstraintViolationException) {
-                    Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
-                    ValidationError validationError = constraintViolationsDetail(violations);
-                    return Results.create(BAD_REQUEST, validationError.getViolationMessages(), validationError);
-                } else {
-                    return Results.create(BAD_REQUEST);
-                }
+            case 400: return Results.create(BAD_REQUEST);
             case 401: return Results.create(UNAUTHORIZED);
             case 402: return Results.create(PAYMENT_REQUIRED);
             case 403: return Results.create(FORBIDDEN);

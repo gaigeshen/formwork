@@ -19,7 +19,7 @@ public class ValidationError {
         return violations;
     }
 
-    public String getViolationMessages() {
+    public String getMessages() {
         if (violations.isEmpty()) {
             return null;
         }
