@@ -1,4 +1,6 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
+
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
 
 import java.util.Map;
 import java.util.Objects;
@@ -10,18 +12,30 @@ import java.util.Objects;
  */
 public class UserTaskCompleteParameters {
 
+    /**
+     * 需要完成的用户任务
+     */
     private final UserTask userTask;
 
+    /**
+     * 任务参数
+     */
     private final Map<String, Object> variables;
 
-    private final String assignee;
+    /**
+     * 审批候选人用于完成用户任务
+     */
+    private final Candidate candidate;
 
+    /**
+     * 审批结果是否拒绝
+     */
     private final boolean rejected;
 
     private UserTaskCompleteParameters(Builder builder) {
         this.userTask = builder.userTask;
         this.variables = builder.variables;
-        this.assignee = builder.assignee;
+        this.candidate = builder.candidate;
         this.rejected = builder.rejected;
     }
 
@@ -37,8 +51,8 @@ public class UserTaskCompleteParameters {
         return variables;
     }
 
-    public String getAssignee() {
-        return assignee;
+    public Candidate getCandidate() {
+        return candidate;
     }
 
     public boolean isRejected() {
@@ -50,7 +64,7 @@ public class UserTaskCompleteParameters {
         return "UserTaskCompleteParameters{" +
                 "userTask=" + userTask +
                 ", variables=" + variables +
-                ", assignee='" + assignee + '\'' +
+                ", candidate=" + candidate +
                 ", rejected=" + rejected +
                 '}';
     }
@@ -61,7 +75,7 @@ public class UserTaskCompleteParameters {
 
         private Map<String, Object> variables;
 
-        private String assignee;
+        private Candidate candidate;
 
         private boolean rejected;
 
@@ -75,8 +89,8 @@ public class UserTaskCompleteParameters {
             return this;
         }
 
-        public Builder assignee(String assignee) {
-            this.assignee = assignee;
+        public Builder candidate(Candidate candidate) {
+            this.candidate = candidate;
             return this;
         }
 
@@ -92,8 +106,8 @@ public class UserTaskCompleteParameters {
             if (Objects.isNull(variables)) {
                 throw new IllegalArgumentException("variables cannot be null");
             }
-            if (Objects.isNull(assignee)) {
-                throw new IllegalArgumentException("assignee cannot be null");
+            if (Objects.isNull(candidate)) {
+                throw new IllegalArgumentException("candidate cannot be null");
             }
             return new UserTaskCompleteParameters(this);
         }

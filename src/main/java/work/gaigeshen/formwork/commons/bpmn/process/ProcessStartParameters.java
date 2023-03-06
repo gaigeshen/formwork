@@ -1,6 +1,7 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.process;
 
-import work.gaigeshen.formwork.commons.bpmn.candidate.CandidateVariables;
+import work.gaigeshen.formwork.commons.bpmn.candidate.CandidateUpdates;
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidates;
 
 import java.util.Map;
 import java.util.Objects;
@@ -12,22 +13,43 @@ import java.util.Objects;
  */
 public class ProcessStartParameters {
 
+    /**
+     * 流程标识符
+     */
     private final String processId;
 
+    /**
+     * 业务标识符
+     */
     private final String businessKey;
 
+    /**
+     * 任务参数
+     */
     private final Map<String, Object> variables;
 
+    /**
+     * 业务流程发起人
+     */
     private final String userId;
 
-    private final CandidateVariables candidateVariables;
+    /**
+     * 发起人自选审批候选人
+     */
+    private final Candidates appointees;
+
+    /**
+     * 审批候选人修改参数
+     */
+    private final CandidateUpdates updates;
 
     private ProcessStartParameters(Builder builder) {
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
         this.variables = builder.variables;
         this.userId = builder.userId;
-        this.candidateVariables = builder.candidateVariables;
+        this.appointees = builder.appointees;
+        this.updates = builder.updates;
     }
 
     public static Builder builder() {
@@ -50,8 +72,12 @@ public class ProcessStartParameters {
         return userId;
     }
 
-    public CandidateVariables getCandidateVariables() {
-        return candidateVariables;
+    public Candidates getAppointees() {
+        return appointees;
+    }
+
+    public CandidateUpdates getUpdates() {
+        return updates;
     }
 
     @Override
@@ -61,7 +87,8 @@ public class ProcessStartParameters {
                 ", businessKey='" + businessKey + '\'' +
                 ", variables=" + variables +
                 ", userId='" + userId + '\'' +
-                ", candidateVariables=" + candidateVariables +
+                ", appointees=" + appointees +
+                ", updates=" + updates +
                 '}';
     }
 
@@ -75,7 +102,9 @@ public class ProcessStartParameters {
 
         private String userId;
 
-        private CandidateVariables candidateVariables;
+        private Candidates appointees;
+
+        private CandidateUpdates updates;
 
         public Builder processId(String processId) {
             this.processId = processId;
@@ -97,8 +126,13 @@ public class ProcessStartParameters {
             return this;
         }
 
-        public Builder candidateVariables(CandidateVariables candidateVariables) {
-            this.candidateVariables = candidateVariables;
+        public Builder appointees(Candidates appointees) {
+            this.appointees = appointees;
+            return this;
+        }
+
+        public Builder updates(CandidateUpdates updates) {
+            this.updates = updates;
             return this;
         }
 
@@ -115,8 +149,11 @@ public class ProcessStartParameters {
             if (Objects.isNull(userId)) {
                 throw new IllegalArgumentException("userId cannot be null");
             }
-            if (Objects.isNull(candidateVariables)) {
-                throw new IllegalArgumentException("candidateVariables cannot be null");
+            if (Objects.isNull(appointees)) {
+                throw new IllegalArgumentException("appointees cannot be null");
+            }
+            if (Objects.isNull(updates)) {
+                throw new IllegalArgumentException("updates cannot be null");
             }
             return new ProcessStartParameters(this);
         }

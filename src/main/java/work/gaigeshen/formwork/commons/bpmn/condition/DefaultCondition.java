@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.condition;
 
 import java.util.Objects;
 
@@ -32,7 +32,7 @@ public class DefaultCondition implements Condition {
     }
 
     public static DefaultCondition equalTo(String variable, Object value) {
-        return new DefaultCondition(variable, value, " = ");
+        return new DefaultCondition(variable, value, " == ");
     }
 
     public static DefaultCondition greaterThan(String variable, Object value) {
@@ -53,6 +53,9 @@ public class DefaultCondition implements Condition {
 
     @Override
     public String toExpression() {
+        if (value instanceof CharSequence) {
+            return variable + operator + "'" + value + "'";
+        }
         return variable + operator + value;
     }
 

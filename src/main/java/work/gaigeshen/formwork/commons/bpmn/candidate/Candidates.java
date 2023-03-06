@@ -1,12 +1,14 @@
 package work.gaigeshen.formwork.commons.bpmn.candidate;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
+ * 审批候选人集合
  *
  * @author gaigeshen
  */
-public class Candidates implements Iterable<Candidate> {
+public class Candidates implements Iterable<Candidate>, Serializable {
 
     private final List<Candidate> candidates;
 
@@ -30,10 +32,8 @@ public class Candidates implements Iterable<Candidate> {
         return candidates.iterator();
     }
 
-    public Candidate poll() {
-        if (candidates.isEmpty()) {
-            return null;
-        }
-        return candidates.remove(0);
+    public Candidate getCandidate(int index) {
+        return candidates.get(index);
     }
+
 }

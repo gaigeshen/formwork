@@ -1,6 +1,6 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
 
-import java.util.Set;
+import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
 
 /**
  * 用户任务自动完成结果
@@ -13,18 +13,15 @@ public class UserTaskAutoCompletion {
 
     private final String businessKey;
 
-    private final Set<String> groups;
+    private final Candidate candidate;
 
-    private final Set<String> users;
-
-    private final boolean hasMoreUserTasks;
+    private final boolean hasMoreTasks;
 
     private UserTaskAutoCompletion(Builder builder) {
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
-        this.groups = builder.groups;
-        this.users = builder.users;
-        this.hasMoreUserTasks = builder.hasMoreUserTasks;
+        this.candidate = builder.candidate;
+        this.hasMoreTasks = builder.hasMoreTasks;
     }
 
     public static Builder builder() {
@@ -39,16 +36,12 @@ public class UserTaskAutoCompletion {
         return businessKey;
     }
 
-    public Set<String> getGroups() {
-        return groups;
-    }
-
-    public Set<String> getUsers() {
-        return users;
+    public Candidate getCandidate() {
+        return candidate;
     }
 
     public boolean hasMoreUserTasks() {
-        return hasMoreUserTasks;
+        return hasMoreTasks;
     }
 
     public static class Builder {
@@ -57,11 +50,9 @@ public class UserTaskAutoCompletion {
 
         private String businessKey;
 
-        private Set<String> groups;
+        private Candidate candidate;
 
-        private Set<String> users;
-
-        private boolean hasMoreUserTasks;
+        private boolean hasMoreTasks;
 
         public Builder processId(String processId) {
             this.processId = processId;
@@ -73,18 +64,13 @@ public class UserTaskAutoCompletion {
             return this;
         }
 
-        public Builder groups(Set<String> groups) {
-            this.groups = groups;
+        public Builder candidate(Candidate candidate) {
+            this.candidate = candidate;
             return this;
         }
 
-        public Builder users(Set<String> users) {
-            this.users = users;
-            return this;
-        }
-
-        public Builder hasMoreUserTasks(boolean hasMoreUserTasks) {
-            this.hasMoreUserTasks = hasMoreUserTasks;
+        public Builder hasMoreTasks(boolean hasMoreTasks) {
+            this.hasMoreTasks = hasMoreTasks;
             return this;
         }
 

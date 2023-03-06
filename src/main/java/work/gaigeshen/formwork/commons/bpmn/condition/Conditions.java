@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.condition;
 
 import java.util.Collections;
 import java.util.Iterator;

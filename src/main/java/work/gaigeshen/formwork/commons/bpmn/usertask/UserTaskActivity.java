@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
 
 import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
 
@@ -11,8 +11,6 @@ import java.util.Date;
  */
 public class UserTaskActivity {
 
-    private final String taskId;
-
     private final Candidate candidate;
 
     private final Date startTime;
@@ -22,7 +20,6 @@ public class UserTaskActivity {
     private final Status status;
 
     private UserTaskActivity(Builder builder) {
-        this.taskId = builder.taskId;
         this.candidate = builder.candidate;
         this.startTime = builder.startTime;
         this.endTime = builder.endTime;
@@ -31,10 +28,6 @@ public class UserTaskActivity {
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    public String getTaskId() {
-        return taskId;
     }
 
     public Candidate getCandidate() {
@@ -55,8 +48,6 @@ public class UserTaskActivity {
 
     public static class Builder {
 
-        private String taskId;
-
         private Candidate candidate;
 
         private Date startTime;
@@ -64,11 +55,6 @@ public class UserTaskActivity {
         private Date endTime;
 
         private Status status;
-
-        public Builder taskId(String taskId) {
-            this.taskId = taskId;
-            return this;
-        }
 
         public Builder candidate(Candidate candidate) {
             this.candidate = candidate;
@@ -95,20 +81,36 @@ public class UserTaskActivity {
         }
     }
 
+    /**
+     * 用户任务审批结果状态
+     *
+     * @author gaigeshen
+     */
     public enum Status {
 
+        /**
+         * 正在审批中
+         */
         PROCESSING(1) {
             @Override
             public boolean isProcessing() {
                 return true;
             }
         },
+
+        /**
+         * 审批结果为通过
+         */
         APPROVED(2) {
             @Override
             public boolean isApproved() {
                 return true;
             }
         },
+
+        /**
+         * 审批结果为拒绝
+         */
         REJECTED(3) {
             @Override
             public boolean isRejected() {

@@ -7,7 +7,7 @@ import org.flowable.engine.TaskService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import work.gaigeshen.formwork.commons.bpmn.BpmnService;
-import work.gaigeshen.formwork.commons.bpmn.flowable.FlowableBpmnService;
+import work.gaigeshen.formwork.commons.bpmn.FlowableBpmnService;
 
 /**
  *

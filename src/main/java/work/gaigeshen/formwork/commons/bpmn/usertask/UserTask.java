@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
 
 import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
 
@@ -11,14 +11,29 @@ import java.util.Date;
  */
 public class UserTask {
 
+    /**
+     * 任务标识符
+     */
     private final String id;
 
+    /**
+     * 流程标识符
+     */
     private final String processId;
 
+    /**
+     * 业务标识符
+     */
     private final String businessKey;
 
+    /**
+     * 审批候选人
+     */
     private final Candidate candidate;
 
+    /**
+     * 创建时间
+     */
     private final Date createTime;
 
     private UserTask(Builder builder) {

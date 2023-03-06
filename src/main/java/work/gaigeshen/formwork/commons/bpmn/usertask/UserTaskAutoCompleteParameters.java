@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
 
 import java.util.Map;
 import java.util.Objects;
@@ -10,10 +10,19 @@ import java.util.Objects;
  */
 public class UserTaskAutoCompleteParameters {
 
+    /**
+     * 流程标识符
+     */
     private final String processId;
 
+    /**
+     * 业务标识符
+     */
     private final String businessKey;
 
+    /**
+     * 任务参数
+     */
     private final Map<String, Object> variables;
 
     private UserTaskAutoCompleteParameters(Builder builder) {

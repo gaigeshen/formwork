@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn.flowable;
+package work.gaigeshen.formwork.commons.bpmn;
 
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.FlowElement;
@@ -18,14 +18,17 @@ import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
-import work.gaigeshen.formwork.commons.bpmn.Process;
-import work.gaigeshen.formwork.commons.bpmn.*;
-import work.gaigeshen.formwork.commons.bpmn.UserTaskActivity.Status;
+import work.gaigeshen.formwork.commons.bpmn.process.*;
+import work.gaigeshen.formwork.commons.bpmn.usertask.*;
+import work.gaigeshen.formwork.commons.bpmn.usertask.UserTaskActivity.Status;
 import work.gaigeshen.formwork.commons.bpmn.candidate.*;
+import work.gaigeshen.formwork.commons.bpmn.process.Process;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-import static work.gaigeshen.formwork.commons.bpmn.flowable.FlowableBpmnParser.*;
+import static work.gaigeshen.formwork.commons.bpmn.FlowableBpmnParser.*;
 
 /**
  *
@@ -119,7 +122,8 @@ public class FlowableBpmnService implements BpmnService {
             TypedCandidate appliedCandidate = getTaskAppliedCandidate(task.getId());
             UserTask.Builder builder = UserTask.builder().id(task.getId())
                     .processId(processId).businessKey(businessKey)
-                    .createTime(task.getCreateTime()).candidate(appliedCandidate);
+                    .candidate(appliedCandidate)
+                    .createTime(task.getCreateTime());
             userTasks.add(builder.build());
         }
         return userTasks;
@@ -131,17 +135,20 @@ public class FlowableBpmnService implements BpmnService {
             throw new IllegalArgumentException("user historic task query parameters cannot be null");
         }
         HistoricTaskInstanceQuery historicTaskInstanceQuery = historyService.createHistoricTaskInstanceQuery()
-                .processDefinitionKey(wrapProcessId(parameters.getProcessId()))
-                .processInstanceBusinessKey(parameters.getBusinessKey())
-                .orderByHistoricTaskInstanceStartTime()
-                .asc();
+                .orderByHistoricTaskInstanceStartTime().asc();
         if (Objects.nonNull(parameters.getTaskId())) {
             historicTaskInstanceQuery.taskId(parameters.getTaskId());
         }
+        if (Objects.nonNull(parameters.getProcessId())) {
+            historicTaskInstanceQuery.processDefinitionKey(wrapProcessId(parameters.getProcessId()));
+        }
+        if (Objects.nonNull(parameters.getBusinessKey())) {
+            historicTaskInstanceQuery.processInstanceBusinessKey(parameters.getBusinessKey());
+        }
         List<HistoricTaskInstance> queryResult = new ArrayList<>();
-        if (Objects.nonNull(parameters.getAssignees()) && !parameters.getAssignees().isEmpty()) {
-            for (String assignee : parameters.getAssignees()) {
-                historicTaskInstanceQuery.taskAssigneeLike("%" + assignee + "%");
+        if (Objects.nonNull(parameters.getCandidates()) && !parameters.getCandidates().isEmpty()) {
+            for (String candidate : parameters.getCandidates()) {
+                historicTaskInstanceQuery.taskAssigneeLike("%" + candidate + "%");
                 queryResult.addAll(historicTaskInstanceQuery.list());
             }
         } else {
@@ -159,10 +166,10 @@ public class FlowableBpmnService implements BpmnService {
                 businessKey = historicProcess.getBusinessKey();
             }
             TypedCandidate appliedCandidate = getTaskAppliedCandidate(historicTask.getId());
-            UserHistoricTask.Builder builder = UserHistoricTask.builder()
-                    .id(historicTask.getId()).processId(processId).businessKey(businessKey)
-                    .createTime(historicTask.getCreateTime()).endTime(historicTask.getEndTime())
-                    .candidate(appliedCandidate);
+            UserHistoricTask.Builder builder = UserHistoricTask.builder().id(historicTask.getId())
+                    .processId(processId).businessKey(businessKey)
+                    .candidate(appliedCandidate)
+                    .createTime(historicTask.getCreateTime()).endTime(historicTask.getEndTime());
             userHistoricTasks.add(builder.build());
         }
         return userHistoricTasks;
@@ -173,10 +180,9 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("user task activity query parameters cannot be null");
         }
-        String processId = wrapProcessId(parameters.getProcessId());
-        String businessKey = parameters.getBusinessKey();
         HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
-                .processDefinitionKey(processId).processInstanceBusinessKey(businessKey)
+                .processDefinitionKey(wrapProcessId(parameters.getProcessId()))
+                .processInstanceBusinessKey(parameters.getBusinessKey())
                 .singleResult();
         if (Objects.isNull(historicProcessInstance)) {
             return Collections.emptyList();
@@ -184,36 +190,39 @@ public class FlowableBpmnService implements BpmnService {
         Date startTime = historicProcessInstance.getStartTime();
         String startUserId = historicProcessInstance.getStartUserId();
         List<UserTaskActivity> taskActivities = new ArrayList<>();
-        UserTaskActivity startActivity = UserTaskActivity.builder()
-                .status(UserTaskActivity.Status.APPROVED).startTime(startTime).endTime(startTime)
-                .candidate(DefaultCandidate.createUser(startUserId))
-                .build();
-        taskActivities.add(startActivity);
+        taskActivities.add(
+                UserTaskActivity.builder()
+                        .candidate(DefaultCandidate.createUser(startUserId))
+                        .startTime(startTime).endTime(startTime).status(Status.APPROVED)
+                        .build()
+        );
         List<HistoricActivityInstance> activities = historyService.createHistoricActivityInstanceQuery()
-                .processInstanceId(historicProcessInstance.getId())
-                .activityType("userTask").orderByHistoricActivityInstanceStartTime().asc().list();
+                .processInstanceId(historicProcessInstance.getId()).activityType("userTask")
+                .orderByHistoricActivityInstanceStartTime().asc().list();
         if (activities.isEmpty()) {
             return taskActivities;
         }
-        Map<String, TypedCandidate> taskAssignees = getProcessTaskApprovedCandidates(processId, businessKey);
+        Map<String, TypedCandidate> taskApprovedCandidates = getProcessTaskApprovedCandidates(parameters.getProcessId(), parameters.getBusinessKey());
+        Map<String, Map<String, Object>> taskVariables = getProcessTaskVariables(parameters.getProcessId(), parameters.getBusinessKey());
         for (HistoricActivityInstance activity : activities) {
             String taskId = activity.getTaskId();
-            TypedCandidate taskCandidate = getTaskCandidate(taskId);
-            CandidateType taskCandidateType = taskCandidate.getType();
             if (Objects.isNull(activity.getEndTime())) {
+                Map<String, TypedCandidate> taskAppliedCandidates = getProcessTaskAppliedCandidates(parameters.getProcessId(), parameters.getBusinessKey());
                 UserTaskActivity lastActivityCandidate = UserTaskActivity.builder()
-                        .taskId(taskId).status(Status.PROCESSING).candidate(taskAssignees.get(taskId))
-                        .startTime(activity.getStartTime())
+                        .candidate(taskAppliedCandidates.get(taskId))
+                        .startTime(activity.getStartTime()).status(Status.PROCESSING)
                         .build();
                 taskActivities.add(lastActivityCandidate);
                 break;
             } else {
-                if (taskCandidateType.isAutoApprover()) {
-                    continue;
+                Map<String, Object> variables = taskVariables.get(activity.getTaskId());
+                Object rejected = variables.get("rejected");
+                if (Objects.isNull(rejected)) {
+                    throw new IllegalStateException("missing rejected variable of task: " + activity.getTaskId());
                 }
                 UserTaskActivity userTaskActivity = UserTaskActivity.builder()
-                        .taskId(taskId).status(null)
-                        .candidate(taskAssignees.get(taskId))
+                        .status(((boolean) rejected) ? Status.REJECTED : Status.APPROVED)
+                        .candidate(taskApprovedCandidates.get(taskId))
                         .startTime(activity.getStartTime()).endTime(activity.getEndTime())
                         .build();
                 taskActivities.add(userTaskActivity);
@@ -244,23 +253,32 @@ public class FlowableBpmnService implements BpmnService {
         UserTask userTask = parameters.getUserTask();
         String taskId = userTask.getId();
         Map<String, Object> variables = parameters.getVariables();
-        String assignee = parameters.getAssignee();
+        Candidate candidate = parameters.getCandidate();
         boolean rejected = parameters.isRejected();
+
+        Map<String, Object> processVariables = createProcessVariables(variables, rejected);
+        Map<String, Object> taskVariables = createTaskVariables(variables, rejected);
+
+        Map<String, TypedCandidate> appliedCandidates = getProcessTaskAppliedCandidates(userTask.getProcessId(), userTask.getBusinessKey());
+        TypedCandidate approvedCandidate = appliedCandidates.get(taskId).replaceCandidate(candidate);
+        taskVariables.put("approvedCandidate", approvedCandidate);
+
         try {
-            completeTask(taskId, variables, DefaultCandidate.createUser(assignee), rejected);
+            Set<String> groupsAndUsers = new HashSet<>(approvedCandidate.getGroups());
+            groupsAndUsers.addAll(approvedCandidate.getUsers());
+            taskService.setAssignee(taskId, String.join(",", groupsAndUsers));
+            taskService.setVariablesLocal(taskId, taskVariables);
+            taskService.complete(taskId, processVariables);
         } catch (Exception ex) {
             throw new IllegalStateException("could not complete user task: " + parameters, ex);
         }
+
         UserTaskAutoCompleteParameters autoCompleteParameters = UserTaskAutoCompleteParameters.builder()
                 .processId(userTask.getProcessId())
                 .businessKey(userTask.getBusinessKey())
                 .variables(variables)
                 .build();
-        UserTaskAutoCompletion taskAutoCompletion = autoCompleteTasks(autoCompleteParameters);
-        if (taskAutoCompletion.hasMoreUserTasks()) {
-            applyTaskProcessCandidateVariables(userTask.getProcessId(), userTask.getBusinessKey());
-        }
-        return taskAutoCompletion;
+        return autoCompleteTasks(autoCompleteParameters);
     }
 
     @Override
@@ -268,36 +286,47 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.isNull(parameters)) {
             throw new IllegalArgumentException("user task auto complete parameters cannot be null");
         }
-        String processId = wrapProcessId(parameters.getProcessId());
+        String wrappedProcessId = wrapProcessId(parameters.getProcessId());
         String businessKey = parameters.getBusinessKey();
-        Map<String, Object> variables = parameters.getVariables();
         UserTaskAutoCompletion.Builder builder = UserTaskAutoCompletion.builder()
-                .processId(parameters.getProcessId())
-                .groups(Collections.emptySet()).users(Collections.emptySet())
-                .businessKey(businessKey);
-        Task nextTask = taskService.createTaskQuery().processDefinitionKey(processId)
+                .processId(parameters.getProcessId()).businessKey(businessKey);
+        Task nextTask = taskService.createTaskQuery().processDefinitionKey(wrappedProcessId)
                 .processInstanceBusinessKey(businessKey)
                 .singleResult();
         if (Objects.isNull(nextTask)) {
-            return builder.hasMoreUserTasks(false).build();
+            return builder.candidate(DefaultCandidate.create()).hasMoreTasks(false).build();
         }
         Set<String> allGroups = new HashSet<>();
         Set<String> allUsers = new HashSet<>();
-        builder.groups(allGroups).users(allUsers);
+
+        Map<String, Object> processVariables = createProcessVariables(parameters.getVariables(), false);
+
+        Map<String, TypedCandidate> taskAppliedCandidates = getProcessTaskAppliedCandidates(parameters.getProcessId(), businessKey);
+
         try {
             while (Objects.nonNull(nextTask)) {
-                TypedCandidate taskCandidate = getTaskCandidate(nextTask.getId());
-                CandidateType taskCandidateType = taskCandidate.getType();
-                if (!taskCandidateType.isAutoApprover()) {
-                    return builder.hasMoreUserTasks(true).build();
+                applyProcessTaskCandidates(parameters.getProcessId(), businessKey);
+
+                TypedCandidate appliedCandidate = taskAppliedCandidates.get(nextTask.getId());
+                if (!appliedCandidate.getType().isAutoApprover()) {
+                    return builder.hasMoreTasks(true).build();
                 }
-                nextTask = taskService.createTaskQuery().processDefinitionKey(processId)
+                Set<String> groupsAndUsers = new HashSet<>(appliedCandidate.getGroups());
+                groupsAndUsers.addAll(appliedCandidate.getUsers());
+                taskService.setAssignee(nextTask.getId(), String.join(",", groupsAndUsers));
+
+                Map<String, Object> taskVariables = createTaskVariables(parameters.getVariables(), false);
+                taskVariables.put("approvedCandidate", appliedCandidate);
+
+                taskService.setVariablesLocal(nextTask.getId(), taskVariables);
+                taskService.complete(nextTask.getId(), processVariables);
+                nextTask = taskService.createTaskQuery().processDefinitionKey(wrappedProcessId)
                         .processInstanceBusinessKey(businessKey)
                         .singleResult();
-                allGroups.addAll(taskCandidate.getGroups());
-                allUsers.addAll(taskCandidate.getUsers());
+                allGroups.addAll(appliedCandidate.getGroups());
+                allUsers.addAll(appliedCandidate.getUsers());
             }
-            return builder.hasMoreUserTasks(false).build();
+            return builder.candidate(DefaultCandidate.create(allGroups, allUsers)).hasMoreTasks(false).build();
         } catch (Exception e) {
             throw new IllegalStateException("could not auto complete user task: " + parameters, e);
         }
@@ -310,6 +339,7 @@ public class FlowableBpmnService implements BpmnService {
         }
         String processId = wrapProcessId(parameters.getProcessId());
         String businessKey = parameters.getBusinessKey();
+        Map<String, Object> variables = parameters.getVariables();
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
                 .processDefinitionKey(processId)
                 .processInstanceBusinessKey(businessKey)
@@ -317,23 +347,31 @@ public class FlowableBpmnService implements BpmnService {
         if (Objects.nonNull(processInstance)) {
             throw new IllegalStateException("could not start process because has been started: " + parameters);
         }
-        Map<String, Object> processVariables = createProcessVariables(parameters.getVariables(), false);
+        Map<String, Object> processVariables = createProcessVariables(variables, false);
+        processVariables.put("userId", parameters.getUserId());
+        processVariables.put("appointees", parameters.getAppointees());
+        processVariables.put("updates", parameters.getUpdates());
         try {
             Authentication.setAuthenticatedUserId(parameters.getUserId());
             runtimeService.startProcessInstanceByKey(processId, businessKey, processVariables);
         } catch (Exception e) {
             throw new IllegalStateException("could not start process: " + parameters, e);
         }
-        updateProcessCandidateVariables(processId, businessKey, parameters.getCandidateVariables());
-        UserTaskAutoCompleteParameters autoCompleteParameters = UserTaskAutoCompleteParameters.builder()
-                .processId(parameters.getProcessId()).businessKey(parameters.getBusinessKey())
-                .variables(parameters.getVariables())
+        UserTaskAutoCompleteParameters completeParameters = UserTaskAutoCompleteParameters.builder()
+                .processId(parameters.getProcessId())
+                .businessKey(parameters.getBusinessKey())
+                .variables(variables)
                 .build();
-        UserTaskAutoCompletion taskAutoCompletion = autoCompleteTasks(autoCompleteParameters);
-        if (taskAutoCompletion.hasMoreUserTasks()) {
-            applyTaskProcessCandidateVariables(processId, businessKey);
+        return autoCompleteTasks(completeParameters);
+    }
+
+    @Override
+    public List<TypedCandidate> prognoseProcessCandidates(ProcessCandidatePrognosisParameters parameters) {
+        if (Objects.isNull(parameters)) {
+            throw new IllegalArgumentException("process candidate prognosis parameters cannot be null");
         }
-        return taskAutoCompletion;
+        Map<String, Object> processVariables = createProcessVariables(parameters.getVariables(), false);
+        return getProcessCalculateCandidates(parameters.getProcessId(), processVariables);
     }
 
     @Override
@@ -471,6 +509,55 @@ public class FlowableBpmnService implements BpmnService {
         return taskApprovedCandidates;
     }
 
+    private void applyProcessTaskCandidates(String processId, String businessKey) {
+        getProcessTaskVariables(processId, businessKey).forEach((taskId, vars) -> {
+            if (vars.containsKey("appliedCandidate")) { return; }
+            HistoricTaskInstance taskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
+            List<HistoricVariableInstance> variableInstances = historyService.createHistoricVariableInstanceQuery()
+                    .processInstanceId(taskInstance.getProcessInstanceId()).list();
+            Map<String, HistoricVariableInstance> groupedVariables = variableInstances.stream().collect(
+                    Collectors.groupingBy(HistoricVariableInstance::getVariableName, Collectors.collectingAndThen(Collectors.toList(), lst -> lst.get(0))));
+            if (!groupedVariables.containsKey("starter")
+                    || !groupedVariables.containsKey("appointees")
+                    || !groupedVariables.containsKey("updates")) {
+                throw new IllegalStateException("missing starter or appointee or updates of task: " + taskId);
+            }
+            String userId = (String) groupedVariables.get("userId").getValue();
+            Candidates appointee = (Candidates) groupedVariables.get("appointees").getValue();
+            CandidateUpdates updates = (CandidateUpdates) groupedVariables.get("updates").getValue();
+            TypedCandidate definedCandidate = getTaskCandidate(taskId);
+            AtomicInteger appointeeIndex = new AtomicInteger();
+            switch (definedCandidate.getType()) {
+                case STARTER:
+                    definedCandidate = definedCandidate.replaceCandidate(DefaultCandidate.createUser(userId));
+                    break;
+                case STARTER_APPOINTEE:
+                    definedCandidate = definedCandidate.replaceCandidate(appointee.getCandidate(appointeeIndex.getAndIncrement()));
+                    break;
+            }
+            Set<Candidate> candidatesToAdd = new HashSet<>();
+            Set<Candidate> candidatesToRemove = new HashSet<>();
+            for (Map.Entry<String, Candidate> update : updates.getGroupUpdates().entrySet()) {
+                long count = taskService.createTaskQuery().taskId(taskId).taskCandidateGroup(update.getKey()).count();
+                if (count > 0) {
+                    candidatesToAdd.add(update.getValue());
+                    candidatesToRemove.add(DefaultCandidate.createGroups(Collections.singleton(update.getKey())));
+                }
+            }
+            for (Map.Entry<String, Candidate> update : updates.getUserUpdates().entrySet()) {
+                long count = taskService.createTaskQuery().taskId(taskId).taskCandidateUser(update.getKey()).count();
+                if (count > 0) {
+                    candidatesToAdd.add(update.getValue());
+                    candidatesToRemove.add(DefaultCandidate.createUsers(Collections.singleton(update.getKey())));
+                }
+            }
+            definedCandidate = definedCandidate.mergeCandidates(candidatesToAdd).clearCandidates(candidatesToRemove);
+            taskService.setVariableLocal(taskId, "appliedCandidate", definedCandidate);
+            addTaskCandidates(taskId, candidatesToAdd);
+            removeTaskCandidates(taskId, candidatesToRemove);
+        });
+    }
+
     private void addTaskCandidates(String taskId, Set<Candidate> candidates) {
         for (Candidate candidate : candidates) {
             addTaskCandidate(taskId, candidate);
@@ -523,102 +610,5 @@ public class FlowableBpmnService implements BpmnService {
             throw new IllegalStateException("missing task flow element: " + taskDefinitionKey);
         }
         return (FlowNode) element;
-    }
-
-    private TypedCandidate completeTask(String taskId, Map<String, Object> variables, Candidate candidate, boolean rejected) {
-        TypedCandidate appliedCandidate = getTaskAppliedCandidate(taskId);
-        TypedCandidate replacedCandidate = appliedCandidate.replaceCandidate(candidate);
-        Map<String, Object> processVariables = createProcessVariables(variables, rejected);
-        Map<String, Object> taskVariables = createTaskVariables(variables, rejected);
-        taskVariables.put("assignee", replacedCandidate);
-        Set<String> groupsAndUsers = new HashSet<>(replacedCandidate.getGroups());
-        groupsAndUsers.addAll(replacedCandidate.getUsers());
-        taskService.setAssignee(taskId, String.join(",", groupsAndUsers));
-        taskService.setVariablesLocal(taskId, taskVariables);
-        taskService.complete(taskId, processVariables);
-        return replacedCandidate;
-    }
-
-    private CandidateVariables getTaskProcessCandidateVariables(String taskId) {
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        if (Objects.isNull(task)) {
-            throw new IllegalStateException("could not find task: " + taskId);
-        }
-        Object candidateVariables = task.getProcessVariables().get("candidateVariables");
-        if (Objects.isNull(candidateVariables)) {
-            throw new IllegalStateException("could not find candidate variables: " + taskId);
-        }
-        return (CandidateVariables) candidateVariables;
-    }
-
-    private void updateProcessCandidateVariables(String processId, String businessKey, CandidateVariables variables) {
-        Task task = taskService.createTaskQuery()
-                .processDefinitionKey(wrapProcessId(processId))
-                .processInstanceBusinessKey(businessKey)
-                .singleResult();
-        if (Objects.isNull(task)) {
-            throw new IllegalStateException("could not find task: " + businessKey);
-        }
-        updateProcessCandidateVariables(task.getId(), variables);
-    }
-
-    private void updateProcessCandidateVariables(String taskId, CandidateVariables variables) {
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        if (Objects.isNull(task)) {
-            throw new IllegalStateException("could not find task: " + taskId);
-        }
-        runtimeService.setVariable(task.getExecutionId(), "candidateVariables", variables);
-    }
-
-    private void applyTaskProcessCandidateVariables(String processId, String businessKey) {
-        Task task = taskService.createTaskQuery()
-                .processDefinitionKey(wrapProcessId(processId))
-                .processInstanceBusinessKey(businessKey)
-                .singleResult();
-        if (Objects.isNull(task)) {
-            throw new IllegalStateException("could not find task: " + businessKey);
-        }
-        applyTaskProcessCandidateVariables(task.getId());
-    }
-
-    private void applyTaskProcessCandidateVariables(String taskId) {
-        CandidateVariables candidateVariables = getTaskProcessCandidateVariables(taskId);
-        TypedCandidate taskCandidate = getTaskCandidate(taskId);
-        CandidateType taskCandidateType = taskCandidate.getType();
-        if (taskCandidateType.isStarter()) {
-            DefaultCandidate candidate = DefaultCandidate.createUser(candidateVariables.getStarter());
-            addTaskCandidate(taskId, candidate);
-            taskCandidate = taskCandidate.mergeCandidate(candidate);
-        }
-        else if (taskCandidateType.isStarterAppointee()) {
-            Candidate candidate = candidateVariables.getStarterAppointee().poll();
-            if (Objects.nonNull(candidate)) {
-                addTaskCandidate(taskId, candidate);
-                updateProcessCandidateVariables(taskId, candidateVariables);
-                taskCandidate = taskCandidate.mergeCandidate(candidate);
-            }
-        }
-        CandidateUpdates candidateUpdates = candidateVariables.getCandidateUpdates();
-        Set<Candidate> candidatesToAdd = new HashSet<>();
-        Set<Candidate> candidatesToRemove = new HashSet<>();
-        for (Map.Entry<String, Candidate> update : candidateUpdates.getGroupUpdates().entrySet()) {
-            long count = taskService.createTaskQuery().taskId(taskId).taskCandidateGroup(update.getKey()).count();
-            if (count > 0) {
-                candidatesToAdd.add(update.getValue());
-                candidatesToRemove.add(DefaultCandidate.createGroups(Collections.singleton(update.getKey())));
-            }
-        }
-        for (Map.Entry<String, Candidate> update : candidateUpdates.getUserUpdates().entrySet()) {
-            long count = taskService.createTaskQuery().taskId(taskId).taskCandidateUser(update.getKey()).count();
-            if (count > 0) {
-                candidatesToAdd.add(update.getValue());
-                candidatesToRemove.add(DefaultCandidate.createUsers(Collections.singleton(update.getKey())));
-            }
-        }
-        addTaskCandidates(taskId, candidatesToAdd);
-        removeTaskCandidates(taskId, candidatesToRemove);
-        taskCandidate = taskCandidate.mergeCandidates(candidatesToAdd);
-        taskCandidate = taskCandidate.clearCandidates(candidatesToRemove);
-        taskService.setVariableLocal(taskId, "candidate", taskCandidate);
     }
 }

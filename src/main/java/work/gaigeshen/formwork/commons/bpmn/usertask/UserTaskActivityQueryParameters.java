@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
 
 import java.util.Objects;
 
@@ -9,8 +9,14 @@ import java.util.Objects;
  */
 public class UserTaskActivityQueryParameters {
 
+    /**
+     * 流程标识符
+     */
     private final String processId;
 
+    /**
+     * 业务标识符
+     */
     private final String businessKey;
 
     private UserTaskActivityQueryParameters(Builder builder) {

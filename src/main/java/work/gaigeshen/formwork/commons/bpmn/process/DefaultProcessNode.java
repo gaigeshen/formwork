@@ -1,6 +1,7 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.process;
 
 import work.gaigeshen.formwork.commons.bpmn.candidate.TypedCandidate;
+import work.gaigeshen.formwork.commons.bpmn.condition.Conditions;
 
 import java.util.Collections;
 import java.util.Objects;

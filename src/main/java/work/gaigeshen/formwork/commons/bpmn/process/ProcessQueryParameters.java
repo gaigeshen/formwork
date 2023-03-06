@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.process;
 
 /**
  * 业务流程查询参数
@@ -7,12 +7,24 @@ package work.gaigeshen.formwork.commons.bpmn;
  */
 public class ProcessQueryParameters {
 
+    /**
+     * 流程标识符
+     */
     private final String processId;
 
+    /**
+     * 业务标识符
+     */
     private final String businessKey;
 
+    /**
+     * 业务流程发起人
+     */
     private final String userId;
 
+    /**
+     * 是否包含历史业务流程
+     */
     private final boolean includeHistorical;
 
     private ProcessQueryParameters(Builder builder) {

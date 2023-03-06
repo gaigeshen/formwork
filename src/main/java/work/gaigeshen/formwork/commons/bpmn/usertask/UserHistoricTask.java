@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
 
 import work.gaigeshen.formwork.commons.bpmn.candidate.Candidate;
 

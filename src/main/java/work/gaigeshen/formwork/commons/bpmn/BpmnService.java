@@ -1,5 +1,10 @@
 package work.gaigeshen.formwork.commons.bpmn;
 
+import work.gaigeshen.formwork.commons.bpmn.candidate.TypedCandidate;
+import work.gaigeshen.formwork.commons.bpmn.process.Process;
+import work.gaigeshen.formwork.commons.bpmn.process.*;
+import work.gaigeshen.formwork.commons.bpmn.usertask.*;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -35,7 +40,7 @@ public interface BpmnService {
     Collection<UserHistoricTask> queryHistoricTasks(UserHistoricTaskQueryParameters parameters);
 
     /**
-     * 查询用户任务活动
+     * 查询业务流程的用户任务活动
      *
      * @param parameters 用户任务活动查询参数
      * @return 用户任务活动集合
@@ -43,7 +48,7 @@ public interface BpmnService {
     List<UserTaskActivity> queryTaskActivities(UserTaskActivityQueryParameters parameters);
 
     /**
-     * 查询下个进行中的用户任务活动，如果不存在则返回空对象
+     * 查询业务流程的下个进行中的用户任务活动，如果不存在则返回空对象
      *
      * @param parameters 下个进行中的用户任务活动查询参数
      * @return 下个进行中的用户任务活动
@@ -73,6 +78,14 @@ public interface BpmnService {
      * @return 任务自动执行完成结果
      */
     UserTaskAutoCompletion startProcess(ProcessStartParameters parameters);
+
+    /**
+     * 预测业务流程审批候选人
+     *
+     * @param parameters 业务流程审批候选人预测参数
+     * @return 审批候选人集合
+     */
+    List<TypedCandidate> prognoseProcessCandidates(ProcessCandidatePrognosisParameters parameters);
 
     /**
      * 部署业务流程

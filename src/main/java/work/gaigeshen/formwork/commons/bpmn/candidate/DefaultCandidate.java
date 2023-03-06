@@ -27,6 +27,10 @@ public class DefaultCandidate implements Candidate {
         return new DefaultCandidate(groups, users);
     }
 
+    public static DefaultCandidate create() {
+        return create(Collections.emptySet(), Collections.emptySet());
+    }
+
     public static DefaultCandidate createGroups(Set<String> groups) {
         return create(groups, Collections.emptySet());
     }

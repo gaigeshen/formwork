@@ -1,9 +1,9 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.process;
 
 import java.util.Objects;
 
 /**
- * 业务流程部署参数
+ * 流程部署参数
  *
  * @author gaigeshen
  */

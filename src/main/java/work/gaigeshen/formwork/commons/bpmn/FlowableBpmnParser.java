@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn.flowable;
+package work.gaigeshen.formwork.commons.bpmn;
 
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
@@ -8,9 +8,9 @@ import org.flowable.common.engine.impl.de.odysseus.el.util.SimpleContext;
 import org.flowable.common.engine.impl.javax.el.ExpressionFactory;
 import org.flowable.common.engine.impl.javax.el.ValueExpression;
 import org.flowable.common.engine.impl.persistence.StrongUuidGenerator;
-import work.gaigeshen.formwork.commons.bpmn.Condition;
-import work.gaigeshen.formwork.commons.bpmn.Conditions;
-import work.gaigeshen.formwork.commons.bpmn.ProcessNode;
+import work.gaigeshen.formwork.commons.bpmn.condition.Condition;
+import work.gaigeshen.formwork.commons.bpmn.condition.Conditions;
+import work.gaigeshen.formwork.commons.bpmn.process.ProcessNode;
 import work.gaigeshen.formwork.commons.bpmn.candidate.*;
 
 import java.util.*;

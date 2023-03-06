@@ -1,30 +1,39 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.usertask;
 
 import java.util.Set;
 
 /**
- * 用户任务查询参数
+ * 用户历史任务查询参数
  *
  * @author gaigeshen
  */
-public class UserTaskQueryParameters {
+public class UserHistoricTaskQueryParameters {
 
+    /**
+     * 任务标识符
+     */
     private final String taskId;
 
+    /**
+     * 流程标识符
+     */
     private final String processId;
 
+    /**
+     * 业务标识符
+     */
     private final String businessKey;
 
-    private final Set<String> candidateGroups;
+    /**
+     * 审批候选人组或者审批候选人
+     */
+    private final Set<String> candidates;
 
-    private final String candidateUser;
-
-    private UserTaskQueryParameters(Builder builder) {
+    private UserHistoricTaskQueryParameters(Builder builder) {
         this.taskId = builder.taskId;
         this.processId = builder.processId;
         this.businessKey = builder.businessKey;
-        this.candidateGroups = builder.candidateGroups;
-        this.candidateUser = builder.candidateUser;
+        this.candidates = builder.candidates;
     }
 
     public static Builder builder() {
@@ -43,22 +52,17 @@ public class UserTaskQueryParameters {
         return businessKey;
     }
 
-    public Set<String> getCandidateGroups() {
-        return candidateGroups;
-    }
-
-    public String getCandidateUser() {
-        return candidateUser;
+    public Set<String> getCandidates() {
+        return candidates;
     }
 
     @Override
     public String toString() {
-        return "UserTaskQueryParameters{" +
+        return "UserHistoricTaskQueryParameters{" +
                 "taskId='" + taskId + '\'' +
                 ", processId='" + processId + '\'' +
                 ", businessKey='" + businessKey + '\'' +
-                ", candidateGroups=" + candidateGroups +
-                ", candidateUser='" + candidateUser + '\'' +
+                ", candidates=" + candidates +
                 '}';
     }
 
@@ -70,9 +74,7 @@ public class UserTaskQueryParameters {
 
         private String businessKey;
 
-        private Set<String> candidateGroups;
-
-        private String candidateUser;
+        private Set<String> candidates;
 
         public Builder taskId(String taskId) {
             this.taskId = taskId;
@@ -89,18 +91,13 @@ public class UserTaskQueryParameters {
             return this;
         }
 
-        public Builder candidateGroups(Set<String> candidateGroups) {
-            this.candidateGroups = candidateGroups;
+        public Builder candidates(Set<String> candidates) {
+            this.candidates = candidates;
             return this;
         }
 
-        public Builder candidateUser(String candidateUser) {
-            this.candidateUser = candidateUser;
-            return this;
-        }
-
-        public UserTaskQueryParameters build() {
-            return new UserTaskQueryParameters(this);
+        public UserHistoricTaskQueryParameters build() {
+            return new UserHistoricTaskQueryParameters(this);
         }
     }
 }

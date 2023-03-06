@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.process;
 
 /**
  * @author gaigeshen
@@ -38,7 +38,7 @@ public class DefaultProcess implements Process {
 
     @Override
     public String toString() {
-        return "ProcessQueryParameters{" +
+        return "DefaultProcess{" +
                 "processId='" + processId + '\'' +
                 ", businessKey='" + businessKey + '\'' +
                 ", userId='" + userId + '\'' +
