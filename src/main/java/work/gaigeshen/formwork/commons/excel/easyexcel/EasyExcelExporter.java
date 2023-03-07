@@ -70,7 +70,7 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
             // 处理列宽适应单元格内容
             writerSheetBuilder.registerWriteHandler(new LongestMatchColumnWidthStyleStrategy());
             // 开始分批次写入数据行内容
-            WriteSheet writeSheet = writerSheetBuilder.build();
+            WriteSheet writeSheet = writerSheetBuilder.sheetName("sheet1").build();
             int rowIndex = titleRowCount;
             List<R> rowDataBatch = new LinkedList<>();
             for (R rowData : manyRowData) {
