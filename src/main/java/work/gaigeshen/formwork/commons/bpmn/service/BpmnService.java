@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.service;
 
 import work.gaigeshen.formwork.commons.bpmn.candidate.TypedCandidate;
 import work.gaigeshen.formwork.commons.bpmn.process.Process;

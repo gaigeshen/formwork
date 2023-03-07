@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.service.flowable;
 
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
@@ -129,10 +129,10 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 获取流程节点模型的审批人（如果该节点是用户任务类型），如果不是用户类型的节点则会返回空对象
+     * 获取流程节点的审批候选人（如果该节点是用户任务类型），如果不是用户类型的节点则会返回空对象
      *
-     * @param flowNode 流程节点模型
-     * @return 流程节点模型的审批人
+     * @param flowNode 流程节点
+     * @return 流程节点的审批候选人
      */
     public static TypedCandidate getCandidate(FlowNode flowNode) {
         if (flowNode instanceof UserTask) {
@@ -143,11 +143,11 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 获取流程节点模型的审批人（如果该节点是用户任务类型），以及后续所有的审批人
+     * 获取流程节点的审批候选人（如果该节点是用户任务类型），以及后续所有的审批候选人
      *
-     * @param flowNode 流程节点模型
-     * @param variables 变量集合
-     * @return 后续的所有审批人
+     * @param flowNode 流程节点
+     * @param variables 变量集合用于计算后续的审批候选人
+     * @return 后续的所有审批候选人
      */
     public static List<TypedCandidate> getCandidates(FlowNode flowNode, Map<String, Object> variables) {
         List<UserTask> nextUserTasks = getNextUserTasks(flowNode, variables);
@@ -163,11 +163,11 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 获取流程节点模型后续的所有用户任务节点模型
+     * 获取流程节点后续的所有用户任务节点
      *
-     * @param flowNode 流程节点模型
-     * @param variables 变量集合
-     * @return 后续的所有用户任务节点模型
+     * @param flowNode 流程节点
+     * @param variables 变量集合用于计算后续的所有用户任务节点
+     * @return 后续的所有用户任务节点
      */
     public static List<UserTask> getNextUserTasks(FlowNode flowNode, Map<String, Object> variables) {
         List<UserTask> userTasks = new ArrayList<>();
@@ -180,11 +180,11 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 获取流程节点模型后续的用户任务节点模型
+     * 获取流程节点后续的用户任务节点
      *
-     * @param flowNode 流程节点模型
-     * @param variables 变量集合
-     * @return 后续的用户任务节点模型
+     * @param flowNode 流程节点
+     * @param variables 变量集合用于计算后续的用户任务节点
+     * @return 后续的用户任务节点
      */
     public static UserTask getNextUserTask(FlowNode flowNode, Map<String, Object> variables) {
         FlowNode nextFlowNode = getNextFlowNode(flowNode, variables);
@@ -198,11 +198,11 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 获取流程节点模型后续的流程节点模型
+     * 获取流程节点后续的流程节点
      *
-     * @param flowNode 流程节点模型
-     * @param variables 变量集合
-     * @return 后续的流程节点模型
+     * @param flowNode 流程节点
+     * @param variables 变量集合用于计算后续的流程节点
+     * @return 后续的流程节点
      */
     public static FlowNode getNextFlowNode(FlowNode flowNode, Map<String, Object> variables) {
         List<SequenceFlow> nextFlows = flowNode.getOutgoingFlows();
@@ -226,9 +226,9 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 将审批人应用到用户任务中，作为用户任务的自定义属性保存
+     * 将审批候选人应用到用户任务中，作为用户任务的自定义属性保存
      *
-     * @param candidate 审批人
+     * @param candidate 审批候选人
      * @param userTask 用户任务
      */
     public static void applyUserTaskCandidate(TypedCandidate candidate, UserTask userTask) {
@@ -252,10 +252,10 @@ public abstract class FlowableBpmnParser {
     }
 
     /**
-     * 解析用户任务的审批人
+     * 解析用户任务的审批候选人
      *
      * @param userTask 用户任务
-     * @return 审批人
+     * @return 审批候选人
      */
     public static TypedCandidate resolveUserTaskCandidate(UserTask userTask) {
         List<String> groups = userTask.getCandidateGroups();

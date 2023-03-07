@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.bpmn;
+package work.gaigeshen.formwork.commons.bpmn.service.flowable;
 
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.bpmn.model.FlowElement;
@@ -19,6 +19,7 @@ import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import work.gaigeshen.formwork.commons.bpmn.process.*;
+import work.gaigeshen.formwork.commons.bpmn.service.BpmnService;
 import work.gaigeshen.formwork.commons.bpmn.usertask.*;
 import work.gaigeshen.formwork.commons.bpmn.usertask.UserTaskActivity.Status;
 import work.gaigeshen.formwork.commons.bpmn.candidate.*;
@@ -28,7 +29,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static work.gaigeshen.formwork.commons.bpmn.FlowableBpmnParser.*;
+import static work.gaigeshen.formwork.commons.bpmn.service.flowable.FlowableBpmnParser.*;
 
 /**
  *
