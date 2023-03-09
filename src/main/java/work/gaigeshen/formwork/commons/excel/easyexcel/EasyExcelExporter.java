@@ -2,6 +2,9 @@ package work.gaigeshen.formwork.commons.excel.easyexcel;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.annotation.ExcelIgnore;
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
 import com.alibaba.excel.write.handler.RowWriteHandler;
@@ -17,6 +20,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import work.gaigeshen.formwork.commons.excel.ExcelExporter;
 
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -41,18 +45,14 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
      *
      * @param titleRows 标题行内容，此标题行不是字段的标题，是整个电子表格的顶部标题
      * @param headClass 字段标题通过从这个类型中的字段注解获取
-     * @param columnCount 字段数量
      */
-    public EasyExcelExporter(List<String> titleRows, Class<R> headClass, int columnCount) {
+    public EasyExcelExporter(List<String> titleRows, Class<R> headClass) {
         if (Objects.isNull(titleRows) || Objects.isNull(headClass)) {
             throw new IllegalArgumentException("title rows and header class cannot be null");
         }
-        if (columnCount < 0) {
-            throw new IllegalArgumentException("column count is invalid");
-        }
         this.titleRows = titleRows;
         this.headClass = headClass;
-        this.columnCount = columnCount;
+        this.columnCount = resolveColumnCount(headClass);
     }
 
     @Override
@@ -199,5 +199,31 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
             writeCellStyle.setWriteFont(writeFont);
             writeCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
         }
+    }
+
+    private int resolveColumnCount(Class<?> headClass) {
+        boolean hasExcelIgnoreUnannotated = hasExcelIgnoreUnannotated(headClass);
+        int columnCount = 0;
+        for (Field declaredField : headClass.getDeclaredFields()) {
+            if (hasExcelIgnore(declaredField)) {
+                continue;
+            }
+            if (hasExcelProperty(declaredField) || !hasExcelIgnoreUnannotated) {
+                columnCount++;
+            }
+        }
+        return columnCount;
+    }
+
+    private boolean hasExcelIgnoreUnannotated(Class<?> headClass) {
+        return Objects.nonNull(headClass.getDeclaredAnnotation(ExcelIgnoreUnannotated.class));
+    }
+
+    private boolean hasExcelProperty(Field field) {
+        return Objects.nonNull(field.getDeclaredAnnotation(ExcelProperty.class));
+    }
+
+    private boolean hasExcelIgnore(Field field) {
+        return Objects.nonNull(field.getDeclaredAnnotation(ExcelIgnore.class));
     }
 }
