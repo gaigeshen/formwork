@@ -225,6 +225,7 @@ public class FlowableBpmnService implements BpmnService {
                         .status(((boolean) rejected) ? Status.REJECTED : Status.APPROVED)
                         .candidate(taskApprovedCandidates.get(taskId))
                         .startTime(activity.getStartTime()).endTime(activity.getEndTime())
+                        .comment((String) variables.get("comment"))
                         .build();
                 taskActivities.add(userTaskActivity);
             }
@@ -258,7 +259,7 @@ public class FlowableBpmnService implements BpmnService {
         boolean rejected = parameters.isRejected();
 
         Map<String, Object> processVariables = createProcessVariables(variables, rejected);
-        Map<String, Object> taskVariables = createTaskVariables(variables, rejected);
+        Map<String, Object> taskVariables = createTaskVariables(variables, rejected, parameters.getComment());
 
         Map<String, TypedCandidate> appliedCandidates = getProcessTaskAppliedCandidates(userTask.getProcessId(), userTask.getBusinessKey());
         TypedCandidate approvedCandidate = appliedCandidates.get(taskId).replaceCandidate(candidate);
@@ -316,7 +317,7 @@ public class FlowableBpmnService implements BpmnService {
                 groupsAndUsers.addAll(appliedCandidate.getUsers());
                 taskService.setAssignee(nextTask.getId(), String.join(",", groupsAndUsers));
 
-                Map<String, Object> taskVariables = createTaskVariables(parameters.getVariables(), false);
+                Map<String, Object> taskVariables = createTaskVariables(parameters.getVariables(), false, null);
                 taskVariables.put("approvedCandidate", appliedCandidate);
 
                 taskService.setVariablesLocal(nextTask.getId(), taskVariables);
@@ -401,12 +402,15 @@ public class FlowableBpmnService implements BpmnService {
         return processVariables;
     }
 
-    private Map<String, Object> createTaskVariables(Map<String, Object> variables, boolean rejected) {
+    private Map<String, Object> createTaskVariables(Map<String, Object> variables, boolean rejected, String comment) {
         Map<String, Object> taskVariables = new HashMap<>();
         for (Map.Entry<String, Object> entry : variables.entrySet()) {
             taskVariables.put("task_variable_" + entry.getKey(), entry.getValue());
         }
         taskVariables.put("rejected", rejected);
+        if (Objects.nonNull(comment)) {
+            taskVariables.put("comment", comment);
+        }
         return taskVariables;
     }
 

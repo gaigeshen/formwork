@@ -32,11 +32,17 @@ public class UserTaskCompleteParameters {
      */
     private final boolean rejected;
 
+    /**
+     * 审批意见
+     */
+    private final String comment;
+
     private UserTaskCompleteParameters(Builder builder) {
         this.userTask = builder.userTask;
         this.variables = builder.variables;
         this.candidate = builder.candidate;
         this.rejected = builder.rejected;
+        this.comment = builder.comment;
     }
 
     public static Builder builder() {
@@ -59,6 +65,10 @@ public class UserTaskCompleteParameters {
         return rejected;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
     @Override
     public String toString() {
         return "UserTaskCompleteParameters{" +
@@ -66,6 +76,7 @@ public class UserTaskCompleteParameters {
                 ", variables=" + variables +
                 ", candidate=" + candidate +
                 ", rejected=" + rejected +
+                ", comment='" + comment + '\'' +
                 '}';
     }
 
@@ -78,6 +89,8 @@ public class UserTaskCompleteParameters {
         private Candidate candidate;
 
         private boolean rejected;
+
+        private String comment;
 
         public Builder userTask(UserTask userTask) {
             this.userTask = userTask;
@@ -96,6 +109,11 @@ public class UserTaskCompleteParameters {
 
         public Builder rejected(boolean rejected) {
             this.rejected = rejected;
+            return this;
+        }
+
+        public Builder comment(String comment) {
+            this.comment = comment;
             return this;
         }
 

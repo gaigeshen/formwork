@@ -19,11 +19,14 @@ public class UserTaskActivity {
 
     private final Status status;
 
+    private final String comment;
+
     private UserTaskActivity(Builder builder) {
         this.candidate = builder.candidate;
         this.startTime = builder.startTime;
         this.endTime = builder.endTime;
         this.status = builder.status;
+        this.comment = builder.comment;
     }
 
     public static Builder builder() {
@@ -46,6 +49,10 @@ public class UserTaskActivity {
         return status;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
     public static class Builder {
 
         private Candidate candidate;
@@ -55,6 +62,8 @@ public class UserTaskActivity {
         private Date endTime;
 
         private Status status;
+
+        private String comment;
 
         public Builder candidate(Candidate candidate) {
             this.candidate = candidate;
@@ -73,6 +82,11 @@ public class UserTaskActivity {
 
         public Builder status(Status status) {
             this.status = status;
+            return this;
+        }
+
+        public Builder comment(String comment) {
+            this.comment = comment;
             return this;
         }
 
