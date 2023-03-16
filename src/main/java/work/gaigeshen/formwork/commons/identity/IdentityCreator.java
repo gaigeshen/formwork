@@ -8,7 +8,7 @@ package work.gaigeshen.formwork.commons.identity;
 public interface IdentityCreator {
 
     static String createDefault() {
-        return DefaultIdentityCreator.INSTANCE.create();
+        return UUIDIdentityCreator.INSTANCE.create();
     }
 
     String create();

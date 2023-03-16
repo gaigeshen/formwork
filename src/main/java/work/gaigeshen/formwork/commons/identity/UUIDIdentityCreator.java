@@ -6,9 +6,9 @@ import java.util.UUID;
  *
  * @author gaigeshen
  */
-public class DefaultIdentityCreator implements IdentityCreator {
+public class UUIDIdentityCreator implements IdentityCreator {
 
-    public static DefaultIdentityCreator INSTANCE = new DefaultIdentityCreator();
+    public static UUIDIdentityCreator INSTANCE = new UUIDIdentityCreator();
 
     @Override
     public String create() {
