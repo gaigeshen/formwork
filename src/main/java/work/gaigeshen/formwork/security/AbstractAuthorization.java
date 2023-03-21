@@ -16,10 +16,22 @@ public abstract class AbstractAuthorization implements Authorization {
 
     private final Set<String> authorities;
 
+    private Details details;
+
     public AbstractAuthorization(String userId, String username, Set<String> authorities) {
         this.userId = userId;
         this.username = username;
         this.authorities = authorities;
+    }
+
+    public AbstractAuthorization(String userId, String username) {
+        this.userId = userId;
+        this.username = username;
+        this.authorities = Collections.emptySet();
+    }
+
+    public void setDetails(Details details) {
+        this.details = details;
     }
 
     @Override
@@ -35,6 +47,11 @@ public abstract class AbstractAuthorization implements Authorization {
     @Override
     public Set<String> getAuthorities() {
         return Collections.unmodifiableSet(authorities);
+    }
+
+    @Override
+    public Details getDetails() {
+        return details;
     }
 
     @Override

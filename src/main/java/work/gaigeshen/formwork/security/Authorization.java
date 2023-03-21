@@ -14,4 +14,9 @@ public interface Authorization {
     String getUsername();
 
     Set<String> getAuthorities();
+
+    Details getDetails();
+
+    interface Details {
+    }
 }

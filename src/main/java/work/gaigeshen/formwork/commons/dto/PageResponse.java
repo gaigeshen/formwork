@@ -1,49 +1,41 @@
-package work.gaigeshen.formwork.dto.response;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import work.gaigeshen.formwork.dto.parameters.PageQueryParameters;
+package work.gaigeshen.formwork.commons.dto;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
 /**
- * 分页查询结果
+ * 分页响应类数据传输对象
  *
  * @author gaigeshen
  */
-@Schema(description = "分页查询结果")
-public class PageQueryResponse<C> implements QueryResponse {
+public class PageResponse<C> extends Response {
 
-    @Schema(description = "分页页码")
     private int current;
 
-    @Schema(description = "分页大小")
     private int pageSize;
 
-    @Schema(description = "查询结果数据")
     private Collection<C> content;
 
-    @Schema(description = "总数据条数")
     private long total;
 
-    protected PageQueryResponse() {
+    protected PageResponse() {
 
     }
 
-    protected PageQueryResponse(PageQueryParameters parameters, Collection<C> content, long total) {
-        this.current = parameters.getCurrent();
-        this.pageSize = parameters.getPageSize();
+    protected PageResponse(PageQuery pageQuery, Collection<C> content, long total) {
+        this.current = pageQuery.getCurrent();
+        this.pageSize = pageQuery.getPageSize();
         this.content = content;
         this.total = total;
     }
 
-    public static <C> PageQueryResponse<C> create(PageQueryParameters parameters) {
-        return new PageQueryResponse<>(parameters, Collections.emptyList(), 0);
+    public static <C> PageResponse<C> create(PageQuery pageQuery) {
+        return new PageResponse<>(pageQuery, Collections.emptyList(), 0);
     }
 
-    public static <C> PageQueryResponse<C> create(PageQueryParameters parameters, Collection<C> content, long totalCount) {
-        return new PageQueryResponse<>(parameters, content, totalCount);
+    public static <C> PageResponse<C> create(PageQuery pageQuery, Collection<C> content, long totalCount) {
+        return new PageResponse<>(pageQuery, content, totalCount);
     }
 
     public int getCurrent() {
@@ -86,7 +78,7 @@ public class PageQueryResponse<C> implements QueryResponse {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PageQueryResponse<?> that = (PageQueryResponse<?>) o;
+        PageResponse<?> that = (PageResponse<?>) o;
         if (current != that.current) {
             return false;
         }

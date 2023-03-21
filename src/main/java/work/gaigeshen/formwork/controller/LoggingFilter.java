@@ -47,16 +47,16 @@ public class LoggingFilter implements Filter {
         responseWrapper.setHeader(TRACE_ID_HEADER, traceId);
 
         MDC.put(TRACE_ID_KEY, traceId);
+
+        log.info("URI => {} {}", requestWrapper.getMethod(), requestWrapper.getRequestURI());
+        log.info("Query => {}", requestWrapper.getQueryString());
+        log.info("Headers => {}", headers);
+
+        log.info("Body => {}", getBody(requestWrapper));
+
         try {
             chain.doFilter(requestWrapper, responseWrapper);
-
-            log.info("URI => {} {}", requestWrapper.getMethod(), requestWrapper.getRequestURI());
-            log.info("Query => {}", requestWrapper.getQueryString());
-            log.info("Headers => {}", headers);
-
-            log.info("Body => {}", getBody(requestWrapper));
             log.info("Response => {}", getResponse(responseWrapper));
-
             responseWrapper.copyBodyToResponse();
         } finally {
             MDC.remove(TRACE_ID_KEY);
