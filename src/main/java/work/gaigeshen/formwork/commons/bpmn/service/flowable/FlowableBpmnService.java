@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static work.gaigeshen.formwork.commons.bpmn.candidate.CandidateType.STARTER_APPOINTEE;
 import static work.gaigeshen.formwork.commons.bpmn.service.flowable.FlowableBpmnParser.*;
 
 /**
@@ -415,15 +416,15 @@ public class FlowableBpmnService implements BpmnService {
     }
 
     private Map<String, Map<String, Object>> getProcessTaskVariables(String processId, String businessKey) {
-        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+        HistoricProcessInstance processInstance = historyService.createHistoricProcessInstanceQuery()
                 .processDefinitionKey(wrapProcessId(processId))
                 .processInstanceBusinessKey(businessKey)
                 .singleResult();
-        if (Objects.isNull(historicProcessInstance)) {
-            throw new IllegalStateException("could not find historic process instance: " + businessKey);
+        if (Objects.isNull(processInstance)) {
+            throw new IllegalStateException("historic process instance not found: " + businessKey);
         }
         List<HistoricVariableInstance> variableInstances = historyService.createHistoricVariableInstanceQuery()
-                .processInstanceId(historicProcessInstance.getId())
+                .processInstanceId(processInstance.getId())
                 .list();
         Map<String, Map<String, Object>> processTaskVariables = new HashMap<>();
         for (HistoricVariableInstance variableInstance : variableInstances) {
@@ -439,6 +440,14 @@ public class FlowableBpmnService implements BpmnService {
                 Map<String, Object> newVariables = new HashMap<>();
                 newVariables.put(variableName, variableValue);
                 processTaskVariables.put(taskId, newVariables);
+            }
+        }
+        List<HistoricTaskInstance> taskInstances = historyService.createHistoricTaskInstanceQuery()
+                .processInstanceId(processInstance.getId())
+                .list();
+        for (HistoricTaskInstance taskInstance : taskInstances) {
+            if (!processTaskVariables.containsKey(taskInstance.getId())) {
+                processTaskVariables.put(taskInstance.getId(), Collections.emptyMap());
             }
         }
         return processTaskVariables;
@@ -515,29 +524,38 @@ public class FlowableBpmnService implements BpmnService {
     }
 
     private void applyProcessTaskCandidates(String processId, String businessKey) {
+        AtomicInteger appointeeIndex = new AtomicInteger();
         getProcessTaskVariables(processId, businessKey).forEach((taskId, vars) -> {
-            if (vars.containsKey("appliedCandidate")) { return; }
+            TypedCandidate definedCandidate = getTaskCandidate(taskId);
+            if (vars.containsKey("appliedCandidate")) {
+                if (STARTER_APPOINTEE == definedCandidate.getType()) {
+                    appointeeIndex.getAndIncrement();
+                }
+                return;
+            }
             HistoricTaskInstance taskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
             List<HistoricVariableInstance> variableInstances = historyService.createHistoricVariableInstanceQuery()
                     .processInstanceId(taskInstance.getProcessInstanceId()).list();
             Map<String, HistoricVariableInstance> groupedVariables = variableInstances.stream().collect(
                     Collectors.groupingBy(HistoricVariableInstance::getVariableName, Collectors.collectingAndThen(Collectors.toList(), lst -> lst.get(0))));
-            if (!groupedVariables.containsKey("starter")
+            if (!groupedVariables.containsKey("userId")
                     || !groupedVariables.containsKey("appointees")
                     || !groupedVariables.containsKey("updates")) {
                 throw new IllegalStateException("missing starter or appointee or updates of task: " + taskId);
             }
             String userId = (String) groupedVariables.get("userId").getValue();
-            Candidates appointee = (Candidates) groupedVariables.get("appointees").getValue();
+            Candidates appointees = (Candidates) groupedVariables.get("appointees").getValue();
             CandidateUpdates updates = (CandidateUpdates) groupedVariables.get("updates").getValue();
-            TypedCandidate definedCandidate = getTaskCandidate(taskId);
-            AtomicInteger appointeeIndex = new AtomicInteger();
             switch (definedCandidate.getType()) {
                 case STARTER:
                     definedCandidate = definedCandidate.replaceCandidate(DefaultCandidate.createUser(userId));
                     break;
                 case STARTER_APPOINTEE:
-                    definedCandidate = definedCandidate.replaceCandidate(appointee.getCandidate(appointeeIndex.getAndIncrement()));
+                    Candidate appointee = appointees.getCandidate(appointeeIndex.getAndIncrement());
+                    if (Objects.isNull(appointee)) {
+                        throw new IllegalStateException("could not find next appointee candidate of task: " + taskId);
+                    }
+                    definedCandidate = definedCandidate.replaceCandidate(appointee);
                     break;
             }
             Set<Candidate> candidatesToAdd = new HashSet<>();

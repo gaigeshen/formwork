@@ -33,6 +33,9 @@ public class Candidates implements Iterable<Candidate>, Serializable {
     }
 
     public Candidate getCandidate(int index) {
+        if (index >= candidates.size()) {
+            return null;
+        }
         return candidates.get(index);
     }
 
