@@ -44,9 +44,7 @@ public class TimelessAccessTokenCreator implements AccessTokenCreator {
     @Override
     public String createToken(Authorization authorization) {
         String newToken = UUID.randomUUID().toString().replace("-", "");
-        Set<String> tokens = allTokens.computeIfAbsent(authorization, a -> new CopyOnWriteArraySet<>());
-        tokens.add(newToken);
-        allTokens.put(authorization, tokens);
+        allTokens.computeIfAbsent(authorization, a -> new CopyOnWriteArraySet<>()).add(newToken);
         return newToken;
     }
 
