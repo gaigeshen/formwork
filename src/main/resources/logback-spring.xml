@@ -23,7 +23,7 @@
             <fileNamePattern>${FILE}.%d{yyyy-MM-dd}.%i.gz}</fileNamePattern>
             <cleanHistoryOnStart>false</cleanHistoryOnStart>
             <maxFileSize>30MB</maxFileSize>
-            <totalSizeCap>0</totalSizeCap>
+            <totalSizeCap>10GB</totalSizeCap>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
     </appender>
