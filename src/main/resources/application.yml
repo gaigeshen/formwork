@@ -15,9 +15,7 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
   cache:
-    type: caffeine
-    caffeine:
-      spec: maximumSize=1000,expireAfterAccess=600s
+    type: redis
 
 springdoc:
   paths-to-match: /*

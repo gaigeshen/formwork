@@ -34,11 +34,17 @@ public abstract class AbstractAccessTokenCreator implements AccessTokenCreator {
 
     @Override
     public final void invalidate(String token) {
+        if (Objects.isNull(token)) {
+            throw new IllegalArgumentException("token cannot be null");
+        }
         authorizations.invalidate(token);
     }
 
     @Override
     public final void invalidate(Authorization authorization) {
+        if (Objects.isNull(authorization)) {
+            throw new IllegalArgumentException("authorization cannot be null");
+        }
         String token = authorizationTokens.get(authorization);
         if (Objects.nonNull(token)) {
             invalidate(token);
@@ -47,6 +53,9 @@ public abstract class AbstractAccessTokenCreator implements AccessTokenCreator {
 
     @Override
     public final String createToken(Authorization authorization) {
+        if (Objects.isNull(authorization)) {
+            throw new IllegalArgumentException("authorization cannot be null");
+        }
         String newToken = createTokenInternal(authorization);
         String previousToken = authorizationTokens.put(authorization, newToken);
         if (Objects.nonNull(previousToken)) {
@@ -58,6 +67,9 @@ public abstract class AbstractAccessTokenCreator implements AccessTokenCreator {
 
     @Override
     public final Authorization validateToken(String token) {
+        if (Objects.isNull(token)) {
+            throw new IllegalArgumentException("token cannot be null");
+        }
         Authorization authorization = authorizations.getIfPresent(token);
         if (Objects.isNull(authorization)) {
             return null;

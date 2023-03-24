@@ -1,5 +1,6 @@
 package work.gaigeshen.formwork.security;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Set;
  *
  * @author gaigeshen
  */
-public interface Authorization {
+public interface Authorization extends Serializable {
 
     String getUserId();
 
