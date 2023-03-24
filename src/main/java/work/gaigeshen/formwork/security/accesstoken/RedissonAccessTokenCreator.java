@@ -38,7 +38,7 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
         if (Objects.isNull(authorization)) {
             return;
         }
-        deleteTokenBucket(getTokenBucket(authorization.getUserId()));
+        deleteTokenBucket(getTokenBucket(authorization));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
         if (Objects.isNull(authorization)) {
             throw new IllegalArgumentException("authorization cannot be null");
         }
-        String token = deleteTokenBucket(getTokenBucket(authorization.getUserId()));
+        String token = deleteTokenBucket(getTokenBucket(authorization));
         if (Objects.isNull(token)) {
             return;
         }
@@ -96,18 +96,26 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
         return authorizationRBucket.getAndDelete();
     }
 
-    private RBucket<String> getTokenBucket(String userId) {
-        return redisson.getBucket("user_" + userId);
+    private RBucket<String> getTokenBucket(Authorization authorization) {
+        return redisson.getBucket(getTokenBucketKey(authorization));
     }
 
     private RBucket<Authorization> getAuthorizationBucket(String token) {
-        return redisson.getBucket("token_" + token);
+        return redisson.getBucket(getAuthorizationBucketKey(token));
     }
 
     private void setTokenAndAuthorizationBucket(String token, Authorization authorization) {
         RBatch batch = redisson.createBatch(BatchOptions.defaults());
-        batch.getBucket("user_" + authorization.getUserId()).setAsync(token, expiresSeconds, TimeUnit.SECONDS);
-        batch.getBucket("token_" + token).setAsync(authorization, expiresSeconds, TimeUnit.SECONDS);
+        batch.getBucket(getTokenBucketKey(authorization)).setAsync(token, expiresSeconds, TimeUnit.SECONDS);
+        batch.getBucket(getAuthorizationBucketKey(token)).setAsync(authorization, expiresSeconds, TimeUnit.SECONDS);
         batch.execute();
+    }
+
+    private String getTokenBucketKey(Authorization authorization) {
+        return "user_" + authorization.getUserId() + "_" + authorization.getPurpose();
+    }
+
+    private String getAuthorizationBucketKey(String token) {
+        return "token_" + token;
     }
 }

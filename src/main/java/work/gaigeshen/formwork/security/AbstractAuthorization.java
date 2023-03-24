@@ -16,6 +16,8 @@ public abstract class AbstractAuthorization implements Authorization {
 
     private final Set<String> authorities;
 
+    private String purpose;
+
     public AbstractAuthorization(String userId, String username, Set<String> authorities) {
         this.userId = userId;
         this.username = username;
@@ -26,6 +28,10 @@ public abstract class AbstractAuthorization implements Authorization {
         this.userId = userId;
         this.username = username;
         this.authorities = Collections.emptySet();
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
     }
 
     @Override
@@ -44,6 +50,14 @@ public abstract class AbstractAuthorization implements Authorization {
     }
 
     @Override
+    public String getPurpose() {
+        if (Objects.isNull(purpose)) {
+            return Authorization.super.getPurpose();
+        }
+        return purpose;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -52,7 +66,8 @@ public abstract class AbstractAuthorization implements Authorization {
             return false;
         }
         AbstractAuthorization that = (AbstractAuthorization) o;
-        return Objects.equals(userId, that.userId);
+        return Objects.equals(userId, that.userId)
+                && Objects.equals(purpose, that.purpose);
     }
 
     @Override
