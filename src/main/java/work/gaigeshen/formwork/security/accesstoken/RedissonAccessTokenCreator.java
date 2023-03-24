@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 采用外部缓存的访问令牌创建器
+ * 采用外部缓存的访问令牌创建器，会在缓存中维护两个键值对，用于查询访问令牌以及通过访问令牌查询授权信息
  *
  * @author gaigeshen
  */
