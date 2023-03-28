@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 这是默认的实现
+ * 这是默认的实现，不要在集群环境中使用
  *
  * @author gaigeshen
  * @see #create(double)
