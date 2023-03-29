@@ -1,9 +1,6 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
-import org.redisson.api.BatchOptions;
-import org.redisson.api.RBatch;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import work.gaigeshen.formwork.commons.identity.IdentityCreator;
 import work.gaigeshen.formwork.security.Authorization;
 
@@ -69,11 +66,20 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
         if (Objects.isNull(token)) {
             throw new IllegalArgumentException("token cannot be null");
         }
-        Authorization authorization = getAuthorizationBucket(token).get();
+        RBucket<Authorization> authorizationBucket = getAuthorizationBucket(token);
+        Authorization authorization = authorizationBucket.get();
         if (Objects.isNull(authorization)) {
             return null;
         }
-        return authorization;
+        RBucket<String> tokenBucket = getTokenBucket(authorization);
+        if (Objects.equals(tokenBucket.get(), token)) {
+            authorizationBucket.touch();
+            tokenBucket.touch();
+            return authorization;
+        }
+        deleteAuthorizationBucket(authorizationBucket);
+        deleteTokenBucket(tokenBucket);
+        return null;
     }
 
     /**
