@@ -14,13 +14,12 @@ public interface RowDataHandler<R> {
      *
      * @param manyRowData 许多行数据不为空
      */
-    void handleRowData(List<R> manyRowData);
+    default void handleRowData(List<R> manyRowData) { }
 
     /**
      * 处理标题行数据
      *
      * @param headerRowData 标题行数据
      */
-    default void handleHeaderRowData(Map<Integer, String> headerRowData) {
-    }
+    default void handleHeaderRowData(Map<Integer, String> headerRowData) { }
 }
