@@ -14,7 +14,7 @@ public interface SerialNumberCreator {
      * @return 生成的序列号
      */
     static String createDefault(String prefix) {
-        return SimpleSerialNumberCreator.INSTANCE.create(prefix);
+        return DefaultSerialNumberCreator.INSTANCE.create(prefix);
     }
 
     /**
