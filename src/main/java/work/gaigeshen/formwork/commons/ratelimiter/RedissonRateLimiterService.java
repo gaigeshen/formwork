@@ -40,9 +40,7 @@ public class RedissonRateLimiterService implements RateLimiterService {
     public void acquire(String key, int permits) {
         rateLimiters.computeIfAbsent(key, k -> {
             RRateLimiter rateLimiter = redisson.getRateLimiter(key);
-            if (!rateLimiter.trySetRate(PER_CLIENT, (long) getPermitsPerSecond(), 1, SECONDS)) {
-                throw new IllegalStateException("could not set rate of key: " + k);
-            }
+            rateLimiter.trySetRate(PER_CLIENT, (long) getPermitsPerSecond(), 1, SECONDS);
             return rateLimiter;
         }).acquire(permits);
     }
@@ -51,9 +49,7 @@ public class RedissonRateLimiterService implements RateLimiterService {
     public boolean tryAcquire(String key, int permits, Duration timeout) {
         return rateLimiters.computeIfAbsent(key, k -> {
             RRateLimiter rateLimiter = redisson.getRateLimiter(key);
-            if (!rateLimiter.trySetRate(PER_CLIENT, (long) getPermitsPerSecond(), 1, SECONDS)) {
-                throw new IllegalStateException("could not set rate of key: " + k);
-            }
+            rateLimiter.trySetRate(PER_CLIENT, (long) getPermitsPerSecond(), 1, SECONDS);
             return rateLimiter;
         }).tryAcquire(permits, timeout.toMillis(), TimeUnit.MILLISECONDS);
     }
