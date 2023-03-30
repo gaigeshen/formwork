@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -41,8 +40,6 @@ public class LoggingFilter implements Filter {
         ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper((HttpServletRequest) request);
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
-        HttpHeaders headers = new ServletServerHttpRequest(requestWrapper).getHeaders();
-
         String traceId = UUID.randomUUID().toString().replace("-", "");
         responseWrapper.setHeader(TRACE_ID_HEADER, traceId);
 
@@ -50,7 +47,8 @@ public class LoggingFilter implements Filter {
 
         log.info("URI => {} {}", requestWrapper.getMethod(), requestWrapper.getRequestURI());
         log.info("Query => {}", requestWrapper.getQueryString());
-        log.info("Headers => {}", headers);
+
+        log.info("Headers => {}", new ServletServerHttpRequest(requestWrapper).getHeaders());
 
         log.info("Body => {}", getBody(requestWrapper));
 
