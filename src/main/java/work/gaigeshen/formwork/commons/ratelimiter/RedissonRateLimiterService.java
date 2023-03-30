@@ -3,9 +3,11 @@ package work.gaigeshen.formwork.commons.ratelimiter;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RedissonClient;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import static org.redisson.api.RateIntervalUnit.SECONDS;
 import static org.redisson.api.RateType.PER_CLIENT;
@@ -36,12 +38,6 @@ public class RedissonRateLimiterService implements RateLimiterService {
 
     @Override
     public void acquire(String key, int permits) {
-        if (Objects.isNull(key)) {
-            throw new IllegalArgumentException("key cannot be null");
-        }
-        if (permits <= 0) {
-            throw new IllegalArgumentException("permits is invalid");
-        }
         rateLimiters.computeIfAbsent(key, k -> {
             RRateLimiter rateLimiter = redisson.getRateLimiter(key);
             if (!rateLimiter.trySetRate(PER_CLIENT, (long) getPermitsPerSecond(), 1, SECONDS)) {
@@ -49,6 +45,17 @@ public class RedissonRateLimiterService implements RateLimiterService {
             }
             return rateLimiter;
         }).acquire(permits);
+    }
+
+    @Override
+    public boolean tryAcquire(String key, int permits, Duration timeout) {
+        return rateLimiters.computeIfAbsent(key, k -> {
+            RRateLimiter rateLimiter = redisson.getRateLimiter(key);
+            if (!rateLimiter.trySetRate(PER_CLIENT, (long) getPermitsPerSecond(), 1, SECONDS)) {
+                throw new IllegalStateException("could not set rate of key: " + k);
+            }
+            return rateLimiter;
+        }).tryAcquire(permits, timeout.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override

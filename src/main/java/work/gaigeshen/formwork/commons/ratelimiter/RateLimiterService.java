@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.ratelimiter;
 
+import java.time.Duration;
+
 /**
  * 限流服务
  *
@@ -33,6 +35,27 @@ public interface RateLimiterService {
      */
     default void acquire(String key) {
         acquire(key, 1);
+    }
+
+    /**
+     * 在超时之前获取许可会阻塞
+     *
+     * @param key 限流针对的标识符，不同标识符限流隔离
+     * @param permits 需要获取多少个许可
+     * @param timeout 超时时间
+     * @return 返回是否获取许可成功
+     */
+    boolean tryAcquire(String key, int permits, Duration timeout);
+
+    /**
+     * 在超时之前获取许可会阻塞，获取单个许可
+     *
+     * @param key 限流针对的标识符，不同标识符限流隔离
+     * @param timeout 超时时间
+     * @return 返回是否获取许可成功
+     */
+    default boolean tryAcquire(String key, Duration timeout) {
+        return tryAcquire(key, 1, timeout);
     }
 
     /**
