@@ -9,9 +9,9 @@ import java.util.Objects;
  */
 public abstract class PageQuery extends Query {
 
-    private int current;
+    private int current = 1;
 
-    private int pageSize;
+    private int pageSize = 10;
 
     protected PageQuery() {
     }
