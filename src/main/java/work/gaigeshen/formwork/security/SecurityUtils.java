@@ -14,15 +14,15 @@ public abstract class SecurityUtils {
     private SecurityUtils() { }
 
     public static Optional<Long> getUserIdAsNumber() {
-        return getAuthorization().map(Authorization::getUserId).map(Long::parseLong);
+        return getPrincipal().map(Authorization::getUserId).map(Long::parseLong);
     }
 
     public static Optional<String> getUserId() {
-        return getAuthorization().map(Authorization::getUserId);
+        return getPrincipal().map(Authorization::getUserId);
     }
 
-    public static Optional<Authorization> getAuthorization() {
-        return getAuthentication().filter(a -> a instanceof Authorization).map(a -> (Authorization) a);
+    public static Optional<Authorization> getPrincipal() {
+        return getAuthentication().map(Authentication::getPrincipal).map(a -> (Authorization) a);
     }
 
     public static Optional<Authentication> getAuthentication() {
