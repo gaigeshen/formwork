@@ -15,4 +15,6 @@ spring:
     password: 12345678
   flyway:
     enabled: true
-    table: schema_history
+    baseline-on-migrate: true
+    baseline-description: baseline
+    baseline-version: 0.0.1
