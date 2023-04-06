@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 抽象序列号生成器，此类维护当前有效的序列号状态
+ * 抽象序列号生成器，此类维护当前有效的序列号状态，凡是直接继承此类的，都不能作为集群环境使用
  *
  * @author gaigeshen
  */
