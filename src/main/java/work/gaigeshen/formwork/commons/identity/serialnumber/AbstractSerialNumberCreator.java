@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.identity.serialnumber;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +39,8 @@ public abstract class AbstractSerialNumberCreator implements SerialNumberCreator
      * @return 包装后的序列号
      */
     protected String wrapSerialNumber(String prefix, long serialNumber) {
-        return prefix + serialNumber;
+        String serialNumberText = Long.toString(serialNumber);
+        return prefix + StringUtils.leftPad(serialNumberText, 7, "0");
     }
 
     /**
