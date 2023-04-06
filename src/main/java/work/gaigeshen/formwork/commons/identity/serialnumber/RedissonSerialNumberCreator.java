@@ -7,7 +7,7 @@ import org.redisson.client.codec.LongCodec;
 import java.util.Objects;
 
 /**
- * 此序列号生成器利用外部缓存，可以作为集群环境中使用
+ * 此序列号生成器利用外部缓存，不可以作为集群环境中使用
  *
  * @author gaigeshen
  */
