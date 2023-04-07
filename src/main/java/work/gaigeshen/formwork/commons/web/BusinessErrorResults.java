@@ -1,8 +1,7 @@
 package work.gaigeshen.formwork.commons.web;
 
 import work.gaigeshen.formwork.commons.exception.BusinessErrorException;
-
-import static work.gaigeshen.formwork.commons.web.BusinessErrorResultCode.BUSINESS_ERROR;
+import work.gaigeshen.formwork.commons.web.resultcode.BusinessErrorResultCode;
 
 /**
  *
@@ -13,6 +12,6 @@ public abstract class BusinessErrorResults {
     private BusinessErrorResults() { }
 
     public static Result<?> createResult(BusinessErrorException ex) {
-        return Results.create(BUSINESS_ERROR, ex.getMessage(), ex.getData());
+        return Results.create(BusinessErrorResultCode.BUSINESS_ERROR, ex.getMessage(), ex.getData());
     }
 }

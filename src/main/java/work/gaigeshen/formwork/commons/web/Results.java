@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.commons.web;
 
+import work.gaigeshen.formwork.commons.web.resultcode.ResultCode;
+
 /**
  * @author gaigeshen
  */

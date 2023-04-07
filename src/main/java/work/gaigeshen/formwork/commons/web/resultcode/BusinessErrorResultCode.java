@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.web;
+package work.gaigeshen.formwork.commons.web.resultcode;
 
 /**
  *

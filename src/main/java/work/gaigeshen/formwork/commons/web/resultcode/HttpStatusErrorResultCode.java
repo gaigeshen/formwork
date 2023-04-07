@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.web;
+package work.gaigeshen.formwork.commons.web.resultcode;
 
 /**
  * @author gaigeshen
@@ -20,6 +20,8 @@ public enum HttpStatusErrorResultCode implements ResultCode {
     NOT_ACCEPTABLE(9406, "Not Acceptable"),
 
     UNSUPPORTED_MEDIA_TYPE(9415, "Unsupported Media Type"),
+
+    TOO_MANY_REQUESTS(9429, "Too Many Requests"),
 
     INTERNAL_SERVER_ERROR(9500, "Internal Server Error"),
 

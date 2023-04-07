@@ -11,7 +11,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Set;
 
-import static work.gaigeshen.formwork.commons.web.HttpStatusErrorResultCode.*;
+import static work.gaigeshen.formwork.commons.web.resultcode.HttpStatusErrorResultCode.*;
 
 /**
  * 用于全局异常处理，当发生任何异常的时候决定如何生成响应内容对象
@@ -50,6 +50,7 @@ public abstract class ErrorResults {
             case 405: return Results.create(METHOD_NOT_ALLOWED);
             case 406: return Results.create(NOT_ACCEPTABLE);
             case 415: return Results.create(UNSUPPORTED_MEDIA_TYPE);
+            case 429: return Results.create(TOO_MANY_REQUESTS);
             case 501: return Results.create(NOT_IMPLEMENTED);
             case 502: return Results.create(BAD_GATEWAY);
             case 503: return Results.create(SERVICE_UNAVAILABLE);

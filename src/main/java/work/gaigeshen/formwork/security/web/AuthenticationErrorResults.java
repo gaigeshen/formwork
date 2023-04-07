@@ -6,7 +6,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import work.gaigeshen.formwork.commons.web.Result;
 import work.gaigeshen.formwork.commons.web.Results;
-import work.gaigeshen.formwork.commons.web.SecurityErrorResultCode;
+import work.gaigeshen.formwork.commons.web.resultcode.SecurityErrorResultCode;
 import work.gaigeshen.formwork.security.AuthenticationTokenMissingException;
 import work.gaigeshen.formwork.security.AuthorizationNotFoundException;
 
