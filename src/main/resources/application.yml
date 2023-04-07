@@ -16,6 +16,12 @@ spring:
     time-zone: GMT+8
   cache:
     type: redis
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: always
+      isolation-level-for-create: default
 
 springdoc:
   paths-to-match: /*
@@ -32,3 +38,4 @@ management:
         include:
           - health
           - info
+          - metrics
