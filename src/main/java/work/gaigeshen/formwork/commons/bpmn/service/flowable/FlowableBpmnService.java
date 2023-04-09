@@ -463,17 +463,6 @@ public class FlowableBpmnService implements BpmnService {
         return getCandidate(getTaskFlowNode(processDefinitionId, taskDefinitionKey));
     }
 
-    private List<TypedCandidate> getTaskCandidates(String taskId, Map<String, Object> variables) {
-        HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery()
-                .taskId(taskId).singleResult();
-        if (Objects.isNull(historicTaskInstance)) {
-            throw new IllegalStateException("historic task instance not found: " + taskId);
-        }
-        String processDefinitionId = historicTaskInstance.getProcessDefinitionId();
-        String taskDefinitionKey = historicTaskInstance.getTaskDefinitionKey();
-        return getCandidates(getTaskFlowNode(processDefinitionId, taskDefinitionKey), variables);
-    }
-
     private List<TypedCandidate> getProcessCalculateCandidates(String processId, Map<String, Object> variables) {
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionKey(wrapProcessId(processId))
