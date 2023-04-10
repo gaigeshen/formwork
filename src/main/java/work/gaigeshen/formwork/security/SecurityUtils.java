@@ -25,7 +25,7 @@ public abstract class SecurityUtils {
         return getAuthentication().map(Authentication::getPrincipal).map(a -> (Authorization) a);
     }
 
-    public static Optional<Authentication> getAuthentication() {
+    public static Optional<AuthenticationToken> getAuthentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof AuthenticationToken)) {
             return Optional.empty();
@@ -33,6 +33,6 @@ public abstract class SecurityUtils {
         else if (!authentication.isAuthenticated()) {
             return Optional.empty();
         }
-        return Optional.of(authentication);
+        return Optional.of((AuthenticationToken) authentication);
     }
 }
