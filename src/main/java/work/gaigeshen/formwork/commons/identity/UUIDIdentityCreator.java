@@ -8,7 +8,7 @@ import java.util.UUID;
  */
 public class UUIDIdentityCreator implements IdentityCreator {
 
-    public static UUIDIdentityCreator INSTANCE = new UUIDIdentityCreator();
+    public static final UUIDIdentityCreator INSTANCE = new UUIDIdentityCreator();
 
     @Override
     public String create() {

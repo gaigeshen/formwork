@@ -7,5 +7,5 @@ package work.gaigeshen.formwork.commons.identity.serialnumber;
  */
 public class DefaultSerialNumberCreator extends AbstractSerialNumberCreator {
 
-    public static DefaultSerialNumberCreator INSTANCE = new DefaultSerialNumberCreator();
+    public static final DefaultSerialNumberCreator INSTANCE = new DefaultSerialNumberCreator();
 }
