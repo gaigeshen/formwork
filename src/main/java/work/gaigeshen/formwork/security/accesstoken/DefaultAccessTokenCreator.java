@@ -1,8 +1,7 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
+import work.gaigeshen.formwork.commons.identity.IdentityCreator;
 import work.gaigeshen.formwork.security.Authorization;
-
-import java.util.UUID;
 
 /**
  *
@@ -24,7 +23,7 @@ public class DefaultAccessTokenCreator extends AbstractAccessTokenCreator {
 
     @Override
     protected String createTokenInternal(Authorization authorization) {
-        return UUID.randomUUID().toString().replace("-", "");
+        return IdentityCreator.createDefault();
     }
 
     @Override

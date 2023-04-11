@@ -1,10 +1,10 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
+import work.gaigeshen.formwork.commons.identity.IdentityCreator;
 import work.gaigeshen.formwork.security.Authorization;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -43,7 +43,7 @@ public class TimelessAccessTokenCreator implements AccessTokenCreator {
      */
     @Override
     public String createToken(Authorization authorization) {
-        String newToken = UUID.randomUUID().toString().replace("-", "");
+        String newToken = IdentityCreator.createDefault();
         allTokens.computeIfAbsent(authorization, a -> new CopyOnWriteArraySet<>()).add(newToken);
         return newToken;
     }
