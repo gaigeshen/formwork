@@ -538,6 +538,7 @@ public class FlowableBpmnService implements BpmnService {
             switch (definedCandidate.getType()) {
                 case STARTER:
                     definedCandidate = definedCandidate.replaceCandidate(DefaultCandidate.createUser(userId));
+                    addTaskCandidate(taskId, definedCandidate);
                     break;
                 case STARTER_APPOINTEE:
                     Candidate appointee = appointees.getCandidate(appointeeIndex.getAndIncrement());
@@ -545,6 +546,7 @@ public class FlowableBpmnService implements BpmnService {
                         throw new IllegalStateException("could not find next appointee candidate of task: " + taskId);
                     }
                     definedCandidate = definedCandidate.replaceCandidate(appointee);
+                    addTaskCandidate(taskId, definedCandidate);
                     break;
             }
             Set<Candidate> candidatesToAdd = new HashSet<>();
