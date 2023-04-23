@@ -74,7 +74,7 @@ public class CryptoBodyAdvice implements RequestBodyAdvice, ResponseBodyAdvice<R
     public Result<?> beforeBodyWrite(Result<?> result, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         // 在输出响应之前判断是否有数据需要加密
         if (Objects.isNull(result) || Objects.isNull(result.getData())) {
-            return null;
+            return result;
         }
         // 将需要加密的数据对象转换为字符串
         // 然后将字符串执行加密操作
