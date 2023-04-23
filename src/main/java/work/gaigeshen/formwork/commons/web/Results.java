@@ -10,11 +10,11 @@ public abstract class Results {
     private Results() { }
 
     public static <D> Result<D> create(ResultCode resultCode) {
-        return create(resultCode, resultCode.getMessage());
+        return create(resultCode, null);
     }
 
-    public static <D> Result<D> create(ResultCode resultCode, String message) {
-        return create(resultCode, message, null);
+    public static <D> Result<D> create(ResultCode resultCode, D data) {
+        return create(resultCode, resultCode.getMessage(), data);
     }
 
     public static <D> Result<D> create(ResultCode resultCode, String message, D data) {

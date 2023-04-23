@@ -15,6 +15,7 @@ import work.gaigeshen.formwork.commons.crypto.CryptoProcessor;
 import work.gaigeshen.formwork.commons.json.JsonCodec;
 import work.gaigeshen.formwork.commons.web.Result;
 import work.gaigeshen.formwork.commons.web.Results;
+import work.gaigeshen.formwork.commons.web.resultcode.DefaultResultCode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class CryptoBodyAdvice implements RequestBodyAdvice, ResponseBodyAdvice<R
             return new InternalHttpInputMessage(inputMessage.getHeaders(), decryptedData);
         }
         catch (GeneralSecurityException e) {
-            throw new IOException(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
@@ -82,7 +83,7 @@ public class CryptoBodyAdvice implements RequestBodyAdvice, ResponseBodyAdvice<R
         String encodedJsonData = JsonCodec.instance().encode(result.getData());
         try {
             String encryptedData = cryptoProcessor.doEncrypt(encodedJsonData);
-            return Results.create(encryptedData);
+            return Results.create(DefaultResultCode.create(result.getCode(), result.getMessage()), encryptedData);
         }
         catch (GeneralSecurityException e) {
             throw new IllegalStateException(e);
