@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import work.gaigeshen.formwork.commons.crypto.CryptoProcessor;
 import work.gaigeshen.formwork.security.AbstractAuthenticationProvider;
 import work.gaigeshen.formwork.security.AuthenticationToken;
 import work.gaigeshen.formwork.security.Authorization;
@@ -47,6 +48,11 @@ import java.util.List;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration {
+
+    @Bean
+    public CryptoProcessor cryptoProcessor() {
+        return CryptoProcessor.createDefault("0123456789abcdef");
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
