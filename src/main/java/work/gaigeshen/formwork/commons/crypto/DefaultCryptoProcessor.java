@@ -1,7 +1,5 @@
 package work.gaigeshen.formwork.commons.crypto;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -36,7 +34,13 @@ public class DefaultCryptoProcessor implements CryptoProcessor {
 
         byte[] encryptedDataBytes = cipher.doFinal(plainData.getBytes(StandardCharsets.UTF_8));
 
-        return Base64.getEncoder().encodeToString(ArrayUtils.addAll(encryptedDataBytes, seedBytes));
+        byte[] encryptedDataWithSeedBytes = new byte[encryptedDataBytes.length + 16];
+
+        System.arraycopy(encryptedDataBytes, 0, encryptedDataWithSeedBytes, 0, encryptedDataBytes.length);
+
+        System.arraycopy(seedBytes, 0, encryptedDataWithSeedBytes, encryptedDataBytes.length, 16);
+
+        return Base64.getEncoder().encodeToString(encryptedDataWithSeedBytes);
     }
 
     @Override
