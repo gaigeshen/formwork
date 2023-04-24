@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.crypto;
+package work.gaigeshen.formwork.security.crypto;
 
 import java.security.GeneralSecurityException;
 
