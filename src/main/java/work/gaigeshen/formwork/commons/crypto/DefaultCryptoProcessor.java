@@ -30,7 +30,7 @@ public class DefaultCryptoProcessor implements CryptoProcessor {
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        byte[] seedBytes = SecureRandom.getInstanceStrong().generateSeed(16);
+        byte[] seedBytes = new SecureRandom().generateSeed(16);
 
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(secret, "AES"), new IvParameterSpec(seedBytes));
 
