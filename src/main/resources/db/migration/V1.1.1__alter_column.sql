@@ -1,0 +1,1 @@
+alter table system_user change column password password varchar(255) null after user_name;
