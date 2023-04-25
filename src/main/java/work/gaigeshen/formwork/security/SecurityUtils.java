@@ -14,7 +14,7 @@ public abstract class SecurityUtils {
     private SecurityUtils() { }
 
     public static Optional<Long> getUserIdAsNumber() {
-        return getPrincipal().map(Authorization::getUserId).map(Long::parseLong);
+        return getUserId().map(Long::parseLong);
     }
 
     public static Optional<String> getUserId() {
