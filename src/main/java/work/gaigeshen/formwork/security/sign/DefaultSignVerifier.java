@@ -24,7 +24,7 @@ public class DefaultSignVerifier implements SignVerifier {
 
         byte[] signResultBytes = Base64.getDecoder().decode(signResult);
 
-        Signature signature = Signature.getInstance("SHA1withRSA");
+        Signature signature = Signature.getInstance("SHA256withRSA");
 
         signature.initVerify(publicKey);
 

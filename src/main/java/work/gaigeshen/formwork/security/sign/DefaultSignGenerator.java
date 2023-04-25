@@ -22,7 +22,7 @@ public class DefaultSignGenerator implements SignGenerator {
     @Override
     public String generate(String signContent) throws GeneralSecurityException {
 
-        Signature signature = Signature.getInstance("SHA1withRSA");
+        Signature signature = Signature.getInstance("SHA256withRSA");
 
         signature.initSign(privateKey);
 
