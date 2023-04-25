@@ -33,6 +33,7 @@
         <appender-ref ref="RollingFile" />
     </root>
 
-    <logger name="work.gaigeshen" level="debug" />
+    <logger name="org.hibernate.SQL" level="debug" />
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
 
 </configuration>
