@@ -11,6 +11,9 @@ import java.util.concurrent.Executor;
 /**
  *
  * @author gaigeshen
+ * @see org.springframework.scheduling.annotation.Async
+ * @see org.springframework.context.event.EventListener
+ * @see org.springframework.transaction.event.TransactionalEventListener
  */
 @EnableAsync
 @Configuration
