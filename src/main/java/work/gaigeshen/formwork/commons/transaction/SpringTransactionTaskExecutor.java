@@ -1,5 +1,6 @@
 package work.gaigeshen.formwork.commons.transaction;
 
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -10,7 +11,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,20 +23,20 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
 
     private final PlatformTransactionManager transactionManager;
 
-    private final ThreadPoolExecutor threadPoolExecutor;
+    private final AsyncTaskExecutor asyncTaskExecutor;
 
     /**
      * 创建默认的事务任务执行器
      *
      * @param transactionManager 事务管理器不能为空
-     * @param threadPoolExecutor 执行任务的线程池
+     * @param asyncTaskExecutor 执行任务的线程池
      */
-    public SpringTransactionTaskExecutor(PlatformTransactionManager transactionManager, ThreadPoolExecutor threadPoolExecutor) {
-        if (Objects.isNull(transactionManager) || Objects.isNull(threadPoolExecutor)) {
+    public SpringTransactionTaskExecutor(PlatformTransactionManager transactionManager, AsyncTaskExecutor asyncTaskExecutor) {
+        if (Objects.isNull(transactionManager) || Objects.isNull(asyncTaskExecutor)) {
             throw new IllegalArgumentException("transaction manager and thread pool executor cannot be null");
         }
         this.transactionManager = transactionManager;
-        this.threadPoolExecutor = threadPoolExecutor;
+        this.asyncTaskExecutor = asyncTaskExecutor;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
         if (Objects.isNull(tasks)) {
             throw new IllegalArgumentException("tasks cannot be null");
         }
-        return threadPoolExecutor.submit(new TaskBatchRunner(tasks)).get();
+        return asyncTaskExecutor.submit(new TaskBatchRunner(tasks)).get();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
         if (Objects.isNull(tasks)) {
             throw new IllegalArgumentException("tasks cannot be null");
         }
-        return threadPoolExecutor.submit(new TaskBatchRunner(tasks));
+        return asyncTaskExecutor.submit(new TaskBatchRunner(tasks));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
         if (Objects.isNull(tasks)) {
             throw new IllegalArgumentException("tasks cannot be null");
         }
-        return threadPoolExecutor.submit(new ChainTaskBatchRunner(tasks, breakOnError)).get();
+        return asyncTaskExecutor.submit(new ChainTaskBatchRunner(tasks, breakOnError)).get();
     }
 
     @Override
@@ -68,7 +68,7 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
         if (Objects.isNull(tasks)) {
             throw new IllegalArgumentException("tasks cannot be null");
         }
-        return threadPoolExecutor.submit(new ChainTaskBatchRunner(tasks, breakOnError));
+        return asyncTaskExecutor.submit(new ChainTaskBatchRunner(tasks, breakOnError));
     }
 
     /**
@@ -95,7 +95,7 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
             List<Future<TransactionTaskResult>> futures = new ArrayList<>();
             AtomicBoolean hasError = new AtomicBoolean();
             for (TransactionTask task : tasks) {
-                futures.add(threadPoolExecutor.submit(new TaskRunner(hasError, taskLatch, task)));
+                futures.add(asyncTaskExecutor.submit(new TaskRunner(hasError, taskLatch, task)));
             }
             taskLatch.await();
             List<TransactionTaskResult> results = new ArrayList<>();
@@ -190,7 +190,7 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
                 if (Objects.nonNull(taskResult.getError()) && breakOnError) {
                     return results;
                 }
-                TransactionTaskResult nextTaskResult = threadPoolExecutor.submit(new ChainTaskRunner(task, taskResult)).get();
+                TransactionTaskResult nextTaskResult = asyncTaskExecutor.submit(new ChainTaskRunner(task, taskResult)).get();
                 previousTaskResult.set(nextTaskResult);
                 results.add(nextTaskResult);
             }
