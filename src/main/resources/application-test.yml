@@ -13,6 +13,16 @@ spring:
     database: 0
     username: root
     password: 12345678
+  rabbitmq:
+    addresses: localhost:5672
+    virtual-host: /
+    username: root
+    password: 12345678
+    listener:
+      direct:
+        acknowledge-mode: manual
+      simple:
+        acknowledge-mode: manual
   flyway:
     enabled: true
     baseline-on-migrate: true
