@@ -6,12 +6,12 @@ import java.util.UUID;
  *
  * @author gaigeshen
  */
-public class UUIDIdentityCreator implements IdentityCreator {
+public class UUIDIdentityGenerator implements IdentityGenerator {
 
-    public static final UUIDIdentityCreator INSTANCE = new UUIDIdentityCreator();
+    public static final UUIDIdentityGenerator INSTANCE = new UUIDIdentityGenerator();
 
     @Override
-    public String create() {
+    public String generate() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 }

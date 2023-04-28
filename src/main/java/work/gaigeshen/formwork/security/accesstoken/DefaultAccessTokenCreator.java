@@ -1,6 +1,6 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
-import work.gaigeshen.formwork.commons.identity.IdentityCreator;
+import work.gaigeshen.formwork.commons.identity.IdentityGenerator;
 import work.gaigeshen.formwork.security.Authorization;
 
 /**
@@ -23,7 +23,7 @@ public class DefaultAccessTokenCreator extends AbstractAccessTokenCreator {
 
     @Override
     protected String createTokenInternal(Authorization authorization) {
-        return IdentityCreator.createDefault();
+        return IdentityGenerator.generateDefault();
     }
 
     @Override

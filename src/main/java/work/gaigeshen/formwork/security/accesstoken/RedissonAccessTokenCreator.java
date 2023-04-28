@@ -1,7 +1,7 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
 import org.redisson.api.*;
-import work.gaigeshen.formwork.commons.identity.IdentityCreator;
+import work.gaigeshen.formwork.commons.identity.IdentityGenerator;
 import work.gaigeshen.formwork.security.Authorization;
 
 import java.util.Objects;
@@ -56,7 +56,7 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
             throw new IllegalArgumentException("authorization cannot be null");
         }
         invalidate(authorization);
-        String newToken = IdentityCreator.createDefault();
+        String newToken = IdentityGenerator.generateDefault();
         setTokenAndAuthorizationBucket(newToken, authorization);
         return newToken;
     }

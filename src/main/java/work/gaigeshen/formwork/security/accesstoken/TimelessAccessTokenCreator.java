@@ -1,6 +1,6 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
-import work.gaigeshen.formwork.commons.identity.IdentityCreator;
+import work.gaigeshen.formwork.commons.identity.IdentityGenerator;
 import work.gaigeshen.formwork.security.Authorization;
 
 import java.util.Map;
@@ -43,7 +43,7 @@ public class TimelessAccessTokenCreator implements AccessTokenCreator {
      */
     @Override
     public String createToken(Authorization authorization) {
-        String newToken = IdentityCreator.createDefault();
+        String newToken = IdentityGenerator.generateDefault();
         allTokens.computeIfAbsent(authorization, a -> new CopyOnWriteArraySet<>()).add(newToken);
         return newToken;
     }
