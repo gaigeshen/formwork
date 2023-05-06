@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.util.json;
+package work.gaigeshen.formwork.commons.json;
 
 import java.util.Collection;
 import java.util.Map;

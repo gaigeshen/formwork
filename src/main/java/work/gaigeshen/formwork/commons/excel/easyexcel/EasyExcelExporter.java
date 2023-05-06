@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.util.excel.easyexcel;
+package work.gaigeshen.formwork.commons.excel.easyexcel;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
@@ -13,7 +13,7 @@ import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import work.gaigeshen.formwork.util.excel.ExcelExporter;
+import work.gaigeshen.formwork.commons.excel.ExcelExporter;
 
 import java.io.OutputStream;
 import java.util.LinkedList;

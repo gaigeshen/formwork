@@ -4,7 +4,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import work.gaigeshen.formwork.util.json.JsonCodec;
+import work.gaigeshen.formwork.commons.json.JsonCodec;
 import work.gaigeshen.formwork.security.crypto.CryptoProcessor;
 
 import java.io.IOException;
