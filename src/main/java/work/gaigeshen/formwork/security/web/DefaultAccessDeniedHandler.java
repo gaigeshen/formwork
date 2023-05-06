@@ -1,6 +1,6 @@
 package work.gaigeshen.formwork.security.web;
 
-import work.gaigeshen.formwork.commons.json.JsonCodec;
+import work.gaigeshen.formwork.util.json.JsonCodec;
 import work.gaigeshen.formwork.commons.web.Result;
 import work.gaigeshen.formwork.commons.web.Results;
 import work.gaigeshen.formwork.commons.web.resultcode.SecurityErrorResultCode;

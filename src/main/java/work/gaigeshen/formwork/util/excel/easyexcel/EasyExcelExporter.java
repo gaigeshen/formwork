@@ -1,10 +1,7 @@
-package work.gaigeshen.formwork.commons.excel.easyexcel;
+package work.gaigeshen.formwork.util.excel.easyexcel;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.annotation.ExcelIgnore;
-import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
-import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
 import com.alibaba.excel.write.handler.RowWriteHandler;
@@ -14,13 +11,11 @@ import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
-import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import work.gaigeshen.formwork.commons.excel.ExcelExporter;
+import work.gaigeshen.formwork.util.excel.ExcelExporter;
 
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -45,14 +40,18 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
      *
      * @param titleRows 标题行内容，此标题行不是字段的标题，是整个电子表格的顶部标题
      * @param headClass 字段标题通过从这个类型中的字段注解获取
+     * @param columnCount 导出列数量
      */
-    public EasyExcelExporter(List<String> titleRows, Class<R> headClass) {
-        if (Objects.isNull(titleRows) || Objects.isNull(headClass)) {
-            throw new IllegalArgumentException("title rows and header class cannot be null");
+    public EasyExcelExporter(List<String> titleRows, Class<R> headClass, int columnCount) {
+        if (Objects.isNull(titleRows)) {
+            throw new IllegalArgumentException("titleRows cannot be null");
+        }
+        if (Objects.isNull(headClass)) {
+            throw new IllegalArgumentException("headClass cannot be null");
         }
         this.titleRows = titleRows;
         this.headClass = headClass;
-        this.columnCount = resolveColumnCount(headClass);
+        this.columnCount = columnCount;
     }
 
     @Override
@@ -61,15 +60,9 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
         ExcelWriterBuilder writerBuilder = EasyExcel.write(outputStream, headClass).autoCloseStream(false);
         try (ExcelWriter excelWriter = writerBuilder.build()) {
             ExcelWriterSheetBuilder writerSheetBuilder = EasyExcel.writerSheet();
-            // 设定数据的写入开始行索引，需要排除掉标题行
             writerSheetBuilder.relativeHeadRowIndex(titleRowCount);
-            // 处理标题行的创建和格式设定
             writerSheetBuilder.registerWriteHandler(this);
-            // 处理数据行内容的样式
             writerSheetBuilder.registerWriteHandler(createCellStyleStrategy());
-            // 处理列宽适应单元格内容
-            writerSheetBuilder.registerWriteHandler(new LongestMatchColumnWidthStyleStrategy());
-            // 开始分批次写入数据行内容
             WriteSheet writeSheet = writerSheetBuilder.sheetName("sheet1").build();
             int rowIndex = titleRowCount;
             List<R> rowDataBatch = new LinkedList<>();
@@ -87,7 +80,6 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
                 excelWriter.write(rowDataBatch, writeSheet);
                 rowDataBatch.clear();
             }
-            // 底部的行内容具体怎么创建，需要子类决定
             WriteSheetHolder sheetHolder = excelWriter.writeContext().writeSheetHolder();
             createFooterCells(sheetHolder.getSheet(), rowIndex + 1, columnCount);
         }
@@ -100,8 +92,7 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
      * @param rowIndex 当前的行索引，可以直接使用该索引来创建行内容
      * @param columnCount 字段数量
      */
-    protected void createFooterCells(Sheet sheet, int rowIndex, int columnCount) {
-    }
+    protected void createFooterCells(Sheet sheet, int rowIndex, int columnCount) { }
 
     /**
      * 此方法用于创建标题行内容
@@ -199,31 +190,5 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
             writeCellStyle.setWriteFont(writeFont);
             writeCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
         }
-    }
-
-    private int resolveColumnCount(Class<?> headClass) {
-        boolean hasExcelIgnoreUnannotated = hasExcelIgnoreUnannotated(headClass);
-        int columnCount = 0;
-        for (Field declaredField : headClass.getDeclaredFields()) {
-            if (hasExcelIgnore(declaredField)) {
-                continue;
-            }
-            if (hasExcelProperty(declaredField) || !hasExcelIgnoreUnannotated) {
-                columnCount++;
-            }
-        }
-        return columnCount;
-    }
-
-    private boolean hasExcelIgnoreUnannotated(Class<?> headClass) {
-        return Objects.nonNull(headClass.getDeclaredAnnotation(ExcelIgnoreUnannotated.class));
-    }
-
-    private boolean hasExcelProperty(Field field) {
-        return Objects.nonNull(field.getDeclaredAnnotation(ExcelProperty.class));
-    }
-
-    private boolean hasExcelIgnore(Field field) {
-        return Objects.nonNull(field.getDeclaredAnnotation(ExcelIgnore.class));
     }
 }

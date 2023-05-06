@@ -11,7 +11,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-import work.gaigeshen.formwork.commons.json.JsonCodec;
+import work.gaigeshen.formwork.util.json.JsonCodec;
 import work.gaigeshen.formwork.commons.web.Result;
 import work.gaigeshen.formwork.commons.web.Results;
 import work.gaigeshen.formwork.commons.web.resultcode.DefaultResultCode;

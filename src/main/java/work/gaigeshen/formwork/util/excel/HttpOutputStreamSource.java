@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.excel;
+package work.gaigeshen.formwork.util.excel;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class HttpOutputStreamSource implements ExcelExporter.OutputStreamSource 
      */
     public HttpOutputStreamSource(HttpServletResponse response, String filename) {
         if (Objects.isNull(response)) {
-            throw new IllegalArgumentException("http servlet response cannot be null");
+            throw new IllegalArgumentException("response cannot be null");
         }
         if (Objects.isNull(filename)) {
             throw new IllegalArgumentException("filename cannot be null");

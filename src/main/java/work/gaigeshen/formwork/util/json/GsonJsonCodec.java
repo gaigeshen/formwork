@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.commons.json;
+package work.gaigeshen.formwork.util.json;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;

@@ -1,6 +1,6 @@
 package work.gaigeshen.formwork.security.web.logout;
 
-import work.gaigeshen.formwork.commons.json.JsonCodec;
+import work.gaigeshen.formwork.util.json.JsonCodec;
 import work.gaigeshen.formwork.commons.web.Results;
 import work.gaigeshen.formwork.security.AuthenticationToken;
 import work.gaigeshen.formwork.security.accesstoken.AccessTokenCreator;
