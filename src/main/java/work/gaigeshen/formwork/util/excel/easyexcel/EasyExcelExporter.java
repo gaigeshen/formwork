@@ -27,7 +27,7 @@ import java.util.function.Consumer;
  * @author gaigeshen
  * @see EasyExcel
  */
-public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
+public class EasyExcelExporter<R> implements ExcelExporter<R> {
 
     private final List<String> titleRows;
 
@@ -61,7 +61,7 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
         try (ExcelWriter excelWriter = writerBuilder.build()) {
             ExcelWriterSheetBuilder writerSheetBuilder = EasyExcel.writerSheet();
             writerSheetBuilder.relativeHeadRowIndex(titleRowCount);
-            writerSheetBuilder.registerWriteHandler(this);
+            writerSheetBuilder.registerWriteHandler(new TitleRowWriteHandler());
             writerSheetBuilder.registerWriteHandler(createCellStyleStrategy());
             WriteSheet writeSheet = writerSheetBuilder.sheetName("sheet1").build();
             int rowIndex = titleRowCount;
@@ -93,28 +93,6 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
      * @param columnCount 字段数量
      */
     protected void createFooterCells(Sheet sheet, int rowIndex, int columnCount) { }
-
-    /**
-     * 此方法用于创建标题行内容
-     *
-     * @param context 处理器上下文
-     */
-    @Override
-    public final void beforeRowCreate(RowWriteHandlerContext context) {
-        if (titleRows.isEmpty() || columnCount < 1) {
-            return;
-        }
-        if (titleRows.size() != context.getRowIndex()) {
-            return;
-        }
-        Sheet sheet = context.getWriteSheetHolder().getSheet();
-        Workbook workbook = sheet.getWorkbook();
-        int rowIndex = 0;
-        for (String titleRow : titleRows) {
-            Row row = sheet.createRow(rowIndex++);
-            createTitleCells(workbook, sheet, row, titleRow, columnCount);
-        }
-    }
 
     /**
      * 创建标题行的单元格，默认情况会合并标题行的所有单元格
@@ -189,6 +167,26 @@ public class EasyExcelExporter<R> implements RowWriteHandler, ExcelExporter<R> {
             writeFont.setBold(true);
             writeCellStyle.setWriteFont(writeFont);
             writeCellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
+        }
+    }
+
+    /**
+     *
+     * @author gaigeshen
+     */
+    private class TitleRowWriteHandler implements RowWriteHandler {
+        @Override
+        public void beforeRowCreate(RowWriteHandlerContext context) {
+            if (titleRows.isEmpty() || context.getRowIndex() != titleRows.size()) {
+                return;
+            }
+            Sheet sheet = context.getWriteSheetHolder().getSheet();
+            Workbook workbook = sheet.getWorkbook();
+            int rowIndex = 0;
+            for (String titleRow : titleRows) {
+                Row row = sheet.createRow(rowIndex++);
+                createTitleCells(workbook, sheet, row, titleRow, columnCount);
+            }
         }
     }
 }
