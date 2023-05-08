@@ -7,16 +7,16 @@ import java.util.Objects;
  *
  * @author gaigeshen
  */
-public abstract class PageQuery extends Query {
+public abstract class PageQueryParameters extends QueryParameters {
 
     private int current = 1;
 
     private int pageSize = 10;
 
-    protected PageQuery() {
+    protected PageQueryParameters() {
     }
 
-    protected PageQuery(int current, int pageSize) {
+    protected PageQueryParameters(int current, int pageSize) {
         this.current = current;
         this.pageSize = pageSize;
     }
@@ -45,8 +45,8 @@ public abstract class PageQuery extends Query {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PageQuery query = (PageQuery) o;
-        return current == query.current && pageSize == query.pageSize;
+        PageQueryParameters pqps = (PageQueryParameters) o;
+        return current == pqps.current && pageSize == pqps.pageSize;
     }
 
     @Override

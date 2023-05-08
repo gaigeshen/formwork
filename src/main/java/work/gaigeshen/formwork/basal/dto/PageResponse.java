@@ -23,18 +23,18 @@ public class PageResponse<C> extends Response {
 
     }
 
-    protected PageResponse(PageQuery pageQuery, Collection<C> content, long total) {
+    protected PageResponse(PageQueryParameters pageQuery, Collection<C> content, long total) {
         this.current = pageQuery.getCurrent();
         this.pageSize = pageQuery.getPageSize();
         this.content = content;
         this.total = total;
     }
 
-    public static <C> PageResponse<C> create(PageQuery pageQuery) {
+    public static <C> PageResponse<C> create(PageQueryParameters pageQuery) {
         return new PageResponse<>(pageQuery, Collections.emptyList(), 0);
     }
 
-    public static <C> PageResponse<C> create(PageQuery pageQuery, Collection<C> content, long totalCount) {
+    public static <C> PageResponse<C> create(PageQueryParameters pageQuery, Collection<C> content, long totalCount) {
         return new PageResponse<>(pageQuery, content, totalCount);
     }
 
