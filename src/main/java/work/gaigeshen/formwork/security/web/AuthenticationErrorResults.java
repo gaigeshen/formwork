@@ -4,9 +4,9 @@ import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
-import work.gaigeshen.formwork.commons.web.Result;
-import work.gaigeshen.formwork.commons.web.Results;
-import work.gaigeshen.formwork.commons.web.resultcode.SecurityErrorResultCode;
+import work.gaigeshen.formwork.basal.web.Result;
+import work.gaigeshen.formwork.basal.web.Results;
+import work.gaigeshen.formwork.basal.web.resultcode.SecurityErrorResultCode;
 import work.gaigeshen.formwork.security.AuthenticationTokenMissingException;
 import work.gaigeshen.formwork.security.AuthorizationNotFoundException;
 

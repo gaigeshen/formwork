@@ -3,9 +3,9 @@ package work.gaigeshen.formwork.config;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import work.gaigeshen.formwork.commons.ratelimiter.RatelimiterCreator;
-import work.gaigeshen.formwork.commons.ratelimiter.RedissonRatelimiterCreator;
-import work.gaigeshen.formwork.commons.ratelimiter.aop.RateLimiterAspect;
+import work.gaigeshen.formwork.basal.ratelimiter.RatelimiterCreator;
+import work.gaigeshen.formwork.basal.ratelimiter.RedissonRatelimiterCreator;
+import work.gaigeshen.formwork.basal.ratelimiter.aop.RateLimiterAspect;
 
 /**
  *

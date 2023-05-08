@@ -1,7 +1,7 @@
 package work.gaigeshen.formwork.security.web.authentication;
 
-import work.gaigeshen.formwork.security.Authorization;
 import work.gaigeshen.formwork.security.accesstoken.AccessTokenCreator;
+import work.gaigeshen.formwork.security.Authorization;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;

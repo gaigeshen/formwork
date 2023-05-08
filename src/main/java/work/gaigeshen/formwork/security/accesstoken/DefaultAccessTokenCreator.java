@@ -1,6 +1,6 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
-import work.gaigeshen.formwork.commons.identity.IdentityGenerator;
+import work.gaigeshen.formwork.basal.identity.IdentityGenerator;
 import work.gaigeshen.formwork.security.Authorization;
 
 /**

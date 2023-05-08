@@ -11,11 +11,11 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-import work.gaigeshen.formwork.commons.json.JsonCodec;
-import work.gaigeshen.formwork.commons.web.Result;
-import work.gaigeshen.formwork.commons.web.Results;
-import work.gaigeshen.formwork.commons.web.resultcode.DefaultResultCode;
 import work.gaigeshen.formwork.security.crypto.CryptoProcessor;
+import work.gaigeshen.formwork.basal.json.JsonCodec;
+import work.gaigeshen.formwork.basal.web.Result;
+import work.gaigeshen.formwork.basal.web.Results;
+import work.gaigeshen.formwork.basal.web.resultcode.DefaultResultCode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

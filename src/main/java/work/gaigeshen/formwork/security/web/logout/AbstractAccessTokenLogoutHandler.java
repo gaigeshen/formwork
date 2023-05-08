@@ -1,10 +1,10 @@
 package work.gaigeshen.formwork.security.web.logout;
 
 import org.apache.commons.lang3.StringUtils;
-import work.gaigeshen.formwork.security.AuthenticationToken;
-import work.gaigeshen.formwork.security.Authorization;
 import work.gaigeshen.formwork.security.accesstoken.AccessTokenCreator;
 import work.gaigeshen.formwork.security.web.authentication.AccessTokenAutoAuthenticationFilter;
+import work.gaigeshen.formwork.security.AuthenticationToken;
+import work.gaigeshen.formwork.security.Authorization;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

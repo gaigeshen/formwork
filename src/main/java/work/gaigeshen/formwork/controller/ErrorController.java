@@ -8,8 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.handler.DispatcherServletWebRequest;
-import work.gaigeshen.formwork.commons.web.ErrorResults;
-import work.gaigeshen.formwork.commons.web.Result;
+import work.gaigeshen.formwork.basal.web.ErrorResults;
+import work.gaigeshen.formwork.basal.web.Result;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

@@ -1,7 +1,7 @@
 package work.gaigeshen.formwork.security.accesstoken;
 
 import org.redisson.api.*;
-import work.gaigeshen.formwork.commons.identity.IdentityGenerator;
+import work.gaigeshen.formwork.basal.identity.IdentityGenerator;
 import work.gaigeshen.formwork.security.Authorization;
 
 import java.util.Objects;
