@@ -18,6 +18,7 @@ spring:
     virtual-host: /
     username: root
     password: 12345678
+    publisher-confirm-type: correlated
     listener:
       direct:
         acknowledge-mode: manual
