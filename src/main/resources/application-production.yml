@@ -24,6 +24,7 @@ spring:
         acknowledge-mode: manual
       simple:
         acknowledge-mode: manual
+      queue: queue.default
   flyway:
     enabled: true
     baseline-on-migrate: true

@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.basal.amqp;
+package work.gaigeshen.formwork.message;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public interface MessageProcessor {
     /**
      * 处理消息
      *
-     * @param message 消息字符串
+     * @param message 消息内容
      * @param headers 消息头
      * @param chain 消息处理器链
      * @throws MessageProcessingException 处理消息失败
@@ -29,7 +29,7 @@ public interface MessageProcessor {
         /**
          * 处理消息
          *
-         * @param message 消息字符串
+         * @param message 消息内容
          * @param headers 消息头
          * @throws MessageProcessingException 处理消息失败
          */

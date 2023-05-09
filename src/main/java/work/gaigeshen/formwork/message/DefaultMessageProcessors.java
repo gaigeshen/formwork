@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.basal.amqp;
+package work.gaigeshen.formwork.message;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,8 +23,8 @@ public class DefaultMessageProcessors implements MessageProcessors, Iterable<Mes
 
     @Override
     public void process(String message, Map<String, Object> headers) throws MessageProcessingException {
-        if (Objects.isNull(message)) {
-            throw new IllegalArgumentException("message cannot be null");
+        if (Objects.isNull(message) || Objects.isNull(headers)) {
+            throw new IllegalArgumentException("message and headers cannot be null");
         }
         if (!processors.isEmpty()) {
             new InternalProcessorChain(processors).process(message, headers);

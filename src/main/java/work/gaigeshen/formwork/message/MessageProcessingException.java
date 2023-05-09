@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.basal.amqp;
+package work.gaigeshen.formwork.message;
 
 /**
  * 消息处理异常
