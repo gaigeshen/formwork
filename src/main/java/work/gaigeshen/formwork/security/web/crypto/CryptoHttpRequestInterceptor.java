@@ -88,7 +88,8 @@ public class CryptoHttpRequestInterceptor implements ClientHttpRequestIntercepto
             ByteArrayInputStream bis = new ByteArrayInputStream(decryptedBodyString.getBytes(StandardCharsets.UTF_8));
             return new DecryptedClientHttpResponse(httpResponse, bis);
         }
-        return httpResponse;
+        ByteArrayInputStream bis = new ByteArrayInputStream(bodyString.getBytes(StandardCharsets.UTF_8));
+        return new DecryptedClientHttpResponse(httpResponse, bis);
     }
 
     /**
