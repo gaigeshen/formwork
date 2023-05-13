@@ -42,12 +42,12 @@ public class CryptoBodyAdvice implements RequestBodyAdvice, ResponseBodyAdvice<R
 
     @Override
     public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return methodParameter.hasMethodAnnotation(Decrytion.class);
+        return methodParameter.hasMethodAnnotation(Encrypted.class);
     }
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return returnType.hasMethodAnnotation(Encrytion.class);
+        return returnType.hasMethodAnnotation(Encrypted.class);
     }
 
     @Override
