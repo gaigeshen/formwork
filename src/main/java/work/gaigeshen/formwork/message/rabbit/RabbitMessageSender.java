@@ -9,6 +9,7 @@ import work.gaigeshen.formwork.message.MessageSender;
 import work.gaigeshen.formwork.message.MessageSendingException;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 
@@ -21,11 +22,14 @@ public class RabbitMessageSender implements MessageSender {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public RabbitMessageSender(RabbitTemplate rabbitTemplate) {
+    private final String delayExchange;
+
+    public RabbitMessageSender(RabbitTemplate rabbitTemplate, String delayExchange) {
         if (Objects.isNull(rabbitTemplate)) {
             throw new IllegalArgumentException("rabbitTemplate cannot be null");
         }
         this.rabbitTemplate = rabbitTemplate;
+        this.delayExchange = delayExchange;
     }
 
     @Override
@@ -41,6 +45,27 @@ public class RabbitMessageSender implements MessageSender {
         CorrelationData correlationData = new CorrelationData(IdentityGenerator.generateDefault());
         try {
             rabbitTemplate.send(queue, builded, correlationData);
+        } catch (Exception e) {
+            throw new MessageSendingException("could not send message: " + message, e);
+        }
+    }
+
+    @Override
+    public void sendDelayMessage(String queue, String message, Map<String, Object> headers, Duration duration) throws MessageSendingException {
+        if (Objects.isNull(queue) || Objects.isNull(message)) {
+            throw new IllegalArgumentException("queue and message cannot be null");
+        }
+        if (Objects.isNull(delayExchange)) {
+            throw new MessageSendingException("missing delay exchange: " + message);
+        }
+        MessageBuilder builder = MessageBuilder.withBody(message.getBytes(StandardCharsets.UTF_8));
+        if (Objects.nonNull(headers)) {
+            headers.forEach(builder::setHeaderIfAbsent);
+        }
+        Message builded = builder.setContentType("text/plain").setHeader("x-delay", duration.toMillis()).build();
+        CorrelationData correlationData = new CorrelationData(IdentityGenerator.generateDefault());
+        try {
+            rabbitTemplate.send(delayExchange, queue, builded, correlationData);
         } catch (Exception e) {
             throw new MessageSendingException("could not send message: " + message, e);
         }
