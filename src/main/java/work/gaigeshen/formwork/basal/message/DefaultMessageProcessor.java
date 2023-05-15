@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.message;
+package work.gaigeshen.formwork.basal.message;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

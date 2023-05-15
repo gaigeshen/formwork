@@ -6,9 +6,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import work.gaigeshen.formwork.message.*;
-import work.gaigeshen.formwork.message.rabbit.RabbitMessageReceiver;
-import work.gaigeshen.formwork.message.rabbit.RabbitMessageSender;
+import work.gaigeshen.formwork.basal.message.*;
+import work.gaigeshen.formwork.basal.message.rabbit.RabbitMessageReceiver;
+import work.gaigeshen.formwork.basal.message.rabbit.RabbitMessageSender;
 
 import java.util.Collections;
 import java.util.List;

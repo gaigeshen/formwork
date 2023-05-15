@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.message.rabbit;
+package work.gaigeshen.formwork.basal.message.rabbit;
 
 import com.rabbitmq.client.Channel;
 import org.slf4j.Logger;

@@ -1,12 +1,12 @@
-package work.gaigeshen.formwork.message.rabbit;
+package work.gaigeshen.formwork.basal.message.rabbit;
 
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import work.gaigeshen.formwork.basal.identity.IdentityGenerator;
-import work.gaigeshen.formwork.message.MessageSender;
-import work.gaigeshen.formwork.message.MessageSendingException;
+import work.gaigeshen.formwork.basal.message.MessageSender;
+import work.gaigeshen.formwork.basal.message.MessageSendingException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;

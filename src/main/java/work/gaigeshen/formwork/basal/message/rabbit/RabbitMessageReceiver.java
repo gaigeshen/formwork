@@ -1,12 +1,12 @@
-package work.gaigeshen.formwork.message.rabbit;
+package work.gaigeshen.formwork.basal.message.rabbit;
 
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpMessageHeaderAccessor;
 import org.springframework.messaging.Message;
-import work.gaigeshen.formwork.message.MessageProcessors;
-import work.gaigeshen.formwork.message.MessageReceiver;
-import work.gaigeshen.formwork.message.MessageReceivingException;
+import work.gaigeshen.formwork.basal.message.MessageProcessors;
+import work.gaigeshen.formwork.basal.message.MessageReceiver;
+import work.gaigeshen.formwork.basal.message.MessageReceivingException;
 
 import java.util.HashMap;
 import java.util.Map;

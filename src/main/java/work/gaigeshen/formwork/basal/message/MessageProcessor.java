@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.message;
+package work.gaigeshen.formwork.basal.message;
 
 import java.util.Map;
 

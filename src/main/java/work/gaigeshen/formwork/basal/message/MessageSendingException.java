@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.message;
+package work.gaigeshen.formwork.basal.message;
 
 /**
  * 消息发送异常
