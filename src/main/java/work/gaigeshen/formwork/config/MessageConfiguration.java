@@ -42,32 +42,26 @@ public class MessageConfiguration {
     }
 
     /**
-     * 定义队列和延迟交换机
+     * 定义队列和延迟交换机，延迟交换机绑定定义的队列，路由键为队列的名称
      *
      * @author gaigeshen
      */
     @Configuration
     static class DeclareConfiguration {
 
-        @Value("${spring.rabbitmq.listener.queue}")
-        private String receiveQueue;
-
-        @Value("${spring.rabbitmq.template.exchange.delay}")
-        private String delayExchange;
+        @Bean
+        public Binding delayExchangeBinding(Queue receiveQueue, Exchange delayExchange) {
+            return BindingBuilder.bind(receiveQueue).to(delayExchange).with(receiveQueue.getName()).noargs();
+        }
 
         @Bean
-        public Queue receiveQueue() {
+        public Queue receiveQueue(@Value("${spring.rabbitmq.listener.queue}") String receiveQueue) {
             return QueueBuilder.durable(receiveQueue).build();
         }
 
         @Bean
-        public Exchange delayExchange() {
+        public Exchange delayExchange(@Value("${spring.rabbitmq.template.exchange.delay}") String delayExchange) {
             return ExchangeBuilder.directExchange(delayExchange).delayed().build();
-        }
-
-        @Bean
-        public Binding delayExchangeBinding() {
-            return BindingBuilder.bind(receiveQueue()).to(delayExchange()).with("*").noargs();
         }
     }
 }

@@ -27,7 +27,7 @@ spring:
       queue: queue.default
     template:
       exchange:
-        delay: exchange.delay
+        delay: exchange.delay.default
   flyway:
     enabled: true
     baseline-on-migrate: true

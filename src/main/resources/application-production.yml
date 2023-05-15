@@ -25,6 +25,9 @@ spring:
       simple:
         acknowledge-mode: manual
       queue: queue.default
+    template:
+      exchange:
+        delay: exchange.delay.default
   flyway:
     enabled: true
     baseline-on-migrate: true
