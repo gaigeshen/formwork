@@ -16,7 +16,7 @@ import java.time.Duration;
  * @author gaigeshen
  */
 @Configuration
-public class RestTemplateAutoConfiguration {
+public class RestTemplateConfiguration {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
