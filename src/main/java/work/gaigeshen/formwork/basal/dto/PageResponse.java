@@ -9,7 +9,7 @@ import java.util.Objects;
  *
  * @author gaigeshen
  */
-public class PageQueryResponse<C> extends QueryResponse {
+public class PageResponse<C> extends QueryResponse {
 
     private int current;
 
@@ -19,23 +19,23 @@ public class PageQueryResponse<C> extends QueryResponse {
 
     private long total;
 
-    protected PageQueryResponse() {
+    protected PageResponse() {
 
     }
 
-    protected PageQueryResponse(PageQueryParameters pageQuery, Collection<C> content, long total) {
+    protected PageResponse(PageParameters pageQuery, Collection<C> content, long total) {
         this.current = pageQuery.getCurrent();
         this.pageSize = pageQuery.getPageSize();
         this.content = content;
         this.total = total;
     }
 
-    public static <C> PageQueryResponse<C> create(PageQueryParameters pageQuery) {
-        return new PageQueryResponse<>(pageQuery, Collections.emptyList(), 0);
+    public static <C> PageResponse<C> create(PageParameters pageQuery) {
+        return new PageResponse<>(pageQuery, Collections.emptyList(), 0);
     }
 
-    public static <C> PageQueryResponse<C> create(PageQueryParameters pageQuery, Collection<C> content, long totalCount) {
-        return new PageQueryResponse<>(pageQuery, content, totalCount);
+    public static <C> PageResponse<C> create(PageParameters pageQuery, Collection<C> content, long totalCount) {
+        return new PageResponse<>(pageQuery, content, totalCount);
     }
 
     public int getCurrent() {
@@ -78,7 +78,7 @@ public class PageQueryResponse<C> extends QueryResponse {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PageQueryResponse<?> that = (PageQueryResponse<?>) o;
+        PageResponse<?> that = (PageResponse<?>) o;
         if (current != that.current) {
             return false;
         }
