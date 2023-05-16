@@ -5,6 +5,6 @@ package work.gaigeshen.formwork.basal.dto;
  *
  * @author gaigeshen
  */
-public abstract class Parameters extends DTO {
+public abstract class Parameters {
 
 }

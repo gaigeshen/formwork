@@ -5,7 +5,7 @@ package work.gaigeshen.formwork.basal.dto;
  *
  * @author gaigeshen
  */
-public abstract class Response extends DTO {
+public abstract class Response {
 
 
 }
