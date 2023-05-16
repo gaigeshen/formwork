@@ -26,8 +26,6 @@ spring:
     job-store-type: jdbc
     jdbc:
       initialize-schema: never
-  jpa:
-    open-in-view: false
 
 springdoc:
   paths-to-match: /*
