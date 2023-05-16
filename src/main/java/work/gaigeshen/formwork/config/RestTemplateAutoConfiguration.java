@@ -8,6 +8,8 @@ import org.springframework.web.client.RestTemplate;
 import work.gaigeshen.formwork.basal.security.crypto.CryptoProcessor;
 import work.gaigeshen.formwork.basal.security.web.crypto.CryptoHttpRequestInterceptor;
 
+import java.time.Duration;
+
 /**
  *
  *
@@ -18,7 +20,7 @@ public class RestTemplateAutoConfiguration {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
+        return builder.setConnectTimeout(Duration.ofSeconds(1)).setReadTimeout(Duration.ofSeconds(5)).build();
     }
 
     @Bean
