@@ -1,7 +1,7 @@
 package work.gaigeshen.formwork.basal.dto;
 
 /**
- * 查询类数据传输对象
+ * 查询参数类数据传输对象
  *
  * @author gaigeshen
  */

@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.Objects;
 
 /**
- * 分页响应类数据传输对象
+ * 分页查询响应类数据传输对象
  *
  * @author gaigeshen
  */
-public class PageResponse<C> extends Response {
+public class PageQueryResponse<C> extends QueryResponse {
 
     private int current;
 
@@ -19,23 +19,23 @@ public class PageResponse<C> extends Response {
 
     private long total;
 
-    protected PageResponse() {
+    protected PageQueryResponse() {
 
     }
 
-    protected PageResponse(PageQueryParameters pageQuery, Collection<C> content, long total) {
+    protected PageQueryResponse(PageQueryParameters pageQuery, Collection<C> content, long total) {
         this.current = pageQuery.getCurrent();
         this.pageSize = pageQuery.getPageSize();
         this.content = content;
         this.total = total;
     }
 
-    public static <C> PageResponse<C> create(PageQueryParameters pageQuery) {
-        return new PageResponse<>(pageQuery, Collections.emptyList(), 0);
+    public static <C> PageQueryResponse<C> create(PageQueryParameters pageQuery) {
+        return new PageQueryResponse<>(pageQuery, Collections.emptyList(), 0);
     }
 
-    public static <C> PageResponse<C> create(PageQueryParameters pageQuery, Collection<C> content, long totalCount) {
-        return new PageResponse<>(pageQuery, content, totalCount);
+    public static <C> PageQueryResponse<C> create(PageQueryParameters pageQuery, Collection<C> content, long totalCount) {
+        return new PageQueryResponse<>(pageQuery, content, totalCount);
     }
 
     public int getCurrent() {
@@ -78,7 +78,7 @@ public class PageResponse<C> extends Response {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PageResponse<?> that = (PageResponse<?>) o;
+        PageQueryResponse<?> that = (PageQueryResponse<?>) o;
         if (current != that.current) {
             return false;
         }

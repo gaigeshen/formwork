@@ -3,7 +3,7 @@ package work.gaigeshen.formwork.basal.dto;
 import java.util.Objects;
 
 /**
- * 分页查询类数据传输对象，最基本的需要传递分页页码和页容量
+ * 分页查询参数类数据传输对象，最基本的需要传递分页页码和页容量
  *
  * @author gaigeshen
  */
