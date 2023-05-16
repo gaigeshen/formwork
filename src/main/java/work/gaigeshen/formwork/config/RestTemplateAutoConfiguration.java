@@ -5,8 +5,8 @@ import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import work.gaigeshen.formwork.security.crypto.CryptoProcessor;
-import work.gaigeshen.formwork.security.web.crypto.CryptoHttpRequestInterceptor;
+import work.gaigeshen.formwork.basal.security.crypto.CryptoProcessor;
+import work.gaigeshen.formwork.basal.security.web.crypto.CryptoHttpRequestInterceptor;
 
 /**
  *

@@ -4,9 +4,9 @@ import com.rabbitmq.client.Channel;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpMessageHeaderAccessor;
 import org.springframework.messaging.Message;
-import work.gaigeshen.formwork.basal.message.MessageProcessors;
 import work.gaigeshen.formwork.basal.message.MessageReceiver;
 import work.gaigeshen.formwork.basal.message.MessageReceivingException;
+import work.gaigeshen.formwork.basal.message.MessageProcessors;
 
 import java.util.HashMap;
 import java.util.Map;

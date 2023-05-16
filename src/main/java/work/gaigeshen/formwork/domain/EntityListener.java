@@ -1,6 +1,6 @@
 package work.gaigeshen.formwork.domain;
 
-import work.gaigeshen.formwork.security.SecurityUtils;
+import work.gaigeshen.formwork.basal.security.SecurityUtils;
 
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
