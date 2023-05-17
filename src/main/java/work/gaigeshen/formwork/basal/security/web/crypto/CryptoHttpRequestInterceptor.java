@@ -84,7 +84,7 @@ public class CryptoHttpRequestInterceptor implements ClientHttpRequestIntercepto
             } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
-            String decryptedBodyString = bodyString.replace(encryptedData, decryptedData);
+            String decryptedBodyString = bodyString.replace("\"" + encryptedData + "\"", decryptedData);
             ByteArrayInputStream bis = new ByteArrayInputStream(decryptedBodyString.getBytes(StandardCharsets.UTF_8));
             return new DecryptedClientHttpResponse(httpResponse, bis);
         }
