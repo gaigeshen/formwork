@@ -72,7 +72,12 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
             return null;
         }
         RBucket<String> tokenBucket = getTokenBucket(authorization);
-        if (Objects.equals(tokenBucket.get(), token)) {
+        String tokenValue = tokenBucket.get();
+        if (Objects.isNull(tokenValue)) {
+            authorizationBucket.touch();
+            return authorization;
+        }
+        if (Objects.equals(tokenValue, token)) {
             authorizationBucket.touch();
             tokenBucket.touch();
             return authorization;
