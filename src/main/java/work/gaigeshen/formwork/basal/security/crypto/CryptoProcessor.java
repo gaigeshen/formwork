@@ -23,6 +23,26 @@ public interface CryptoProcessor {
      * 执行加密操作
      *
      * @param plainData 明文字符串
+     * @param secret 加密使用的密钥
+     * @return 加密后的内容
+     * @throws GeneralSecurityException 无法执行加密操作
+     */
+    String doEncrypt(String plainData, String secret) throws GeneralSecurityException;
+
+    /**
+     * 执行解密操作
+     *
+     * @param encrytedData 密文字符串
+     * @param secret 解密使用的密钥
+     * @return 解密后的内容
+     * @throws GeneralSecurityException 无法执行解密操作
+     */
+    String doDecrypt(String encrytedData, String secret) throws GeneralSecurityException;
+
+    /**
+     * 执行加密操作
+     *
+     * @param plainData 明文字符串
      * @return 加密后的内容
      * @throws GeneralSecurityException 无法执行加密操作
      */

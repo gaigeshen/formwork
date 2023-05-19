@@ -24,6 +24,16 @@ public class DefaultCryptoProcessor implements CryptoProcessor {
     }
 
     @Override
+    public String doEncrypt(String plainData, String secret) throws GeneralSecurityException {
+        return new DefaultCryptoProcessor(secret).doEncrypt(plainData);
+    }
+
+    @Override
+    public String doDecrypt(String encrytedData, String secret) throws GeneralSecurityException {
+        return new DefaultCryptoProcessor(secret).doDecrypt(encrytedData);
+    }
+
+    @Override
     public String doEncrypt(String plainData) throws GeneralSecurityException {
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
