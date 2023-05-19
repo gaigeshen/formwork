@@ -71,7 +71,7 @@ public class LoggingFilter implements Filter {
     private String getBody(HttpServletRequest httpRequest, byte[] bodyBytes) {
         String contentType = httpRequest.getContentType();
         if (Objects.nonNull(contentType) && contentType.startsWith("application/json")) {
-            return new String(bodyBytes);
+            return new String(bodyBytes).replace("\r", "");
         }
         return "null";
     }
