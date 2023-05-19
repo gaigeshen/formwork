@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 具体的访问令牌创建器继承此类
+ * 具体的访问令牌创建器继承此类，注意此类是基于内存缓存实现的
  *
  * @author gaigeshen
  */
