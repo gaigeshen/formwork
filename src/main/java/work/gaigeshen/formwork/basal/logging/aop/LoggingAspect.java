@@ -39,7 +39,7 @@ public class LoggingAspect {
         LogRecord.Builder builder = LogRecord.builder()
                 .createTime(new Date()).traceId(getOrCreateTraceId())
                 .name(declaringTypeName + "#" + methodName)
-                .input(convertParameters(joinPoint.getArgs()));
+                .parameters(convertParameters(joinPoint.getArgs()));
 
         LogRecordStack logRecordStack = getOrCreateLogRecordStack();
 
@@ -47,7 +47,7 @@ public class LoggingAspect {
         try {
             proceedResult = joinPoint.proceed();
         } catch (Throwable ex) {
-            logRecordStack.pushRecord(builder.output(ex.getMessage()).build());
+            logRecordStack.pushRecord(builder.result(ex.getMessage()).build());
             if (logging.first()) {
                 recordStore.saveRecords(logRecordStack.toList());
                 removeLogRecordStack();
@@ -55,7 +55,7 @@ public class LoggingAspect {
             }
             throw ex;
         }
-        logRecordStack.pushRecord(builder.output(convertResponse(proceedResult)).build());
+        logRecordStack.pushRecord(builder.result(convertResponse(proceedResult)).build());
         if (logging.first()) {
             recordStore.saveRecords(logRecordStack.toList());
         }

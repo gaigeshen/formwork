@@ -6,9 +6,9 @@ public class LogRecord {
 
     private final String name;
 
-    private final String input;
+    private final String parameters;
 
-    private final String output;
+    private final String result;
 
     private final String traceId;
 
@@ -16,8 +16,8 @@ public class LogRecord {
 
     private LogRecord(Builder builder) {
         this.name = builder.name;
-        this.input = builder.input;
-        this.output = builder.output;
+        this.parameters = builder.parameters;
+        this.result = builder.result;
         this.traceId = builder.traceId;
         this.createTime = builder.createTime;
     }
@@ -30,12 +30,12 @@ public class LogRecord {
         return name;
     }
 
-    public String getInput() {
-        return input;
+    public String getParameters() {
+        return parameters;
     }
 
-    public String getOutput() {
-        return output;
+    public String getResult() {
+        return result;
     }
 
     public String getTraceId() {
@@ -50,9 +50,9 @@ public class LogRecord {
 
         private String name;
 
-        private String input;
+        private String parameters;
 
-        private String output;
+        private String result;
 
         private String traceId;
 
@@ -63,13 +63,13 @@ public class LogRecord {
             return this;
         }
 
-        public Builder input(String input) {
-            this.input = input;
+        public Builder parameters(String parameters) {
+            this.parameters = parameters;
             return this;
         }
 
-        public Builder output(String output) {
-            this.output = output;
+        public Builder result(String result) {
+            this.result = result;
             return this;
         }
 
