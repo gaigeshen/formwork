@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.basal.logging;
+package work.gaigeshen.formwork.basal.logging.traceid;
 
 /**
  * 用于维护当前的跟踪标识符

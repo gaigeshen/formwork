@@ -8,6 +8,8 @@ import work.gaigeshen.formwork.basal.identity.IdentityGenerator;
 import work.gaigeshen.formwork.basal.json.JsonCodec;
 import work.gaigeshen.formwork.basal.logging.*;
 import work.gaigeshen.formwork.basal.logging.LogRecordStore;
+import work.gaigeshen.formwork.basal.logging.traceid.TraceId;
+import work.gaigeshen.formwork.basal.logging.traceid.TraceIdContext;
 
 import java.util.Date;
 import java.util.Objects;
