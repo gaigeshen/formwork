@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import work.gaigeshen.formwork.basal.identity.IdentityGenerator;
 import work.gaigeshen.formwork.basal.json.JsonCodec;
 import work.gaigeshen.formwork.basal.logging.*;
-import work.gaigeshen.formwork.basal.logging.RecordStore;
+import work.gaigeshen.formwork.basal.logging.LogRecordStore;
 
 import java.util.Date;
 import java.util.Objects;
@@ -23,11 +23,11 @@ public class LoggingAspect {
 
     private final TraceIdContext traceIdContext;
 
-    private final RecordStore recordStore;
+    private final LogRecordStore logRecordStore;
 
-    public LoggingAspect(TraceIdContext traceIdContext, RecordStore recordStore) {
+    public LoggingAspect(TraceIdContext traceIdContext, LogRecordStore logRecordStore) {
         this.traceIdContext = traceIdContext;
-        this.recordStore = recordStore;
+        this.logRecordStore = logRecordStore;
     }
 
     @Around("@annotation(logging)")
@@ -47,17 +47,17 @@ public class LoggingAspect {
         try {
             proceedResult = joinPoint.proceed();
         } catch (Throwable ex) {
-            logRecordStack.pushRecord(builder.result(ex.getMessage()).build());
+            logRecordStack.pushLogRecord(builder.result(ex.getMessage()).build());
             if (logging.first()) {
-                recordStore.saveRecords(logRecordStack.toList());
+                logRecordStore.saveLogRecords(logRecordStack.toLogRecords());
                 removeLogRecordStack();
                 removeTraceId();
             }
             throw ex;
         }
-        logRecordStack.pushRecord(builder.result(convertResponse(proceedResult)).build());
+        logRecordStack.pushLogRecord(builder.result(convertResponse(proceedResult)).build());
         if (logging.first()) {
-            recordStore.saveRecords(logRecordStack.toList());
+            logRecordStore.saveLogRecords(logRecordStack.toLogRecords());
         }
         return proceedResult;
     }

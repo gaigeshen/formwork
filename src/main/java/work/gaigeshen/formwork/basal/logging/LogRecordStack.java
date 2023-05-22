@@ -6,16 +6,16 @@ import java.util.Stack;
 
 public class LogRecordStack {
 
-    private final Stack<LogRecord> recordStack = new Stack<>();
+    private final Stack<LogRecord> logRecordStack = new Stack<>();
 
-    public void pushRecord(LogRecord record) {
-        recordStack.push(record);
+    public void pushLogRecord(LogRecord logRecord) {
+        logRecordStack.push(logRecord);
     }
 
-    public List<LogRecord> toList() {
+    public List<LogRecord> toLogRecords() {
         List<LogRecord> list = new ArrayList<>();
-        while (!recordStack.empty()) {
-            list.add(recordStack.pop());
+        while (!logRecordStack.empty()) {
+            list.add(logRecordStack.pop());
         }
         return list;
     }
