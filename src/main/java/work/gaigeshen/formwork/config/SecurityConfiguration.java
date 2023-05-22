@@ -109,7 +109,7 @@ public class SecurityConfiguration {
 
         http.authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                .antMatchers("/api-docs/**", "/ui-docs/**", "/swagger-ui/**").permitAll()
+                .antMatchers("/api-docs/**", "/ui-docs/**", "/swagger-ui/**", "/test/**").permitAll()
                 .anyRequest().authenticated();
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
