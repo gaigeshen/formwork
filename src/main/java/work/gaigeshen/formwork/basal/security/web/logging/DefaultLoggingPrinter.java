@@ -6,6 +6,7 @@ import work.gaigeshen.formwork.basal.json.JsonCodec;
 import work.gaigeshen.formwork.basal.security.SecurityUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -18,9 +19,9 @@ public class DefaultLoggingPrinter implements LoggingPrinter {
     private static final Logger log = LoggerFactory.getLogger(DefaultLoggingPrinter.class);
 
     @Override
-    public void printParameters(HttpServletRequest httpRequest, Object[] parameters) {
+    public void printParameters(HttpServletRequest httpRequest, Object[] parameters, Method method) {
 
-        log.info("=================================>");
+        log.info("========== {}#{} ==========>", method.getDeclaringClass().getSimpleName(), method.getName());
 
         log.info("User: {}", SecurityUtils.getUserId().orElse("None"));
 
