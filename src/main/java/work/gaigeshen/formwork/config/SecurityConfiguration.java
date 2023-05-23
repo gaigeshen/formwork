@@ -28,6 +28,9 @@ import work.gaigeshen.formwork.basal.security.web.authentication.AbstractAuthent
 import work.gaigeshen.formwork.basal.security.web.authentication.AbstractAutoAuthenticationFilter;
 import work.gaigeshen.formwork.basal.security.web.authentication.AccessTokenAutoAuthenticationFilter;
 import work.gaigeshen.formwork.basal.security.web.authentication.DefaultAuthenticationFilter;
+import work.gaigeshen.formwork.basal.security.web.logging.DefaultHandlerLoggingProcessor;
+import work.gaigeshen.formwork.basal.security.web.logging.HandlerLoggingAspect;
+import work.gaigeshen.formwork.basal.security.web.logging.HandlerLoggingProcessor;
 import work.gaigeshen.formwork.basal.security.web.logout.AbstractLogoutHandler;
 import work.gaigeshen.formwork.basal.security.web.logout.DefaultAccessTokenLogoutHandler;
 
@@ -48,6 +51,16 @@ import java.util.List;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration {
+
+    @Bean
+    public HandlerLoggingAspect handlerLoggingAspect() {
+        return new HandlerLoggingAspect(handlerLoggingProcessor());
+    }
+
+    @Bean
+    public HandlerLoggingProcessor handlerLoggingProcessor() {
+        return new DefaultHandlerLoggingProcessor();
+    }
 
     @Bean
     public CryptoProcessor cryptoProcessor() {
