@@ -41,16 +41,16 @@ public class HandlerLoggingAspect {
         String typeName = signature.getDeclaringTypeName();
         String methodName = signature.getName();
 
-        loggingProcessor.handleParameters(parameters, typeName, methodName, httpRequest);
+        loggingProcessor.processParameters(parameters, typeName, methodName, httpRequest);
 
         Object proceedResult;
         try {
             proceedResult = pjp.proceed();
         } catch (Throwable ex) {
-            loggingProcessor.handleError(ex, httpRequest);
+            loggingProcessor.processError(ex, httpRequest);
             throw ex;
         }
-        loggingProcessor.handleResult(proceedResult, httpRequest);
+        loggingProcessor.processResult(proceedResult, httpRequest);
         return proceedResult;
     }
 }

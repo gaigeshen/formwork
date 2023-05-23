@@ -16,7 +16,7 @@ public class DefaultHandlerLoggingProcessor implements HandlerLoggingProcessor {
     private static final Logger log = LoggerFactory.getLogger(DefaultHandlerLoggingProcessor.class);
 
     @Override
-    public void handleParameters(Object[] parameters, String typeName, String methodName, HttpServletRequest httpRequest) {
+    public void processParameters(Object[] parameters, String typeName, String methodName, HttpServletRequest httpRequest) {
         log.info("------> Handler: {}#{}", typeName, methodName);
         log.info("------> URI: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
         log.info("------> Query: {}", httpRequest.getQueryString());
@@ -25,12 +25,12 @@ public class DefaultHandlerLoggingProcessor implements HandlerLoggingProcessor {
     }
 
     @Override
-    public void handleError(Throwable throwable, HttpServletRequest httpRequest) {
+    public void processError(Throwable throwable, HttpServletRequest httpRequest) {
         log.warn("<------ Error: {}", throwable.getMessage());
     }
 
     @Override
-    public void handleResult(Object result, HttpServletRequest httpRequest) {
+    public void processResult(Object result, HttpServletRequest httpRequest) {
         log.info("<------ Result: {}", result);
     }
 

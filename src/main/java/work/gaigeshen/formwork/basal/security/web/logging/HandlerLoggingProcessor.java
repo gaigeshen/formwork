@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface HandlerLoggingProcessor {
 
-    default void handleParameters(Object[] parameters, String typeName, String methodName, HttpServletRequest httpRequest) {}
+    default void processParameters(Object[] parameters, String typeName, String methodName, HttpServletRequest httpRequest) {}
 
-    default void handleError(Throwable throwable, HttpServletRequest httpRequest) {}
+    default void processError(Throwable throwable, HttpServletRequest httpRequest) {}
 
-    default void handleResult(Object result, HttpServletRequest httpRequest) {}
+    default void processResult(Object result, HttpServletRequest httpRequest) {}
 }
