@@ -1,11 +1,12 @@
 package work.gaigeshen.formwork.basal.security.crypto;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -38,7 +39,7 @@ public class DefaultCryptoProcessor implements CryptoProcessor {
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
-        byte[] seedBytes = new SecureRandom().generateSeed(16);
+        byte[] seedBytes = RandomStringUtils.randomAscii(16).getBytes(StandardCharsets.UTF_8);
 
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(secret, "AES"), new IvParameterSpec(seedBytes));
 
@@ -56,7 +57,7 @@ public class DefaultCryptoProcessor implements CryptoProcessor {
     @Override
     public String doDecrypt(String encrytedData) throws GeneralSecurityException {
 
-        byte[] encryptedDataWithSeedBytes = Base64.getDecoder().decode(encrytedData.getBytes(StandardCharsets.UTF_8));
+        byte[] encryptedDataWithSeedBytes = Base64.getDecoder().decode(encrytedData.getBytes(StandardCharsets.ISO_8859_1));
 
         byte[] seedBytes = new byte[16];
 
