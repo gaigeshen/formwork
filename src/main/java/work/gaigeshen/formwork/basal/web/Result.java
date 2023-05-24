@@ -38,4 +38,13 @@ public class Result<D> {
     public void setData(D data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "Result{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }

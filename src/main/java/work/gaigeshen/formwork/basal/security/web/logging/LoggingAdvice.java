@@ -1,0 +1,123 @@
+package work.gaigeshen.formwork.basal.security.web.logging;
+
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.WebUtils;
+import work.gaigeshen.formwork.basal.json.JsonCodec;
+import work.gaigeshen.formwork.basal.security.SecurityUtils;
+import work.gaigeshen.formwork.basal.web.Result;
+
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+/**
+ * 用于打印请求和响应日志
+ *
+ * @author gaigeshen
+ */
+@WebFilter("/*")
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
+@ControllerAdvice
+public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigurer, ResponseBodyAdvice<Result<?>> {
+
+    private static final Logger log = LoggerFactory.getLogger(LoggingAdvice.class);
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        StopWatch stopWatch = StopWatch.createStarted();
+        ContentCachingRequestWrapper requestToUse;
+        if (httpRequest instanceof ContentCachingRequestWrapper) {
+            requestToUse = (ContentCachingRequestWrapper) httpRequest;
+        } else {
+            requestToUse = new ContentCachingRequestWrapper(httpRequest);
+        }
+        log.info("------> URI: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
+        log.info("------> Client: {}", httpRequest.getRemoteAddr());
+        log.info("------> Principal: {}", SecurityUtils.getPrincipal());
+        log.info("------> Query: {}", httpRequest.getQueryString());
+        try {
+            chain.doFilter(requestToUse, response);
+        } finally {
+            stopWatch.stop();
+            log.info("<------ Duration: {}", stopWatch.formatTime());
+        }
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        log.info("------> handler: {}", handler);
+        return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        if (Objects.nonNull(ex)) {
+            log.info("<------ Error: {}", ex.getMessage());
+        }
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(this);
+    }
+
+    @Override
+    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+        return true;
+    }
+
+    @Override
+    public Result<?> beforeBodyWrite(Result<?> body, MethodParameter returnType, MediaType contentType, Class<? extends HttpMessageConverter<?>> converter, ServerHttpRequest request, ServerHttpResponse response) {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            HttpServletRequest httpRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
+            ContentCachingRequestWrapper requestWrapper = WebUtils.getNativeRequest(httpRequest, ContentCachingRequestWrapper.class);
+            if (Objects.nonNull(requestWrapper)) {
+                byte[] contentBytes = requestWrapper.getContentAsByteArray();
+                if (contentBytes.length > 0) {
+                    ByteArrayInputStream contentBytesStream = new ByteArrayInputStream(contentBytes);
+                    BufferedReader contentBytesReader = new BufferedReader(new InputStreamReader(contentBytesStream, StandardCharsets.UTF_8));
+                    String contentLine;
+                    StringBuilder builder = new StringBuilder();
+                    try {
+                        while (Objects.nonNull(contentLine = contentBytesReader.readLine())) {
+                            builder.append(contentLine.trim());
+                        }
+                        log.info("------> Content: {}", builder);
+                    } catch (IOException e) {
+                        log.info("------> Content: [ Cannot Read Because " + e.getMessage() + " ]");
+                    }
+                }
+            }
+        }
+        log.info("------> Result: {}", JsonCodec.instance().encode(body));
+        return body;
+    }
+}
+

@@ -1,6 +1,8 @@
 package work.gaigeshen.formwork.basal.security.web.crypto;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
@@ -31,6 +33,7 @@ import java.util.Objects;
  *
  * @author gaigeshen
  */
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class CryptoBodyAdvice implements RequestBodyAdvice, ResponseBodyAdvice<Result<?>> {
 
@@ -72,18 +75,18 @@ public class CryptoBodyAdvice implements RequestBodyAdvice, ResponseBodyAdvice<R
     }
 
     @Override
-    public Result<?> beforeBodyWrite(Result<?> result, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+    public Result<?> beforeBodyWrite(Result<?> body, MethodParameter returnType, MediaType contentType, Class<? extends HttpMessageConverter<?>> converter, ServerHttpRequest request, ServerHttpResponse response) {
         // 在输出响应之前判断是否有数据需要加密
-        if (Objects.isNull(result) || Objects.isNull(result.getData())) {
-            return result;
+        if (Objects.isNull(body) || Objects.isNull(body.getData())) {
+            return body;
         }
         // 将需要加密的数据对象转换为字符串
         // 然后将字符串执行加密操作
         // 将加密后得到的字符串当作数据内容输出到响应
-        String encodedJsonData = JsonCodec.instance().encode(result.getData());
+        String encodedJsonData = JsonCodec.instance().encode(body.getData());
         try {
             String encryptedData = cryptoProcessor.doEncrypt(encodedJsonData);
-            return Results.create(DefaultResultCode.create(result.getCode(), result.getMessage()), encryptedData);
+            return Results.create(DefaultResultCode.create(body.getCode(), body.getMessage()), encryptedData);
         }
         catch (GeneralSecurityException e) {
             throw new IllegalStateException(e);
