@@ -1,5 +1,6 @@
 package work.gaigeshen.formwork.basal.security.web.logging;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
     private String readJsonHttpRequestContent(ContentCachingRequestWrapper cachingHttpRequest, ServerHttpRequest serverHttpRequest) {
         MediaType contentType = serverHttpRequest.getHeaders().getContentType();
         if (!MediaType.APPLICATION_JSON.equalsTypeAndSubtype(contentType)) {
-            return "Not readable content " + contentType;
+            return "Not readable content [ " + contentType + " ]";
         }
         byte[] contentBytes = cachingHttpRequest.getContentAsByteArray();
         if (contentBytes.length == 0) {
