@@ -65,9 +65,8 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
         httpResponse.setHeader("X-Trace-ID", traceId);
         MDC.put("tid", traceId);
         log.info("------> URI: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
-        log.info("------> Client: {}", getClientRemoteAddr(httpRequest));
-        log.info("------> Principal: {}", SecurityUtils.getPrincipal());
         log.info("------> Query: {}", httpRequest.getQueryString());
+        log.info("------> Client: {}", getClientRemoteAddr(httpRequest));
         try {
             chain.doFilter(requestToUse, response);
         } finally {
@@ -79,6 +78,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        log.info("------> Principal: {}", SecurityUtils.getPrincipal());
         log.info("------> Handler: {}", handler);
         return true;
     }
