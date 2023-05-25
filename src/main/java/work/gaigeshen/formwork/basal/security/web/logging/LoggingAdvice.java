@@ -3,6 +3,7 @@ package work.gaigeshen.formwork.basal.security.web.logging;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.WebUtils;
+import work.gaigeshen.formwork.basal.identity.IdentityGenerator;
 import work.gaigeshen.formwork.basal.json.JsonCodec;
 import work.gaigeshen.formwork.basal.security.SecurityUtils;
 
@@ -49,14 +51,18 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
         StopWatch stopWatch = StopWatch.createStarted();
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
         ContentCachingRequestWrapper requestToUse;
         if (httpRequest instanceof ContentCachingRequestWrapper) {
             requestToUse = (ContentCachingRequestWrapper) httpRequest;
         } else {
             requestToUse = new ContentCachingRequestWrapper(httpRequest);
         }
+        String traceId = IdentityGenerator.generateDefault();
+        httpResponse.setHeader("X-Trace-ID", traceId);
+        MDC.put("tic", traceId);
         log.info("------> URI: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
         log.info("------> Client: {}", httpRequest.getRemoteAddr());
         log.info("------> Principal: {}", SecurityUtils.getPrincipal());
@@ -66,6 +72,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
         } finally {
             stopWatch.stop();
             log.info("<------ Duration: {}", stopWatch.formatTime());
+            MDC.remove("tid");
         }
     }
 
