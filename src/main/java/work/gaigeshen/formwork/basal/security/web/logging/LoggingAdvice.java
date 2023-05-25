@@ -54,27 +54,28 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        StopWatch stopWatch = StopWatch.createStarted();
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
         ContentCachingRequestWrapper requestToUse;
         if (httpRequest instanceof ContentCachingRequestWrapper) {
             requestToUse = (ContentCachingRequestWrapper) httpRequest;
         } else {
             requestToUse = new ContentCachingRequestWrapper(httpRequest);
         }
+
         String traceId = IdentityGenerator.generateDefault();
-        httpResponse.setHeader("X-Trace-ID", traceId);
+        ((HttpServletResponse) response).setHeader("X-Trace-ID", traceId);
+
         MDC.put("tid", traceId);
-        log.info("------> URI: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
-        log.info("------> Query: {}", httpRequest.getQueryString());
-        log.info("------> Client: {}", getClientRemoteAddr(httpRequest));
+
+        log.info("--->>> URI: {} {}", requestToUse.getMethod(), requestToUse.getRequestURI());
+        log.info("-----> Query: {}", requestToUse.getQueryString());
+        log.info("-----> Client: {}", getClientRemoteAddr(requestToUse));
+
+        StopWatch stopWatch = StopWatch.createStarted();
         try {
             chain.doFilter(requestToUse, response);
         } finally {
-            stopWatch.stop();
-            log.info("<------ Duration: {}", stopWatch.formatTime());
-            MDC.remove("tid");
+            log.info("--->>> Duration: {}", stopWatch.formatTime());
         }
     }
 
@@ -87,8 +88,8 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
         if (Objects.equals(ErrorController.class, handlerMethod.getBeanType())) {
             return true;
         }
-        log.info("------> Principal: {}", SecurityUtils.getPrincipal());
-        log.info("------> Handler: {}", handler);
+        log.info("-----> Principal: {}", SecurityUtils.getPrincipal());
+        log.info("-----> Handler: {}", handler);
         return true;
     }
 
@@ -97,7 +98,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
         if (Objects.nonNull(ex)) {
             ContentCachingRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
             if (Objects.nonNull(requestWrapper)) {
-                log.info("------> Content: {}", readJsonHttpRequestContent(requestWrapper));
+                log.info("-----> Content: {}", readJsonHttpRequestContent(requestWrapper));
             }
         }
     }
@@ -122,12 +123,11 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
             HttpServletRequest httpRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
             ContentCachingRequestWrapper requestWrapper = WebUtils.getNativeRequest(httpRequest, ContentCachingRequestWrapper.class);
             if (Objects.nonNull(requestWrapper)) {
-                log.info("------> Content: {}", readJsonHttpRequestContent(requestWrapper));
+                log.info("-----> Content: {}", readJsonHttpRequestContent(requestWrapper));
             }
         }
-        // 只打印特定类型的响应结果
         if (AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converter)) {
-            log.info("------> Result: {}", JsonCodec.instance().encode(body));
+            log.info("-----> Result: {}", JsonCodec.instance().encode(body));
         }
         return body;
     }
@@ -141,7 +141,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
     private String readJsonHttpRequestContent(ContentCachingRequestWrapper cachingHttpRequest) {
         String contentType = cachingHttpRequest.getContentType();
         if (!StringUtils.containsIgnoreCase(contentType, "application/json")) {
-            return "Not readable content [ " + contentType + " ]";
+            return "Not Readable";
         }
         byte[] contentBytes = cachingHttpRequest.getContentAsByteArray();
         if (contentBytes.length == 0) {
@@ -156,8 +156,8 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
                 builder.append(contentLine.trim());
             }
             return builder.toString();
-        } catch (IOException e) {
-            return "Cannot read because " + e.getMessage();
+        } catch (Exception e) {
+            return "Cannot Read Because " + e.getMessage();
         }
     }
 
