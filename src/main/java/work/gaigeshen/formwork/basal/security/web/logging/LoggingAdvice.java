@@ -1,5 +1,6 @@
 package work.gaigeshen.formwork.basal.security.web.logging;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
         httpResponse.setHeader("X-Trace-ID", traceId);
         MDC.put("tid", traceId);
         log.info("------> URI: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
-        log.info("------> Client: {}", httpRequest.getRemoteAddr());
+        log.info("------> Client: {}", getClientRemoteAddr(httpRequest));
         log.info("------> Principal: {}", SecurityUtils.getPrincipal());
         log.info("------> Query: {}", httpRequest.getQueryString());
         try {
@@ -144,6 +145,24 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
         } catch (IOException e) {
             return "Cannot read because " + e.getMessage();
         }
+    }
+
+    /**
+     * 获取客户端的地址，由于可能存在代理，所以先尝试从请求头中获取
+     *
+     * @param httpRequest 请求对象
+     * @return 客户端的地址
+     */
+    private String getClientRemoteAddr(HttpServletRequest httpRequest) {
+        String headerValue = httpRequest.getHeader("X-Forwarded-For");
+        if (StringUtils.isNotBlank(headerValue)) {
+            return headerValue;
+        }
+        headerValue = httpRequest.getHeader("X-Real-IP");
+        if (StringUtils.isNotBlank(headerValue)) {
+            return headerValue;
+        }
+        return httpRequest.getRemoteAddr();
     }
 }
 
