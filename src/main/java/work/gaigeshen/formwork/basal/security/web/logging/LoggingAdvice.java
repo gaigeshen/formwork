@@ -62,7 +62,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
         }
         String traceId = IdentityGenerator.generateDefault();
         httpResponse.setHeader("X-Trace-ID", traceId);
-        MDC.put("tic", traceId);
+        MDC.put("tid", traceId);
         log.info("------> URI: {} {}", httpRequest.getMethod(), httpRequest.getRequestURI());
         log.info("------> Client: {}", httpRequest.getRemoteAddr());
         log.info("------> Principal: {}", SecurityUtils.getPrincipal());
