@@ -1,6 +1,5 @@
 package work.gaigeshen.formwork.basal.security.web.logging;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
