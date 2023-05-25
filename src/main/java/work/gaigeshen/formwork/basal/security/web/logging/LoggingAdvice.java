@@ -8,6 +8,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -22,7 +23,6 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.WebUtils;
 import work.gaigeshen.formwork.basal.json.JsonCodec;
 import work.gaigeshen.formwork.basal.security.SecurityUtils;
-import work.gaigeshen.formwork.basal.web.Result;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -43,7 +43,7 @@ import java.util.Objects;
 @WebFilter("/*")
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 @ControllerAdvice
-public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigurer, ResponseBodyAdvice<Result<?>> {
+public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigurer, ResponseBodyAdvice<Object> {
 
     private static final Logger log = LoggerFactory.getLogger(LoggingAdvice.class);
 
@@ -71,7 +71,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        log.info("------> handler: {}", handler);
+        log.info("------> Handler: {}", handler);
         return true;
     }
 
@@ -93,31 +93,50 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
     }
 
     @Override
-    public Result<?> beforeBodyWrite(Result<?> body, MethodParameter returnType, MediaType contentType, Class<? extends HttpMessageConverter<?>> converter, ServerHttpRequest request, ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType contentType, Class<? extends HttpMessageConverter<?>> converter, ServerHttpRequest request, ServerHttpResponse response) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletRequestAttributes) {
             HttpServletRequest httpRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
             ContentCachingRequestWrapper requestWrapper = WebUtils.getNativeRequest(httpRequest, ContentCachingRequestWrapper.class);
             if (Objects.nonNull(requestWrapper)) {
-                byte[] contentBytes = requestWrapper.getContentAsByteArray();
-                if (contentBytes.length > 0) {
-                    ByteArrayInputStream contentBytesStream = new ByteArrayInputStream(contentBytes);
-                    BufferedReader contentBytesReader = new BufferedReader(new InputStreamReader(contentBytesStream, StandardCharsets.UTF_8));
-                    String contentLine;
-                    StringBuilder builder = new StringBuilder();
-                    try {
-                        while (Objects.nonNull(contentLine = contentBytesReader.readLine())) {
-                            builder.append(contentLine.trim());
-                        }
-                        log.info("------> Content: {}", builder);
-                    } catch (IOException e) {
-                        log.info("------> Content: [ Cannot Read Because " + e.getMessage() + " ]");
-                    }
-                }
+                log.info("------> Content: {}", readJsonHttpRequestContent(requestWrapper, request));
             }
         }
-        log.info("------> Result: {}", JsonCodec.instance().encode(body));
+        // 只打印特定类型的响应结果
+        if (AbstractJackson2HttpMessageConverter.class.isAssignableFrom(converter)) {
+            log.info("------> Result: {}", JsonCodec.instance().encode(body));
+        }
         return body;
+    }
+
+    /**
+     * 读取请求体内容，此方法无论什么情况都会返回字符串内容，如果出现异常则会在内容中体现
+     *
+     * @param cachingHttpRequest 带有缓存的请求对象
+     * @param serverHttpRequest 请求对象
+     * @return 返回请求体内容
+     */
+    private String readJsonHttpRequestContent(ContentCachingRequestWrapper cachingHttpRequest, ServerHttpRequest serverHttpRequest) {
+        MediaType contentType = serverHttpRequest.getHeaders().getContentType();
+        if (!Objects.equals(MediaType.APPLICATION_JSON, contentType)) {
+            return "Not readable content " + contentType;
+        }
+        byte[] contentBytes = cachingHttpRequest.getContentAsByteArray();
+        if (contentBytes.length == 0) {
+            return "None";
+        }
+        ByteArrayInputStream bytesStream = new ByteArrayInputStream(contentBytes);
+        BufferedReader bytesReader = new BufferedReader(new InputStreamReader(bytesStream, StandardCharsets.UTF_8));
+        String contentLine;
+        StringBuilder builder = new StringBuilder();
+        try {
+            while (Objects.nonNull(contentLine = bytesReader.readLine())) {
+                builder.append(contentLine.trim());
+            }
+            return builder.toString();
+        } catch (IOException e) {
+            return "Cannot read because " + e.getMessage();
+        }
     }
 }
 
