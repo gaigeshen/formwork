@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -26,6 +27,7 @@ import org.springframework.web.util.WebUtils;
 import work.gaigeshen.formwork.basal.identity.IdentityGenerator;
 import work.gaigeshen.formwork.basal.json.JsonCodec;
 import work.gaigeshen.formwork.basal.security.SecurityUtils;
+import work.gaigeshen.formwork.controller.ErrorController;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -78,6 +80,13 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
+        if (Objects.equals(ErrorController.class, handlerMethod.getBeanType())) {
+            return true;
+        }
         log.info("------> Principal: {}", SecurityUtils.getPrincipal());
         log.info("------> Handler: {}", handler);
         return true;
@@ -86,7 +95,10 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         if (Objects.nonNull(ex)) {
-            log.info("<------ Error: {}", ex.getMessage());
+            ContentCachingRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
+            if (Objects.nonNull(requestWrapper)) {
+                log.info("------> Content: {}", readJsonHttpRequestContent(requestWrapper));
+            }
         }
     }
 
@@ -102,12 +114,15 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
 
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType contentType, Class<? extends HttpMessageConverter<?>> converter, ServerHttpRequest request, ServerHttpResponse response) {
+        if (Objects.equals(ErrorController.class, returnType.getDeclaringClass())) {
+            return body;
+        }
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletRequestAttributes) {
             HttpServletRequest httpRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
             ContentCachingRequestWrapper requestWrapper = WebUtils.getNativeRequest(httpRequest, ContentCachingRequestWrapper.class);
             if (Objects.nonNull(requestWrapper)) {
-                log.info("------> Content: {}", readJsonHttpRequestContent(requestWrapper, request));
+                log.info("------> Content: {}", readJsonHttpRequestContent(requestWrapper));
             }
         }
         // 只打印特定类型的响应结果
@@ -121,12 +136,11 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
      * 读取请求体内容，此方法无论什么情况都会返回字符串内容，如果出现异常则会在内容中体现
      *
      * @param cachingHttpRequest 带有缓存的请求对象
-     * @param serverHttpRequest 请求对象
      * @return 返回请求体内容
      */
-    private String readJsonHttpRequestContent(ContentCachingRequestWrapper cachingHttpRequest, ServerHttpRequest serverHttpRequest) {
-        MediaType contentType = serverHttpRequest.getHeaders().getContentType();
-        if (!MediaType.APPLICATION_JSON.equalsTypeAndSubtype(contentType)) {
+    private String readJsonHttpRequestContent(ContentCachingRequestWrapper cachingHttpRequest) {
+        String contentType = cachingHttpRequest.getContentType();
+        if (!StringUtils.containsIgnoreCase(contentType, "application/json")) {
             return "Not readable content [ " + contentType + " ]";
         }
         byte[] contentBytes = cachingHttpRequest.getContentAsByteArray();
