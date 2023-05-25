@@ -118,7 +118,7 @@ public class LoggingAdvice implements Filter, HandlerInterceptor, WebMvcConfigur
      */
     private String readJsonHttpRequestContent(ContentCachingRequestWrapper cachingHttpRequest, ServerHttpRequest serverHttpRequest) {
         MediaType contentType = serverHttpRequest.getHeaders().getContentType();
-        if (!Objects.equals(MediaType.APPLICATION_JSON, contentType)) {
+        if (!MediaType.APPLICATION_JSON.equalsTypeAndSubtype(contentType)) {
             return "Not readable content " + contentType;
         }
         byte[] contentBytes = cachingHttpRequest.getContentAsByteArray();
