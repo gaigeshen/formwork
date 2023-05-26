@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author gaigeshen
  */
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 public class LoggingFilter implements Filter, HandlerInterceptor, WebMvcConfigurer {
 
