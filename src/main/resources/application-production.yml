@@ -13,6 +13,10 @@ spring:
     database: 0
     username: root
     password: 12345678
+  elasticsearch:
+    uris: http://localhost:9200
+    connection-timeout: 1s
+    socket-timeout: 30s
   rabbitmq:
     addresses: localhost:5672
     virtual-host: /
