@@ -17,6 +17,8 @@ spring:
     uris: localhost:9200
     connection-timeout: 1s
     socket-timeout: 30s
+    username: elastic
+    password: 12345678
   rabbitmq:
     addresses: localhost:5672
     virtual-host: /
