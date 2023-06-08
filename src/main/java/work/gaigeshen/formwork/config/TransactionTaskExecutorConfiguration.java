@@ -25,7 +25,7 @@ public class TransactionTaskExecutorConfiguration {
     public AsyncTaskExecutor asyncTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(10);
-        taskExecutor.setMaxPoolSize(50);
+        taskExecutor.setMaxPoolSize(100);
         taskExecutor.setQueueCapacity(10);
         taskExecutor.setKeepAliveSeconds(120);
         taskExecutor.setAwaitTerminationSeconds(600);

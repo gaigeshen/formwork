@@ -1,6 +1,7 @@
 package work.gaigeshen.formwork.basal.transaction;
 
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -91,11 +92,17 @@ public class SpringTransactionTaskExecutor implements TransactionTaskExecutor {
 
         @Override
         public List<TransactionTaskResult> call() throws Exception {
-            CountDownLatch taskLatch =  new CountDownLatch(tasks.size());
+            CountDownLatch taskLatch = new CountDownLatch(tasks.size());
             List<Future<TransactionTaskResult>> futures = new ArrayList<>();
             AtomicBoolean hasError = new AtomicBoolean();
             for (TransactionTask task : tasks) {
-                futures.add(asyncTaskExecutor.submit(new TaskRunner(hasError, taskLatch, task)));
+                try {
+                    futures.add(asyncTaskExecutor.submit(new TaskRunner(hasError, taskLatch, task)));
+                } catch (TaskRejectedException ex) {
+                    hasError.set(true);
+                    taskLatch.countDown();
+                    throw ex;
+                }
             }
             taskLatch.await();
             List<TransactionTaskResult> results = new ArrayList<>();
