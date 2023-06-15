@@ -1,14 +1,12 @@
 package work.gaigeshen.formwork.basal.openai.parameters.chat;
 
-import work.gaigeshen.formwork.basal.openai.parameters.OpenAiParameters;
-
 import java.util.List;
 
 /**
  *
  * @author gaigeshen
  */
-public class OpenAiChatCompletionsCreateParameters extends OpenAiParameters {
+public class OpenAiChatCompletionsCreateParameters {
 
     public String model;
 

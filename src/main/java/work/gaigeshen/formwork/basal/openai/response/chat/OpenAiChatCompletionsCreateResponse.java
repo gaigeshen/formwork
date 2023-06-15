@@ -1,18 +1,18 @@
 package work.gaigeshen.formwork.basal.openai.response.chat;
 
-import work.gaigeshen.formwork.basal.openai.response.OpenAiResponse;
-
 import java.util.List;
 
 /**
  *
  * @author gaigeshen
  */
-public class OpenAiChatCompletionsCreateResponse extends OpenAiResponse {
+public class OpenAiChatCompletionsCreateResponse {
 
     public String id;
 
     public String object;
+
+    public String model;
 
     public Long created;
 

@@ -1,6 +1,4 @@
-package work.gaigeshen.formwork.basal.openai.response.embeddings;
-
-import work.gaigeshen.formwork.basal.openai.response.OpenAiResponse;
+package work.gaigeshen.formwork.basal.openai.response.embedding;
 
 import java.util.List;
 
@@ -8,7 +6,7 @@ import java.util.List;
  *
  * @author gaigeshen
  */
-public class OpenAiEmbeddingsCreateResponse extends OpenAiResponse {
+public class OpenAiEmbeddingsCreateResponse {
 
     public String object;
 
