@@ -6,6 +6,10 @@ spring:
     name: formwork
   profiles:
     default: development
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 205MB
   mvc:
     format:
       date-time: yyyy-MM-dd HH:mm:ss
