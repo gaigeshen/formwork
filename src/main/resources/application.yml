@@ -24,7 +24,7 @@ spring:
     job:
       enabled: true
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
       isolation-level-for-create: default
   quartz:
     job-store-type: jdbc
