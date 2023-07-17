@@ -31,7 +31,7 @@ public class UploadConfiguration {
     }
 
     @ConfigurationProperties("spring.minio")
-    static class MinioProperties {
+    public static class MinioProperties {
 
         /**
          * 文件服务器的访问地址
