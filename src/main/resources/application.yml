@@ -47,3 +47,4 @@ management:
           - health
           - info
           - metrics
+          - prometheus
