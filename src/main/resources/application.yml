@@ -48,3 +48,7 @@ management:
           - info
           - metrics
           - prometheus
+
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:}
