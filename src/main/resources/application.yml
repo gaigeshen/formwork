@@ -48,3 +48,6 @@ management:
           - info
           - metrics
           - prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
