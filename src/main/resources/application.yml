@@ -35,7 +35,7 @@ spring:
       initialize-schema: never
 
 springdoc:
-  paths-to-match: /*
+  paths-to-match: /**
   paths-to-exclude: /error
   api-docs:
     enabled: true
