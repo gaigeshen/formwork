@@ -39,8 +39,3 @@ spring:
     baseline-on-migrate: true
     baseline-description: baseline
     baseline-version: 0.0.1
-  minio:
-    server-host: http://localhost:9066
-    endpoint: http://localhost:9066
-    access-key: VN7wbCHxm2w4kTQ1JmZL
-    secret-key: CLjUSK85RVtiaeETR6SSIWNBtYvMRYVvsx517Y3f
