@@ -19,7 +19,8 @@ import org.springframework.context.annotation.Configuration;
         @SecurityScheme(
                 type = SecuritySchemeType.APIKEY,
                 in = SecuritySchemeIn.HEADER,
-                name = "X-Auth-Token")})
+                name = "token",
+                paramName = "X-Auth-Token")})
 @OpenAPIDefinition(
         info = @Info(
                 title = "Open API document",
@@ -30,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
                         email = "gaigeshen@qq.com",
                         url = "https://github.com/gaigeshen")),
         security = {
-                @SecurityRequirement(name = "X-Auth-Token")
+                @SecurityRequirement(name = "token")
         }
 )
 @Configuration
