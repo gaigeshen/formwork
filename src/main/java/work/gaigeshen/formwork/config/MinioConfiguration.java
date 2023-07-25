@@ -5,17 +5,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import work.gaigeshen.formwork.basal.upload.MinioUploader;
-import work.gaigeshen.formwork.basal.upload.Uploader;
 
 /**
  * 文件上传配置
  *
  * @author gaigeshen
  */
-@EnableConfigurationProperties(UploadConfiguration.MinioProperties.class)
+@EnableConfigurationProperties(MinioConfiguration.MinioProperties.class)
 @Configuration
-public class UploadConfiguration {
+public class MinioConfiguration {
 
     @Bean
     public MinioClient minioClient(MinioProperties minioProperties) {
@@ -25,11 +23,11 @@ public class UploadConfiguration {
                 .build();
     }
 
-    @Bean
-    public Uploader uploader(MinioClient minioClient, MinioProperties minioProperties) {
-        return new MinioUploader(minioClient, minioProperties.getServerHost());
-    }
-
+    /**
+     * 文件服务器配置
+     *
+     * @author gaigeshen
+     */
     @ConfigurationProperties("spring.minio")
     public static class MinioProperties {
 
