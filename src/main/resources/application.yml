@@ -3,7 +3,7 @@ server:
 
 spring:
   main:
-    banner-mode: off
+    banner-mode: console
     web-application-type: servlet
   application:
     name: formwork
