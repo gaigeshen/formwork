@@ -23,6 +23,10 @@ spring:
     time-zone: GMT+8
   cache:
     type: redis
+  task:
+    scheduling:
+      pool:
+        size: 10
   batch:
     job:
       enabled: true
