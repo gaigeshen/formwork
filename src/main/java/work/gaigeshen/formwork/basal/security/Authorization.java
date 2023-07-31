@@ -22,7 +22,7 @@ public interface Authorization extends Serializable {
      *
      * @return 用户名称
      */
-    String getUsername();
+    String getUserName();
 
     /**
      * 返回用户授权信息明细

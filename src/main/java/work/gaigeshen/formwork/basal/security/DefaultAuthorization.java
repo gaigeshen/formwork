@@ -9,7 +9,7 @@ import java.util.Set;
  */
 public class DefaultAuthorization extends AbstractAuthorization {
 
-    public DefaultAuthorization(String userId, String username, Set<String> authorities) {
-        super(userId, username, authorities);
+    public DefaultAuthorization(String userId, String userName, Set<String> authorities) {
+        super(userId, userName, authorities);
     }
 }

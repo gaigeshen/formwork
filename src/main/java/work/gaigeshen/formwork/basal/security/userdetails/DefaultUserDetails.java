@@ -18,23 +18,23 @@ public class DefaultUserDetails extends AbstractAuthorization implements UserDet
 
     private final boolean locked;
 
-    public DefaultUserDetails(String userId, String username,
+    public DefaultUserDetails(String userId, String userName,
                               Set<String> authorities, Map<String, Object> properties,
                               boolean disabled, boolean locked) {
-        super(userId, username, authorities);
+        super(userId, userName, authorities);
         this.properties = properties;
         this.disabled = disabled;
         this.locked = locked;
     }
 
-    public static DefaultUserDetails create(String userId, String username,
+    public static DefaultUserDetails create(String userId, String userName,
                                             Set<String> authorities, Map<String, Object> properties) {
-        return new DefaultUserDetails(userId, username, authorities, properties, false, false);
+        return new DefaultUserDetails(userId, userName, authorities, properties, false, false);
     }
 
-    public static DefaultUserDetails create(String userId, String username,
+    public static DefaultUserDetails create(String userId, String userName,
                                             Set<String> authorities, Map<String, Object> properties, boolean disabled) {
-        return new DefaultUserDetails(userId, username, authorities, properties, disabled, false);
+        return new DefaultUserDetails(userId, userName, authorities, properties, disabled, false);
     }
 
     @Override

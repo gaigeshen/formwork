@@ -12,21 +12,21 @@ public abstract class AbstractAuthorization implements Authorization {
 
     private final String userId;
 
-    private final String username;
+    private final String userName;
 
     private final Set<String> authorities;
 
     private String purpose;
 
-    public AbstractAuthorization(String userId, String username, Set<String> authorities) {
+    public AbstractAuthorization(String userId, String userName, Set<String> authorities) {
         this.userId = userId;
-        this.username = username;
+        this.userName = userName;
         this.authorities = authorities;
     }
 
-    public AbstractAuthorization(String userId, String username) {
+    public AbstractAuthorization(String userId, String userName) {
         this.userId = userId;
-        this.username = username;
+        this.userName = userName;
         this.authorities = Collections.emptySet();
     }
 
@@ -40,8 +40,8 @@ public abstract class AbstractAuthorization implements Authorization {
     }
 
     @Override
-    public String getUsername() {
-        return username;
+    public String getUserName() {
+        return userName;
     }
 
     @Override
@@ -77,6 +77,6 @@ public abstract class AbstractAuthorization implements Authorization {
 
     @Override
     public String toString() {
-        return userId + "|" + username;
+        return userId + "|" + userName;
     }
 }

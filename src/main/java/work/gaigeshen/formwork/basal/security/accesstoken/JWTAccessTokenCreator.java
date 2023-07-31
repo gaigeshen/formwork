@@ -18,7 +18,7 @@ public class JWTAccessTokenCreator extends AbstractAccessTokenCreator {
 
     public static final String CLAIM_USER_ID = "userId";
 
-    public static final String CLAIM_USERNAME = "username";
+    public static final String CLAIM_USER_NAME = "userName";
 
     public static final String CLAIM_AUTHORITIES = "authorities";
 
@@ -46,7 +46,7 @@ public class JWTAccessTokenCreator extends AbstractAccessTokenCreator {
         JWTCreator.Builder builder = JWT.create().withIssuedAt(new Date(currentTimeMillis))
                 .withExpiresAt(new Date(currentTimeMillis + expiresSeconds * 1000))
                 .withClaim(CLAIM_USER_ID, authorization.getUserId())
-                .withClaim(CLAIM_USERNAME, authorization.getUsername());
+                .withClaim(CLAIM_USER_NAME, authorization.getUserName());
         if (Objects.isNull(authorization.getAuthorities())) {
             builder.withClaim(CLAIM_AUTHORITIES, Collections.emptyList());
         } else {
@@ -60,7 +60,7 @@ public class JWTAccessTokenCreator extends AbstractAccessTokenCreator {
         try {
             JWT.require(Algorithm.HMAC256(secret))
                     .withClaim(CLAIM_USER_ID, authorization.getUserId())
-                    .withClaim(CLAIM_USERNAME, authorization.getUsername())
+                    .withClaim(CLAIM_USER_NAME, authorization.getUserName())
                     .build().verify(token);
         } catch (Exception e) {
             return false;
