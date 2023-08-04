@@ -39,5 +39,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
      * @return 认证成功之后返回对应的授权信息，如果未找到授权信息则可以直接返回空对象
      * @throws AuthenticationException 认证失败可以抛出异常
      */
-    protected abstract Authorization authenticate(AuthenticationToken token) throws AuthenticationException;
+    protected Authorization authenticate(AuthenticationToken token) throws AuthenticationException {
+        return null;
+    }
 }

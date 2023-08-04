@@ -1,5 +1,7 @@
 package work.gaigeshen.formwork.config;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,19 +11,18 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import work.gaigeshen.formwork.basal.security.crypto.CryptoProcessor;
 import work.gaigeshen.formwork.basal.security.AbstractAuthenticationProvider;
-import work.gaigeshen.formwork.basal.security.AuthenticationToken;
-import work.gaigeshen.formwork.basal.security.Authorization;
 import work.gaigeshen.formwork.basal.security.AuthorizationExpiredEventListener;
 import work.gaigeshen.formwork.basal.security.accesstoken.AccessTokenCreator;
 import work.gaigeshen.formwork.basal.security.accesstoken.DefaultAccessTokenCreator;
+import work.gaigeshen.formwork.basal.security.crypto.CryptoProcessor;
+import work.gaigeshen.formwork.basal.security.userdetails.superadmin.SuperAdminAuthenticationProvider;
+import work.gaigeshen.formwork.basal.security.userdetails.superadmin.SuperAdminProperties;
 import work.gaigeshen.formwork.basal.security.web.AbstractAccessDeniedHandler;
 import work.gaigeshen.formwork.basal.security.web.DefaultAccessDeniedHandler;
 import work.gaigeshen.formwork.basal.security.web.authentication.AbstractAuthenticationFilter;
@@ -126,6 +127,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+    @EnableConfigurationProperties(SuperAdminProperties.class)
     @Configuration
     static class AuthenticationManagerConfiguration {
 
@@ -136,14 +138,12 @@ public class SecurityConfiguration {
         }
 
         @Bean
-        public AuthenticationManager authenticationManager() {
+        public AuthenticationManager authenticationManager(SuperAdminProperties superAdminProperties, PasswordEncoder passwordEncoder) {
+            if (BooleanUtils.toBoolean(superAdminProperties.getEnabled())) {
+                authenticationProviders.add(new SuperAdminAuthenticationProvider(superAdminProperties, passwordEncoder));
+            }
             if (authenticationProviders.isEmpty()) {
-                return new ProviderManager(Collections.singletonList(new AbstractAuthenticationProvider() {
-                    @Override
-                    protected Authorization authenticate(AuthenticationToken token) throws AuthenticationException {
-                        return null;
-                    }
-                }));
+                return new ProviderManager(Collections.singletonList(new AbstractAuthenticationProvider() { }));
             }
             return new ProviderManager(new ArrayList<>(authenticationProviders));
         }
