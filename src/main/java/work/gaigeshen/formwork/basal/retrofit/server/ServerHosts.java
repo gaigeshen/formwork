@@ -20,6 +20,10 @@ public interface ServerHosts extends Iterable<ServerHost> {
     Collection<ServerHost> getServerHosts();
 
     default ServerHost getServerHost() {
-        return getServerHosts().iterator().next();
+        Collection<ServerHost> serverHosts = getServerHosts();
+        if (!serverHosts.isEmpty()) {
+            return serverHosts.iterator().next();
+        }
+        return null;
     }
 }

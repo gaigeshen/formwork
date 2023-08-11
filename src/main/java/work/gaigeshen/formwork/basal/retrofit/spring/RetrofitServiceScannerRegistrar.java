@@ -36,7 +36,7 @@ public class RetrofitServiceScannerRegistrar implements ImportBeanDefinitionRegi
             }
             ClassPathRetrofitServiceScanner scanner = new ClassPathRetrofitServiceScanner(registry, RetrofitService.class);
             scanner.setResourceLoader(resourceLoader);
-            scanner.doScan(packagesToScan.toArray(new String[0]));
+            scanner.scan(packagesToScan.toArray(new String[0]));
         }
     }
 

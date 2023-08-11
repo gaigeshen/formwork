@@ -8,6 +8,7 @@ import okhttp3.Request;
  */
 public interface ServerHostSelector {
 
-    ServerHost select(ServerHosts serverHosts, Request request);
-
+    default ServerHost select(ServerHosts serverHosts, Request request) {
+        return serverHosts.getServerHost();
+    }
 }

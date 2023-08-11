@@ -11,9 +11,6 @@ public class DefaultServerHosts implements ServerHosts {
     private final Map<String, ServerHost> serverHosts = new HashMap<>();
 
     private DefaultServerHosts(List<ServerHost> serverHosts) {
-        if (Objects.isNull(serverHosts) || serverHosts.isEmpty()) {
-            throw new IllegalArgumentException("server hosts cannot be empty");
-        }
         for (ServerHost serverHost : serverHosts) {
             this.serverHosts.put(serverHost.getServerId(), serverHost);
         }

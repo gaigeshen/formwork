@@ -14,8 +14,6 @@ public class RetrofitProperties {
 
     private List<ServerHost> serverHosts = new ArrayList<>();
 
-    private boolean enabled = true;
-
     private long connectTimeout = 1000;
 
     private long readTimeout = 3000;
@@ -26,14 +24,6 @@ public class RetrofitProperties {
 
     public void setServerHosts(List<ServerHost> serverHosts) {
         this.serverHosts = serverHosts;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
 
     public long getConnectTimeout() {
