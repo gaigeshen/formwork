@@ -14,15 +14,6 @@ public class GuavaRatelimiterCreator implements RatelimiterCreator {
 
     private final Map<String, Ratelimiter> rateLimiters = new ConcurrentHashMap<>();
 
-    private final double permitsPerSecond;
-
-    public GuavaRatelimiterCreator(double permitsPerSecond) {
-        if (permitsPerSecond <= 0) {
-            throw new IllegalArgumentException("permitsPerSecond");
-        }
-        this.permitsPerSecond = permitsPerSecond;
-    }
-
     @Override
     public Ratelimiter create(String name, double permitsPerSecond) {
         return rateLimiters.computeIfAbsent(name, n -> {
