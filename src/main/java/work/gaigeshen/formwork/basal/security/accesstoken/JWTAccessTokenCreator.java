@@ -3,8 +3,12 @@ package work.gaigeshen.formwork.basal.security.accesstoken;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import work.gaigeshen.formwork.basal.security.Authorization;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -66,5 +70,22 @@ public class JWTAccessTokenCreator extends AbstractAccessTokenCreator {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 解析访问令牌的过期时间，此方法不校验该访问令牌是否合法
+     *
+     * @param token 访问令牌
+     * @return 过期时间，如果该访问令牌没有设置过期时间则返回空
+     */
+    public LocalDateTime resolveExpiresTime(String token) {
+
+        DecodedJWT decodedJWT = JWT.decode(token);
+
+        Instant expiresAtAsInstant = decodedJWT.getExpiresAtAsInstant();
+        if (Objects.isNull(expiresAtAsInstant)) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(expiresAtAsInstant, ZoneId.systemDefault());
     }
 }

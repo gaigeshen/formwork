@@ -4,6 +4,7 @@ import work.gaigeshen.formwork.basal.security.accesstoken.AccessTokenCreator;
 import work.gaigeshen.formwork.basal.security.Authorization;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 /**
@@ -25,11 +26,19 @@ public class AccessTokenAutoAuthenticationFilter extends AbstractAutoAuthenticat
     }
 
     @Override
-    protected Authorization resolveAuthorization(HttpServletRequest request) {
-        String accessToken = request.getHeader(ACCESS_TOKEN_HEADER);
+    protected Authorization resolveAuthorization(HttpServletRequest request, HttpServletResponse response) {
+        String accessToken = getAccessToken(request);
         if (Objects.isNull(accessToken)) {
             return null;
         }
         return accessTokenCreator.validateToken(accessToken);
+    }
+
+    protected final String getAccessToken(HttpServletRequest request) {
+        return request.getHeader(ACCESS_TOKEN_HEADER);
+    }
+
+    protected final AccessTokenCreator getAccessTokenCreator() {
+        return accessTokenCreator;
     }
 }

@@ -22,7 +22,7 @@ public abstract class AbstractAutoAuthenticationFilter extends OncePerRequestFil
     @Override
     protected final void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        Authorization authorization = resolveAuthorization(request);
+        Authorization authorization = resolveAuthorization(request, response);
         if (Objects.nonNull(authorization)) {
             SecurityContextHolder.getContext().setAuthentication(AuthenticationToken.authenticated(authorization));
         }
@@ -33,7 +33,8 @@ public abstract class AbstractAutoAuthenticationFilter extends OncePerRequestFil
      * 从请求对象中解析授权信息，如果没有解析出授权信息则直接返回空对象
      *
      * @param request 请求对象
+     * @param response 响应对象
      * @return 解析出来的授权信息可以为空
      */
-    protected abstract Authorization resolveAuthorization(HttpServletRequest request);
+    protected abstract Authorization resolveAuthorization(HttpServletRequest request, HttpServletResponse response);
 }
