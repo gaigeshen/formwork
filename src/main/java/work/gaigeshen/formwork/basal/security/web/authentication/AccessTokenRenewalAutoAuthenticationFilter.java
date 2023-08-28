@@ -26,6 +26,10 @@ public class AccessTokenRenewalAutoAuthenticationFilter extends AccessTokenAutoA
         this.beforeRenewalSeconds = beforeRenewalSeconds;
     }
 
+    public AccessTokenRenewalAutoAuthenticationFilter(AccessTokenCreator accessTokenCreator) {
+        this(accessTokenCreator, 600);
+    }
+
     @Override
     protected Authorization resolveAuthorization(HttpServletRequest request, HttpServletResponse response) {
         Authorization authorization = super.resolveAuthorization(request, response);
