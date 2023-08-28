@@ -42,6 +42,9 @@ public class AccessTokenRenewalAutoAuthenticationFilter extends AccessTokenAutoA
         }
         String currentToken = getAccessToken(request);
         LocalDateTime expiresTime = ((JWTAccessTokenCreator) accessTokenCreator).resolveExpiresTime(currentToken);
+        if (Objects.isNull(expiresTime)) {
+            return authorization;
+        }
         if (LocalDateTime.now().until(expiresTime, ChronoUnit.SECONDS) <= beforeRenewalSeconds) {
             String renewalToken = accessTokenCreator.createToken(authorization);
             response.setHeader(ACCESS_TOKEN_HEADER, renewalToken);
