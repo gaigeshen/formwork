@@ -15,39 +15,42 @@ import java.util.Objects;
  *
  * @author gaigeshen
  */
-public class AccessTokenRenewalAutoAuthenticationFilter extends AccessTokenAutoAuthenticationFilter {
+public class JWTAccessTokenAutoAuthenticationFilter extends AccessTokenAutoAuthenticationFilter {
 
-    public static final String ACCESS_TOKEN_HEADER = "X-Auth-Token-Renewal";
+    public static final String RENEWAL_ACCESS_TOKEN_HEADER = "X-Auth-Token-Renewal";
 
     private final int beforeRenewalSeconds;
 
-    public AccessTokenRenewalAutoAuthenticationFilter(AccessTokenCreator accessTokenCreator, int beforeRenewalSeconds) {
+    public JWTAccessTokenAutoAuthenticationFilter(AccessTokenCreator accessTokenCreator, int beforeRenewalSeconds) {
         super(accessTokenCreator);
         this.beforeRenewalSeconds = beforeRenewalSeconds;
     }
 
-    public AccessTokenRenewalAutoAuthenticationFilter(AccessTokenCreator accessTokenCreator) {
+    public JWTAccessTokenAutoAuthenticationFilter(AccessTokenCreator accessTokenCreator) {
         this(accessTokenCreator, 600);
     }
 
     @Override
     protected Authorization resolveAuthorization(HttpServletRequest request, HttpServletResponse response) {
         Authorization authorization = super.resolveAuthorization(request, response);
-        if (Objects.isNull(authorization)) {
-            return null;
-        }
         AccessTokenCreator accessTokenCreator = getAccessTokenCreator();
         if (!(accessTokenCreator instanceof JWTAccessTokenCreator)) {
             return authorization;
         }
+        JWTAccessTokenCreator jwtAccessTokenCreator = (JWTAccessTokenCreator) accessTokenCreator;
         String currentToken = getAccessToken(request);
-        LocalDateTime expiresTime = ((JWTAccessTokenCreator) accessTokenCreator).resolveExpiresTime(currentToken);
-        if (Objects.isNull(expiresTime)) {
-            return authorization;
+        if (Objects.isNull(authorization)) {
+            authorization = jwtAccessTokenCreator.resolveAndVerifyAuthorization(currentToken);
         }
-        if (LocalDateTime.now().until(expiresTime, ChronoUnit.SECONDS) <= beforeRenewalSeconds) {
-            String renewalToken = accessTokenCreator.createToken(authorization);
-            response.setHeader(ACCESS_TOKEN_HEADER, renewalToken);
+        if (Objects.nonNull(authorization)) {
+            LocalDateTime expiresTime = jwtAccessTokenCreator.resolveExpiresTime(currentToken);
+            if (Objects.isNull(expiresTime)) {
+                return authorization;
+            }
+            if (LocalDateTime.now().until(expiresTime, ChronoUnit.SECONDS) <= beforeRenewalSeconds) {
+                String renewalToken = accessTokenCreator.createToken(authorization);
+                response.setHeader(RENEWAL_ACCESS_TOKEN_HEADER, renewalToken);
+            }
         }
         return authorization;
     }
