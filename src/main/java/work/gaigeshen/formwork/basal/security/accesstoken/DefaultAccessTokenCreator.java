@@ -30,4 +30,9 @@ public class DefaultAccessTokenCreator extends AbstractAccessTokenCreator {
     protected boolean validateTokenInternal(String token, Authorization authorization) {
         return true;
     }
+
+    @Override
+    protected boolean allowMultiTokens() {
+        return true;
+    }
 }

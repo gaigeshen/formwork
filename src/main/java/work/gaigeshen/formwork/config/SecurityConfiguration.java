@@ -19,7 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import work.gaigeshen.formwork.basal.security.AbstractAuthenticationProvider;
 import work.gaigeshen.formwork.basal.security.AuthorizationExpiredEventListener;
 import work.gaigeshen.formwork.basal.security.accesstoken.AccessTokenCreator;
-import work.gaigeshen.formwork.basal.security.accesstoken.DefaultAccessTokenCreator;
+import work.gaigeshen.formwork.basal.security.accesstoken.JWTAccessTokenCreator;
 import work.gaigeshen.formwork.basal.security.crypto.CryptoProcessor;
 import work.gaigeshen.formwork.basal.security.userdetails.superadmin.SuperAdminAuthenticationProvider;
 import work.gaigeshen.formwork.basal.security.userdetails.superadmin.SuperAdminProperties;
@@ -27,8 +27,8 @@ import work.gaigeshen.formwork.basal.security.web.AbstractAccessDeniedHandler;
 import work.gaigeshen.formwork.basal.security.web.DefaultAccessDeniedHandler;
 import work.gaigeshen.formwork.basal.security.web.authentication.AbstractAuthenticationFilter;
 import work.gaigeshen.formwork.basal.security.web.authentication.AbstractAutoAuthenticationFilter;
-import work.gaigeshen.formwork.basal.security.web.authentication.AccessTokenAutoAuthenticationFilter;
 import work.gaigeshen.formwork.basal.security.web.authentication.DefaultAuthenticationFilter;
+import work.gaigeshen.formwork.basal.security.web.authentication.JWTAccessTokenAutoAuthenticationFilter;
 import work.gaigeshen.formwork.basal.security.web.logout.AbstractLogoutHandler;
 import work.gaigeshen.formwork.basal.security.web.logout.DefaultAccessTokenLogoutHandler;
 
@@ -67,7 +67,7 @@ public class SecurityConfiguration {
 
     @Bean
     public AccessTokenCreator accessTokenCreator() {
-        return DefaultAccessTokenCreator.create();
+        return JWTAccessTokenCreator.create("0123456789abcdef");
     }
 
     @Bean
@@ -82,7 +82,7 @@ public class SecurityConfiguration {
 
     @Bean
     public AbstractAutoAuthenticationFilter autoAuthenticationFilter() {
-        return new AccessTokenAutoAuthenticationFilter(accessTokenCreator());
+        return new JWTAccessTokenAutoAuthenticationFilter(accessTokenCreator());
     }
 
     @Bean

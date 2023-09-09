@@ -57,11 +57,7 @@ public abstract class AbstractAccessTokenCreator implements AccessTokenCreator {
             throw new IllegalArgumentException("authorization cannot be null");
         }
         String newToken = createTokenInternal(authorization);
-        String previousToken = authorizationTokens.put(authorization, newToken);
-        if (Objects.nonNull(previousToken)) {
-            invalidate(previousToken);
-        }
-        this.authorizations.put(newToken, authorization);
+        putNewToken(authorization, newToken);
         return newToken;
     }
 
@@ -84,4 +80,32 @@ public abstract class AbstractAccessTokenCreator implements AccessTokenCreator {
     protected abstract String createTokenInternal(Authorization authorization);
 
     protected abstract boolean validateTokenInternal(String token, Authorization authorization);
+
+    /**
+     * 存放授权信息新的访问令牌，用于手动指定或替换访问令牌
+     *
+     * @param authorization 授权信息，如果设定为不允许多个访问令牌，此授权信息已有访问令牌则会令其失效
+     * @param newToken 新的访问令牌
+     */
+    protected final void putNewToken(Authorization authorization, String newToken) {
+        if (Objects.isNull(authorization) || Objects.isNull(newToken)) {
+            throw new IllegalArgumentException("authorization and new token cannot be null");
+        }
+        if (!allowMultiTokens()) {
+            String previousToken = authorizationTokens.put(authorization, newToken);
+            if (Objects.nonNull(previousToken)) {
+                invalidate(previousToken);
+            }
+        }
+        authorizations.put(newToken, authorization);
+    }
+
+    /**
+     * 是否允许多个访问令牌，即相同的授权信息是否可以有多个访问令牌
+     *
+     * @return 设置值
+     */
+    protected boolean allowMultiTokens() {
+        return false;
+    }
 }

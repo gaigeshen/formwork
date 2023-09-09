@@ -74,11 +74,31 @@ public class JWTAccessTokenCreator extends AbstractAccessTokenCreator {
         return true;
     }
 
+    @Override
+    protected boolean allowMultiTokens() {
+        return true;
+    }
+
+    /**
+     * 解析访问令牌的过期时间，此方法不校验该访问令牌是否合法
+     *
+     * @param token 访问令牌
+     * @return 过期时间，如果该访问令牌没有设置过期时间则返回空
+     */
+    public LocalDateTime resolveExpiresTime(String token) {
+        DecodedJWT decodedJWT = JWT.decode(token);
+        Instant expiresAtAsInstant = decodedJWT.getExpiresAtAsInstant();
+        if (Objects.isNull(expiresAtAsInstant)) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(expiresAtAsInstant, ZoneId.systemDefault());
+    }
+
     /**
      * 解析访问令牌为授权信息，同时会校验该访问令牌的合法性
      *
      * @param token 访问令牌
-     * @return 如果该访问令牌合法且成功解析则返回授权信息
+     * @return 如果该访问令牌合法且成功解析则返回授权信息，否则返回空对象
      */
     public Authorization resolveAndVerifyAuthorization(String token) {
         DecodedJWT decodedJWT = JWT.decode(token);
@@ -97,20 +117,5 @@ public class JWTAccessTokenCreator extends AbstractAccessTokenCreator {
             return null;
         }
         return authorization;
-    }
-
-    /**
-     * 解析访问令牌的过期时间，此方法不校验该访问令牌是否合法
-     *
-     * @param token 访问令牌
-     * @return 过期时间，如果该访问令牌没有设置过期时间则返回空
-     */
-    public LocalDateTime resolveExpiresTime(String token) {
-        DecodedJWT decodedJWT = JWT.decode(token);
-        Instant expiresAtAsInstant = decodedJWT.getExpiresAtAsInstant();
-        if (Objects.isNull(expiresAtAsInstant)) {
-            return null;
-        }
-        return LocalDateTime.ofInstant(expiresAtAsInstant, ZoneId.systemDefault());
     }
 }

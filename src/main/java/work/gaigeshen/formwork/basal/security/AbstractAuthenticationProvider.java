@@ -22,7 +22,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
             throw new AuthorizationNotFoundException("authorization of " + authentication + " not found");
         }
         if (authorization instanceof UserDetails) {
-            UserDetailsChecker.check((UserDetails) authentication);
+            UserDetailsChecker.check((UserDetails) authorization);
         }
         return AuthenticationToken.authenticated(authorization, authentication.getCredentials());
     }

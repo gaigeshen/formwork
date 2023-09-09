@@ -26,7 +26,7 @@ public interface AccessTokenCreator {
     /**
      * 创建访问令牌
      *
-     * @param authorization 授权信息，如果此授权信息已有访问令牌则会令其失效
+     * @param authorization 授权信息
      * @return 新的访问令牌
      */
     String createToken(Authorization authorization);
