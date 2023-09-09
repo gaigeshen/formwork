@@ -44,9 +44,3 @@ spring:
     server-host: http://localhost:9066
     access-key: root
     secret-key: 12345678
-  retrofit:
-    server-hosts:
-      - server-id: default
-        server-host: http://localhost:9169
-      - server-id: second
-        server-host: https://www.baidu.com
