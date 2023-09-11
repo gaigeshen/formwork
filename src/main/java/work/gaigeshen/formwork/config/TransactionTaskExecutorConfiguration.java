@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
-import work.gaigeshen.formwork.basal.transaction.SpringTransactionTaskExecutor;
-import work.gaigeshen.formwork.basal.transaction.TransactionTaskExecutor;
+import work.gaigeshen.formwork.basal.jdbc.transaction.SpringTransactionTaskExecutor;
+import work.gaigeshen.formwork.basal.jdbc.transaction.TransactionTaskExecutor;
 
 /**
  * 事务任务执行器配置

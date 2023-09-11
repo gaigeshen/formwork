@@ -1,4 +1,4 @@
-package work.gaigeshen.formwork.basal.transaction;
+package work.gaigeshen.formwork.basal.jdbc.transaction;
 
 /**
  * 链式事务任务，当需要在上个事务任务执行完毕并提交且返回结果之后再执行下个任务的情况，可以选择此类型的任务
