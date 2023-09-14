@@ -2,7 +2,7 @@ package work.gaigeshen.formwork.basal.security.web.authentication;
 
 import work.gaigeshen.formwork.basal.security.Authorization;
 import work.gaigeshen.formwork.basal.security.accesstoken.AccessTokenCreator;
-import work.gaigeshen.formwork.basal.security.accesstoken.JWTAccessTokenCreator;
+import work.gaigeshen.formwork.basal.security.accesstoken.JWTAccessTokenSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,21 +34,21 @@ public class JWTAccessTokenAutoAuthenticationFilter extends AccessTokenAutoAuthe
     protected Authorization resolveAuthorization(HttpServletRequest request, HttpServletResponse response) {
         Authorization authorization = super.resolveAuthorization(request, response);
         AccessTokenCreator accessTokenCreator = getAccessTokenCreator();
-        if (!(accessTokenCreator instanceof JWTAccessTokenCreator)) {
+        if (!(accessTokenCreator instanceof JWTAccessTokenSupport)) {
             return authorization;
         }
         String currentToken = getAccessToken(request);
         if (Objects.isNull(currentToken)) {
             return null;
         }
-        JWTAccessTokenCreator jwtAccessTokenCreator = (JWTAccessTokenCreator) accessTokenCreator;
+        JWTAccessTokenSupport jwtAccessTokenSupport = (JWTAccessTokenSupport) accessTokenCreator;
         if (Objects.isNull(authorization)) {
-            authorization = jwtAccessTokenCreator.resolveAndVerifyAuthorization(currentToken);
+            authorization = jwtAccessTokenSupport.resolveAndVerifyAuthorization(currentToken);
         }
         if (Objects.isNull(authorization)) {
             return null;
         }
-        LocalDateTime expiresTime = jwtAccessTokenCreator.resolveExpiresTime(currentToken);
+        LocalDateTime expiresTime = jwtAccessTokenSupport.resolveExpiresTime(currentToken);
         if (Objects.isNull(expiresTime)) {
             return authorization;
         }

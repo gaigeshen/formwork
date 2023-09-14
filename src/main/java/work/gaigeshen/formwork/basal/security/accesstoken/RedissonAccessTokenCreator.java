@@ -56,7 +56,7 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
             throw new IllegalArgumentException("authorization cannot be null");
         }
         invalidate(authorization);
-        String newToken = IdentityGenerator.generateDefault();
+        String newToken = createTokenInternal(authorization);
         setTokenAndAuthorizationBucket(newToken, authorization);
         return newToken;
     }
@@ -72,19 +72,33 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
             return null;
         }
         RBucket<String> tokenBucket = getTokenBucket(authorization);
-        String tokenValue = tokenBucket.get();
-        if (Objects.isNull(tokenValue)) {
-            authorizationBucket.touch();
-            return authorization;
-        }
-        if (Objects.equals(tokenValue, token)) {
-            authorizationBucket.touch();
-            tokenBucket.touch();
-            return authorization;
+        if (validateTokenInternal(token, authorization)) {
+            String tokenValue = tokenBucket.get();
+            if (Objects.isNull(tokenValue)) {
+                authorizationBucket.touch();
+                return authorization;
+            }
+            if (Objects.equals(tokenValue, token)) {
+                authorizationBucket.touch();
+                tokenBucket.touch();
+                return authorization;
+            }
         }
         deleteAuthorizationBucket(authorizationBucket);
         deleteTokenBucket(tokenBucket);
         return null;
+    }
+
+    protected String createTokenInternal(Authorization authorization) {
+        return IdentityGenerator.generateDefault();
+    }
+
+    protected boolean validateTokenInternal(String token, Authorization authorization) {
+        return true;
+    }
+
+    protected long getExpiresSeconds() {
+        return expiresSeconds;
     }
 
     /**
