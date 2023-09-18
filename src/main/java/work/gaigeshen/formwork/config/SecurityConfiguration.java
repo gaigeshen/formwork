@@ -74,7 +74,7 @@ public class SecurityConfiguration {
 
     @Bean
     public AccessTokenCreator accessTokenCreator() {
-        return JWTRedissonAccessTokenCreator.create(redissonClient, 1800, "0123456789abcdef");
+        return JWTRedissonAccessTokenCreator.create(redissonClient, "0123456789abcdef");
     }
 
     @Bean

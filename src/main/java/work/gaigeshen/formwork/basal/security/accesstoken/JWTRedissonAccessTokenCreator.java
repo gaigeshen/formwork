@@ -28,6 +28,10 @@ public class JWTRedissonAccessTokenCreator extends RedissonAccessTokenCreator im
         return new JWTRedissonAccessTokenCreator(redisson, expiresSeconds, secret);
     }
 
+    public static JWTRedissonAccessTokenCreator create(RedissonClient redisson, String secret) {
+        return new JWTRedissonAccessTokenCreator(redisson, 1800, secret);
+    }
+
     @Override
     protected String createTokenInternal(Authorization authorization) {
         long currentTimeMillis = System.currentTimeMillis();
