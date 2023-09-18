@@ -1,6 +1,7 @@
 package work.gaigeshen.formwork.config;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.redisson.api.RedissonClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import work.gaigeshen.formwork.basal.security.AbstractAuthenticationProvider;
 import work.gaigeshen.formwork.basal.security.AuthorizationExpiredEventListener;
 import work.gaigeshen.formwork.basal.security.accesstoken.AccessTokenCreator;
-import work.gaigeshen.formwork.basal.security.accesstoken.JWTAccessTokenCreator;
+import work.gaigeshen.formwork.basal.security.accesstoken.JWTRedissonAccessTokenCreator;
 import work.gaigeshen.formwork.basal.security.crypto.CryptoProcessor;
 import work.gaigeshen.formwork.basal.security.userdetails.superadmin.SuperAdminAuthenticationProvider;
 import work.gaigeshen.formwork.basal.security.userdetails.superadmin.SuperAdminProperties;
@@ -50,6 +51,12 @@ import java.util.List;
 @Configuration
 public class SecurityConfiguration {
 
+    private final RedissonClient redissonClient;
+
+    public SecurityConfiguration(RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
+    }
+
     @Bean
     public CryptoProcessor cryptoProcessor() {
         return CryptoProcessor.createDefault("0123456789abcdef");
@@ -67,7 +74,7 @@ public class SecurityConfiguration {
 
     @Bean
     public AccessTokenCreator accessTokenCreator() {
-        return JWTAccessTokenCreator.create("0123456789abcdef");
+        return JWTRedissonAccessTokenCreator.create(redissonClient, 1800, "0123456789abcdef");
     }
 
     @Bean
