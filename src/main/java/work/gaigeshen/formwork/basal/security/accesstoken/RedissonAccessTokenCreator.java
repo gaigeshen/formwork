@@ -75,12 +75,9 @@ public class RedissonAccessTokenCreator implements AccessTokenCreator {
         if (validateTokenInternal(token, authorization)) {
             String tokenValue = tokenBucket.get();
             if (Objects.isNull(tokenValue)) {
-                authorizationBucket.touch();
                 return authorization;
             }
             if (Objects.equals(tokenValue, token)) {
-                authorizationBucket.touch();
-                tokenBucket.touch();
                 return authorization;
             }
         }

@@ -69,7 +69,6 @@ public class RedissonMultiAccessTokenCreator implements AccessTokenCreator {
         if (Objects.isNull(authorization)) {
             return null;
         }
-        authorizationBucket.touch();
         return authorization;
     }
 
