@@ -422,7 +422,7 @@ public class FlowableBpmnService implements BpmnService {
         List<HistoricVariableInstance> variableInstances = historyService.createHistoricVariableInstanceQuery()
                 .processInstanceId(processInstance.getId())
                 .list();
-        Map<String, Map<String, Object>> processTaskVariables = new HashMap<>();
+        Map<String, Map<String, Object>> processTaskVariables = new LinkedHashMap<>();
         for (HistoricVariableInstance variableInstance : variableInstances) {
             String taskId = variableInstance.getTaskId();
             if (Objects.isNull(taskId)) {

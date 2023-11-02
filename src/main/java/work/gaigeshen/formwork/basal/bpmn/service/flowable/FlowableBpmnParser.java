@@ -263,7 +263,7 @@ public abstract class FlowableBpmnParser {
         Candidate candidate = DefaultCandidate.create(new HashSet<>(groups), new HashSet<>(users));
         for (Map.Entry<String, List<ExtensionElement>> entry : userTask.getExtensionElements().entrySet()) {
             List<ExtensionElement> elements = entry.getValue();
-            if ("type".equals(entry.getKey()) && elements.size() > 0) {
+            if ("type".equals(entry.getKey()) && !elements.isEmpty()) {
                 CandidateType type = CandidateType.valueOf(elements.get(0).getElementText());
                 return DefaultTypedCandidate.create(candidate, type);
             }
